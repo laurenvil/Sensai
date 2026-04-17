@@ -105,9 +105,34 @@ make download-llama.cpp   # download llama.cpp shared libraries
 
 ## Option A: Standalone Inference — No Gateway Required
 
-You do not need the picoclaw agent layer to run LLM inference on the Uno Q. The full inference stack — yzma + llama-server — operates independently as an OpenAI-compatible HTTP API that any script, app, or curl command can talk to directly. This is the simplest path for experimentation, classroom demos, and integrating inference into your own code.
+You do not need the Sensai agent layer to run LLM inference on the Uno Q. The yzma inference stack operates in two modes: a direct terminal conversation via `llama-cli`, or an HTTP server via `llama-server` that any script or app can query. Start with terminal mode — it requires no server and no running process.
 
-### 1. Start llama-server
+### 1. Terminal chat (simplest — no server needed)
+
+`llama-cli` opens a back-and-forth conversation directly in the terminal. The Qwen3 GGUF embeds its own chat template, so conversation mode activates automatically:
+
+```bash
+./yzma/lib/llama-cli \
+  -m ~/models/Qwen_Qwen3.5-0.8B-Q6_K.gguf \
+  -t 4 \
+  -c 4096 \
+  --mlock \
+  --temp 0.6 \
+  --top-k 20 --top-p 0.95
+```
+
+Type your question and press Enter. The model responds, then waits for your next message. Type `/bye` or press `Ctrl+C` to exit.
+
+```
+> I want my LED to fade in and out slowly, like breathing.
+
+That's called a breathing effect. You can achieve it with analogWrite on
+a PWM-capable pin — pin 9 on the Uno Q works well. Here's a sketch...
+```
+
+### 2. HTTP server (for scripts, web UIs, and multi-user classrooms)
+
+When you need multiple students to query the model at the same time, or want to integrate it into a Python script or app, start `llama-server`:
 
 ```bash
 ./yzma/lib/llama-server \
@@ -116,11 +141,8 @@ You do not need the picoclaw agent layer to run LLM inference on the Uno Q. The 
   --ctx-size 12288 --parallel 2
 ```
 
-That is the entire server. It exposes an OpenAI-compatible REST API at `http://127.0.0.1:8080/v1`.
+This exposes an OpenAI-compatible REST API at `http://127.0.0.1:8080/v1`. Test it with:
 
-### 2. Query it directly
-
-**curl:**
 ```bash
 curl http://127.0.0.1:8080/v1/chat/completions \
   -H "Content-Type: application/json" \
