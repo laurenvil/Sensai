@@ -224,14 +224,13 @@ Sensai/
 
 | Document | Description |
 |---|---|
-| `picoclaw_yzma_whitepaper.docx` | Initial deep-dive: PicoClaw + Yzma integration design |
-| `picoclaw_yzma_whitepaper_v2.docx` | Revised architecture + operational analysis (PicoClaw + Yzma) |
-| `picoclaw_yzma_final_eval_v3.docx` | Production evaluation — live server + gateway log analysis |
-| `picoclaw_summary_v4.docx` | Final benchmark results + optimization guide (v4 results) |
-| `yzma_inprocess_whitepaper.docx` | Migration path: HTTP llama-server → in-process Yzma FFI |
-| `Adreno_702_OpenCL_Prefill_Acceleration_Whitepaper.docx` | Adreno 702 OpenCL backend setup for TTFT reduction |
-| `Decode_Throughput_Optimization_Whitepaper_Yzma_Qwen3_Arduino_Uno_Q.docx` | Maximizing decode tok/s on LPDDR4X bandwidth ceiling |
-| `Ventuno_Q_GPU_Enhanced_Prefill_Decode_Whitepaper_Yzma_Qwen3.docx` | Ventuno Q inference with Adreno 623 + Hexagon NPU |
+| `picoclaw_yzma_whitepaper.md` | Initial deep-dive: PicoClaw + Yzma integration design |
+| `picoclaw_yzma_whitepaper_v2.md` | Revised architecture + operational analysis (PicoClaw + Yzma) |
+| `picoclaw_yzma_final_eval_v3.md` | Production evaluation — live server + gateway log analysis |
+| `picoclaw_summary_v4.md` | Final benchmark results + optimization guide (v4 results) |
+| `Adreno_702_OpenCL_Prefill_Acceleration_Whitepaper.md` | Adreno 702 OpenCL backend setup for TTFT reduction |
+| `Decode_Throughput_Optimization_Whitepaper_Yzma_Qwen3_Arduino_Uno_Q.md` | Maximizing decode tok/s on LPDDR4X bandwidth ceiling |
+| `Ventuno_Q_GPU_Enhanced_Prefill_Decode_Whitepaper_Yzma_Qwen3.md` | Ventuno Q inference with Adreno 623 + Hexagon NPU |
 | `llama_dash.py` | Terminal streaming dashboard for llama-server eval |
 | `hackster_article.md` | Hackster.io article — standalone inference and education use case |
 | `testing` | Platform test notes — Qwen + yzma on Uno Q |
