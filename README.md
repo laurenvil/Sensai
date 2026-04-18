@@ -14,7 +14,7 @@ Upstream: [sipeed/picoclaw](https://github.com/sipeed/picoclaw) · Yzma submodul
 | **Inference backend** | Yzma submodule at `yzma/` — direct llama.cpp FFI, no CGo |
 | **GPU acceleration** | Adreno 702 OpenCL prefill path (5–13× TTFT improvement) |
 | **Model** | Qwen3-0.6B Q4_0 / Qwen3.5-0.8B Q6_K — fits within 4 GB |
-| **Docs** | Engineering whitepapers, benchmarks, and GTM roadmap in `docs/Sensai/` |
+| **Docs** | Engineering whitepapers and benchmarks in `docs/Sensai/` |
 
 ---
 
@@ -227,6 +227,56 @@ Add `/no_think` to `~/.picoclaw/workspace/SOUL.md` to suppress reasoning tokens.
 
 ---
 
+## Running from the Arduino App Lab Terminal
+
+Arduino App Lab is the built-in IDE and app environment on the Uno Q. Open the terminal from the `>_` icon in the sidebar, then navigate to the project:
+
+```bash
+cd /home/arduino/ArduinoApps/Sensai
+```
+
+### Option A — Terminal chat via yzma (no gateway)
+
+Talks directly to the model via yzma's `llama-cli`. No build step, no server needed:
+
+```bash
+./yzma/lib/llama-cli \
+  -m ~/models/Qwen_Qwen3.5-0.8B-Q6_K.gguf \
+  -t 4 -c 4096 --mlock \
+  --temp 0.6 --top-k 20 --top-p 0.95
+```
+
+Type your question and press Enter. The model responds in 4–5 seconds, then waits for the next message. Type `/bye` to exit.
+
+### Option B — Full Sensai gateway
+
+First confirm `llama-server` is running:
+
+```bash
+ps aux | grep llama-server
+```
+
+If not running, start it:
+
+```bash
+./yzma/lib/llama-server \
+  -m ~/models/Qwen_Qwen3.5-0.8B-Q6_K.gguf \
+  --host 127.0.0.1 --port 8080 \
+  --ctx-size 12288 --parallel 2 &
+```
+
+Then build and run the gateway:
+
+```bash
+make build
+cp .env.example .env   # first time only
+./build/picoclaw agent
+```
+
+The gateway starts and listens on all configured channels (web UI at port 3000, Telegram, or terminal).
+
+---
+
 ## Repository Layout
 
 ```
@@ -234,8 +284,7 @@ Sensai/
 ├── cmd/picoclaw/       # CLI entry point (Cobra)
 ├── pkg/                # agent, channels, providers, tools, skills, memory…
 ├── yzma/               # submodule → hybridgroup/yzma (llama.cpp FFI)
-├── docs/Sensai/        # whitepapers, benchmarks, business plan, GTM roadmap
-│   └── AITown/         # AI Town on Arduino Uno Q guide
+├── docs/Sensai/        # whitepapers, benchmarks
 ├── Makefile
 └── .env.example
 ```
