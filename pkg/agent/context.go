@@ -495,6 +495,11 @@ func (cb *ContextBuilder) BuildMessages(
 	// Build short dynamic context (time, runtime, session) — changes per request
 	dynamicCtx := cb.buildDynamicContext(channel, chatID)
 
+	// Pre-route skill content into the system prompt based on keywords in the
+	// current user message. Used as a fallback for small local models that do
+	// not reliably emit read_file. Per-request, not cached.
+	preloadCtx := cb.PreloadSkillsForMessage(currentMessage)
+
 	// Compose a single system message: static (cached) + dynamic + optional summary.
 	// Keeping all system content in one message ensures every provider adapter can
 	// extract it correctly (Anthropic adapter -> top-level system param,
@@ -509,6 +514,11 @@ func (cb *ContextBuilder) BuildMessages(
 	contentBlocks := []providers.ContentBlock{
 		{Type: "text", Text: staticPrompt, CacheControl: &providers.CacheControl{Type: "ephemeral"}},
 		{Type: "text", Text: dynamicCtx},
+	}
+
+	if preloadCtx != "" {
+		stringParts = append(stringParts, preloadCtx)
+		contentBlocks = append(contentBlocks, providers.ContentBlock{Type: "text", Text: preloadCtx})
 	}
 
 	if summary != "" {
@@ -533,6 +543,7 @@ func (cb *ContextBuilder) BuildMessages(
 		map[string]any{
 			"static_chars":  len(staticPrompt),
 			"dynamic_chars": len(dynamicCtx),
+			"preload_chars": len(preloadCtx),
 			"total_chars":   len(fullSystemPrompt),
 			"has_summary":   summary != "",
 			"cached":        isCached,

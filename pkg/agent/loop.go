@@ -68,7 +68,6 @@ type processOptions struct {
 
 const (
 	defaultResponse           = "I've completed processing but have no response to give. Increase `max_tool_iterations` in config.json."
-	sessionKeyAgentPrefix     = "agent:"
 	metadataKeyAccountID      = "account_id"
 	metadataKeyGuildID        = "guild_id"
 	metadataKeyTeamID         = "team_id"
@@ -171,6 +170,25 @@ func registerSharedTools(
 		}
 		if cfg.Tools.IsToolEnabled("spi") {
 			agent.Tools.Register(tools.NewSPITool())
+		}
+		if cfg.Tools.IsToolEnabled("arduino") {
+			agent.Tools.Register(tools.NewArduinoTool(
+				cfg.Tools.Arduino.FQBN,
+				cfg.Tools.Arduino.Port,
+				cfg.Tools.Arduino.Protocol,
+			))
+		}
+		if cfg.Tools.IsToolEnabled("camera") {
+			agent.Tools.Register(tools.NewCameraTool())
+		}
+		if cfg.Tools.IsToolEnabled("sysfs_led") {
+			agent.Tools.Register(tools.NewSysfsLEDTool())
+		}
+		if cfg.Tools.IsToolEnabled("network") {
+			agent.Tools.Register(tools.NewNetworkTool())
+		}
+		if cfg.Tools.IsToolEnabled("i2cdetect") {
+			agent.Tools.Register(tools.NewI2CDetectTool())
 		}
 
 		// Message tool
@@ -774,7 +792,13 @@ func (al *AgentLoop) resolveMessageRoute(msg bus.InboundMessage) (routing.Resolv
 }
 
 func resolveScopeKey(route routing.ResolvedRoute, msgSessionKey string) string {
-	if msgSessionKey != "" && strings.HasPrefix(msgSessionKey, sessionKeyAgentPrefix) {
+	// An explicitly-set session key on the inbound message always wins. This
+	// preserves both agent-scoped keys (cron tasks set "agent:<id>:...") and
+	// CLI-user-provided keys (`picoclaw agent --session=<key>`). Before the
+	// fix, only keys prefixed with "agent:" were preserved, so CLI sessions
+	// silently fell back to route.SessionKey ("cli:default") regardless of
+	// what the user passed.
+	if msgSessionKey != "" {
 		return msgSessionKey
 	}
 	return route.SessionKey

@@ -67,18 +67,18 @@ func agentCmd(message, sessionKey, model string, debug bool) error {
 		if err != nil {
 			return fmt.Errorf("error processing message: %w", err)
 		}
-		fmt.Printf("\n%s %s\n", internal.Logo, response)
+		fmt.Printf("\nSensai: %s\n", response)
 		return nil
 	}
 
-	fmt.Printf("%s Interactive mode (Ctrl+C to exit)\n\n", internal.Logo)
+	fmt.Printf("Sensai is ready — type your question below (type 'exit' to quit)\n\n")
 	interactiveMode(agentLoop, sessionKey)
 
 	return nil
 }
 
 func interactiveMode(agentLoop *agent.AgentLoop, sessionKey string) {
-	prompt := fmt.Sprintf("%s You: ", internal.Logo)
+	prompt := "You: "
 
 	rl, err := readline.NewEx(&readline.Config{
 		Prompt:          prompt,
@@ -123,14 +123,14 @@ func interactiveMode(agentLoop *agent.AgentLoop, sessionKey string) {
 			continue
 		}
 
-		fmt.Printf("\n%s %s\n\n", internal.Logo, response)
+		fmt.Printf("\nSensai: %s\n\n", response)
 	}
 }
 
 func simpleInteractiveMode(agentLoop *agent.AgentLoop, sessionKey string) {
 	reader := bufio.NewReader(os.Stdin)
 	for {
-		fmt.Print(fmt.Sprintf("%s You: ", internal.Logo))
+		fmt.Print("You: ")
 		line, err := reader.ReadString('\n')
 		if err != nil {
 			if err == io.EOF {
@@ -158,6 +158,6 @@ func simpleInteractiveMode(agentLoop *agent.AgentLoop, sessionKey string) {
 			continue
 		}
 
-		fmt.Printf("\n%s %s\n\n", internal.Logo, response)
+		fmt.Printf("\nSensai: %s\n\n", response)
 	}
 }

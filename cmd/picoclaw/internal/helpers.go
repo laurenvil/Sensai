@@ -7,7 +7,7 @@ import (
 	"github.com/sipeed/picoclaw/pkg/config"
 )
 
-const Logo = "🦞"
+const Logo = "🧘"
 
 // GetPicoclawHome returns the picoclaw home directory.
 // Priority: $PICOCLAW_HOME > ~/.picoclaw

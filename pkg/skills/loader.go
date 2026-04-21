@@ -175,6 +175,30 @@ func (sl *SkillsLoader) LoadSkill(name string) (string, bool) {
 	return "", false
 }
 
+// LoadReference loads a reference file under a skill's references/ directory.
+// Resolution priority matches LoadSkill: workspace > global > builtin.
+// refName must be a plain filename (no slashes, no ".." traversal).
+func (sl *SkillsLoader) LoadReference(skillName, refName string) (string, bool) {
+	if !namePattern.MatchString(skillName) {
+		return "", false
+	}
+	if refName == "" || strings.ContainsAny(refName, `/\`) || strings.Contains(refName, "..") {
+		return "", false
+	}
+
+	roots := []string{sl.workspaceSkills, sl.globalSkills, sl.builtinSkills}
+	for _, root := range roots {
+		if root == "" {
+			continue
+		}
+		p := filepath.Join(root, skillName, "references", refName)
+		if content, err := os.ReadFile(p); err == nil {
+			return string(content), true
+		}
+	}
+	return "", false
+}
+
 func (sl *SkillsLoader) LoadSkillsForContext(skillNames []string) string {
 	if len(skillNames) == 0 {
 		return ""

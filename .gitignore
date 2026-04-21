@@ -56,3 +56,6 @@ dist/
 !web/backend/dist/
 web/backend/dist/*
 !web/backend/dist/.gitkeep
+
+# Claude Code
+CLAUDE.md

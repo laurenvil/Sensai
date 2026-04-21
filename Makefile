@@ -1,4 +1,4 @@
-.PHONY: all build install uninstall clean help test
+.PHONY: all build install uninstall clean help test sensai sensai-agentic sensai-direct sensai-install sensai-setup sensai-stop sensai-onboard sensai-tui sensai-arduino-setup
 
 # Build variables
 BINARY_NAME=picoclaw
@@ -54,6 +54,11 @@ PICOCLAW_HOME?=$(HOME)/.picoclaw
 WORKSPACE_DIR?=$(PICOCLAW_HOME)/workspace
 WORKSPACE_SKILLS_DIR=$(WORKSPACE_DIR)/skills
 BUILTIN_SKILLS_DIR=$(CURDIR)/skills
+
+# Sensai / llama-server
+LLAMA_SERVER?=$(CURDIR)/yzma/lib/llama-server
+LLAMA_PORT?=8080
+SENSAI_MODEL?=$(HOME)/models/Qwen_Qwen3.5-0.8B-Q4_0.gguf
 
 # OS detection
 UNAME_S:=$(shell uname -s)
@@ -184,6 +189,95 @@ build-all: generate
 	GOOS=netbsd GOARCH=amd64 $(GO) build $(LDFLAGS) -o $(BUILD_DIR)/$(BINARY_NAME)-netbsd-amd64 ./$(CMD_DIR)
 	GOOS=netbsd GOARCH=arm64 $(GO) build $(LDFLAGS) -o $(BUILD_DIR)/$(BINARY_NAME)-netbsd-arm64 ./$(CMD_DIR)
 	@echo "All builds complete"
+
+## sensai-install: One-time setup: build binary, bootstrap workspace, install arduino-cli, run onboarding
+sensai-install: build sensai-setup sensai-arduino-setup sensai-onboard
+
+## sensai-arduino-setup: Install arduino-cli and the Arduino Uno Q board core
+sensai-arduino-setup:
+	@chmod +x scripts/arduino-cli-setup.sh
+	@scripts/arduino-cli-setup.sh
+
+## sensai-onboard: Interactive setup — checks model/server, configures Telegram token
+sensai-onboard:
+	@chmod +x scripts/sensai-onboard.sh
+	@PICOCLAW_HOME=$(PICOCLAW_HOME) \
+	 SENSAI_MODEL=$(SENSAI_MODEL) \
+	 LLAMA_SERVER=$(LLAMA_SERVER) \
+	 scripts/sensai-onboard.sh
+
+## sensai-setup: Install Sensai workspace files and config (safe to re-run)
+sensai-setup:
+	@echo "Setting up Sensai workspace..."
+	@mkdir -p $(WORKSPACE_DIR)
+	@cp workspace/SOUL.md $(WORKSPACE_DIR)/SOUL.md
+	@echo "  Installed: $(WORKSPACE_DIR)/SOUL.md"
+	@cp workspace/IDENTITY.md $(WORKSPACE_DIR)/IDENTITY.md
+	@echo "  Installed: $(WORKSPACE_DIR)/IDENTITY.md"
+	@mkdir -p $(WORKSPACE_DIR)/skills
+	@cp -r workspace/skills/. $(WORKSPACE_DIR)/skills/
+	@echo "  Installed: $(WORKSPACE_DIR)/skills/"
+	@if [ ! -f $(PICOCLAW_HOME)/config.json ]; then \
+		cp config/sensai.config.json $(PICOCLAW_HOME)/config.json; \
+		echo "  Installed: $(PICOCLAW_HOME)/config.json"; \
+	else \
+		echo "  Skipped:   $(PICOCLAW_HOME)/config.json (already exists — edit manually to update)"; \
+	fi
+	@echo "  Workspace ready: $(WORKSPACE_DIR)"
+
+## sensai: Default Sensai launcher — alias for `sensai-agentic` (full agent loop + 8 tools + arduino compile/upload).
+sensai: sensai-agentic
+
+## sensai-agentic: Agentic architecture — agent loop + 23-rule pre-router + 8 tools.
+##                 Tools: read_file, write_file, list_dir, arduino, camera, sysfs_led, network, i2cdetect.
+##                 Pre-router covers 15 skills: sketch-patterns, led-matrix, uno-q-hardware, bridge,
+##                 wireless, vision, audio, arduino-app-lab, modulino, linux-led (+ inherited).
+##                 Use for compile/upload, camera capture, GPIO, networking. ~12–22 min per cell on 0.8B.
+sensai-agentic:
+	@chmod +x scripts/sensai-launch.sh
+	@PICOCLAW_HOME=$(PICOCLAW_HOME) \
+	 SENSAI_MODEL=$(SENSAI_MODEL) \
+	 LLAMA_SERVER=$(LLAMA_SERVER) \
+	 BINARY=$(BUILD_DIR)/$(BINARY_NAME) \
+	 LLAMA_PORT=$(LLAMA_PORT) \
+	 scripts/sensai-launch.sh
+
+## sensai-direct: Direct architecture — 23-rule pre-router + direct API, NO agent loop, NO tools.
+##                Pre-router inlines the same 15 skills as the agentic path; without tools the model
+##                returns sketches as text and cannot capture images, set LEDs, or scan I²C.
+##                ~5–13 min per cell on 0.8B (33% faster than agentic). Best for Q&A and short sketches.
+sensai-direct:
+	@chmod +x scripts/sensai-launch-direct.sh
+	@PICOCLAW_HOME=$(PICOCLAW_HOME) \
+	 SENSAI_MODEL=$(SENSAI_MODEL) \
+	 LLAMA_SERVER=$(LLAMA_SERVER) \
+	 LLAMA_PORT=$(LLAMA_PORT) \
+	 scripts/sensai-launch-direct.sh
+
+## sensai-tui: Build and launch the picoclaw launcher TUI (for advanced channel config)
+sensai-tui:
+	@echo "Building picoclaw-launcher-tui..."
+	@mkdir -p $(BUILD_DIR)
+	@$(GO) build $(GOFLAGS) -o $(BUILD_DIR)/picoclaw-launcher-tui ./cmd/picoclaw-launcher-tui
+	@echo "Launching Sensai TUI..."
+	@$(BUILD_DIR)/picoclaw-launcher-tui
+
+## sensai-stop: Stop background llama-server and gateway processes
+sensai-stop:
+	@if [ -f $(PICOCLAW_HOME)/llama-server.pid ]; then \
+		kill $$(cat $(PICOCLAW_HOME)/llama-server.pid) 2>/dev/null || true; \
+		rm -f $(PICOCLAW_HOME)/llama-server.pid; \
+		echo "Stopped llama-server"; \
+	else \
+		echo "llama-server not running (no PID file)"; \
+	fi
+	@if [ -f $(PICOCLAW_HOME)/gateway.pid ]; then \
+		kill $$(cat $(PICOCLAW_HOME)/gateway.pid) 2>/dev/null || true; \
+		rm -f $(PICOCLAW_HOME)/gateway.pid; \
+		echo "Stopped gateway"; \
+	else \
+		echo "Gateway not running (no PID file)"; \
+	fi
 
 ## install: Install picoclaw to system and copy builtin skills
 install: build

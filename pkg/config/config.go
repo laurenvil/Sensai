@@ -605,10 +605,11 @@ type ModelConfig struct {
 	Workspace   string `json:"workspace,omitempty"`    // Workspace path for CLI-based providers
 
 	// Optional optimizations
-	RPM            int    `json:"rpm,omitempty"`              // Requests per minute limit
-	MaxTokensField string `json:"max_tokens_field,omitempty"` // Field name for max tokens (e.g., "max_completion_tokens")
-	RequestTimeout int    `json:"request_timeout,omitempty"`
-	ThinkingLevel  string `json:"thinking_level,omitempty"` // Extended thinking: off|low|medium|high|xhigh|adaptive
+	RPM            int            `json:"rpm,omitempty"`              // Requests per minute limit
+	MaxTokensField string         `json:"max_tokens_field,omitempty"` // Field name for max tokens (e.g., "max_completion_tokens")
+	RequestTimeout int            `json:"request_timeout,omitempty"`
+	ThinkingLevel  string         `json:"thinking_level,omitempty"` // Extended thinking: off|low|medium|high|xhigh|adaptive
+	ExtraBody      map[string]any `json:"extra_body,omitempty"`     // Extra fields merged into every request body
 }
 
 // Validate checks if the ModelConfig has all required fields.
@@ -729,6 +730,13 @@ type ReadFileToolConfig struct {
 	MaxReadFileSize int  `json:"max_read_file_size"`
 }
 
+type ArduinoToolConfig struct {
+	ToolConfig `envPrefix:"PICOCLAW_TOOLS_ARDUINO_"`
+	FQBN       string `json:"fqbn"     env:"PICOCLAW_TOOLS_ARDUINO_FQBN"`
+	Port       string `json:"port"     env:"PICOCLAW_TOOLS_ARDUINO_PORT"`
+	Protocol   string `json:"protocol" env:"PICOCLAW_TOOLS_ARDUINO_PROTOCOL"`
+}
+
 type ToolsConfig struct {
 	AllowReadPaths  []string           `json:"allow_read_paths"  env:"PICOCLAW_TOOLS_ALLOW_READ_PATHS"`
 	AllowWritePaths []string           `json:"allow_write_paths" env:"PICOCLAW_TOOLS_ALLOW_WRITE_PATHS"`
@@ -738,10 +746,15 @@ type ToolsConfig struct {
 	Skills          SkillsToolsConfig  `json:"skills"`
 	MediaCleanup    MediaCleanupConfig `json:"media_cleanup"`
 	MCP             MCPConfig          `json:"mcp"`
+	Arduino         ArduinoToolConfig  `json:"arduino"`
 	AppendFile      ToolConfig         `json:"append_file"                                              envPrefix:"PICOCLAW_TOOLS_APPEND_FILE_"`
 	EditFile        ToolConfig         `json:"edit_file"                                                envPrefix:"PICOCLAW_TOOLS_EDIT_FILE_"`
 	FindSkills      ToolConfig         `json:"find_skills"                                              envPrefix:"PICOCLAW_TOOLS_FIND_SKILLS_"`
 	I2C             ToolConfig         `json:"i2c"                                                      envPrefix:"PICOCLAW_TOOLS_I2C_"`
+	Camera          ToolConfig         `json:"camera"                                                   envPrefix:"PICOCLAW_TOOLS_CAMERA_"`
+	SysfsLED        ToolConfig         `json:"sysfs_led"                                                envPrefix:"PICOCLAW_TOOLS_SYSFS_LED_"`
+	Network         ToolConfig         `json:"network"                                                  envPrefix:"PICOCLAW_TOOLS_NETWORK_"`
+	I2CDetect       ToolConfig         `json:"i2cdetect"                                                envPrefix:"PICOCLAW_TOOLS_I2CDETECT_"`
 	InstallSkill    ToolConfig         `json:"install_skill"                                            envPrefix:"PICOCLAW_TOOLS_INSTALL_SKILL_"`
 	ListDir         ToolConfig         `json:"list_dir"                                                 envPrefix:"PICOCLAW_TOOLS_LIST_DIR_"`
 	Message         ToolConfig         `json:"message"                                                  envPrefix:"PICOCLAW_TOOLS_MESSAGE_"`
@@ -1031,6 +1044,8 @@ func (t *ToolsConfig) IsToolEnabled(name string) bool {
 		return t.EditFile.Enabled
 	case "find_skills":
 		return t.FindSkills.Enabled
+	case "arduino":
+		return t.Arduino.Enabled
 	case "i2c":
 		return t.I2C.Enabled
 	case "install_skill":
@@ -1055,6 +1070,14 @@ func (t *ToolsConfig) IsToolEnabled(name string) bool {
 		return t.WriteFile.Enabled
 	case "mcp":
 		return t.MCP.Enabled
+	case "camera":
+		return t.Camera.Enabled
+	case "sysfs_led":
+		return t.SysfsLED.Enabled
+	case "network":
+		return t.Network.Enabled
+	case "i2cdetect":
+		return t.I2CDetect.Enabled
 	default:
 		return true
 	}

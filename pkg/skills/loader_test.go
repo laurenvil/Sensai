@@ -403,6 +403,48 @@ func TestGetSkillMetadata_InvalidHeadingNameFallsBackToDirName(t *testing.T) {
 	assert.Equal(t, "Body description.", meta.Description)
 }
 
+func TestLoadReference_FindsWorkspaceFile(t *testing.T) {
+	ws := t.TempDir()
+	refDir := filepath.Join(ws, "skills", "uno-q-hardware", "references")
+	require.NoError(t, os.MkdirAll(refDir, 0o755))
+	require.NoError(t, os.WriteFile(filepath.Join(refDir, "pinout.md"), []byte("PINOUT_BODY"), 0o644))
+
+	sl := NewSkillsLoader(ws, "", "")
+	content, ok := sl.LoadReference("uno-q-hardware", "pinout.md")
+	assert.True(t, ok)
+	assert.Equal(t, "PINOUT_BODY", content)
+}
+
+func TestLoadReference_RejectsPathTraversal(t *testing.T) {
+	ws := t.TempDir()
+	sl := NewSkillsLoader(ws, "", "")
+
+	cases := []string{
+		"../etc/passwd",
+		"foo/bar.md",
+		`foo\bar.md`,
+		"..",
+		"",
+	}
+	for _, c := range cases {
+		_, ok := sl.LoadReference("uno-q-hardware", c)
+		assert.False(t, ok, "ref name %q should be rejected", c)
+	}
+}
+
+func TestLoadReference_RejectsInvalidSkillName(t *testing.T) {
+	ws := t.TempDir()
+	sl := NewSkillsLoader(ws, "", "")
+	_, ok := sl.LoadReference("../etc", "passwd")
+	assert.False(t, ok)
+}
+
+func TestLoadReference_MissingFileReturnsFalse(t *testing.T) {
+	sl := NewSkillsLoader(t.TempDir(), "", "")
+	_, ok := sl.LoadReference("uno-q-hardware", "nonexistent.md")
+	assert.False(t, ok)
+}
+
 func TestGetSkillMetadata_IgnoresHTMLCommentBlocks(t *testing.T) {
 	tmp := t.TempDir()
 	skillDir := filepath.Join(tmp, "workspace", "skills", "biomed-skill")
