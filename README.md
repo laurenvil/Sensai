@@ -2,7 +2,7 @@
 <img width="1408" height="768" alt="Arduino AI Assistant" src="https://github.com/user-attachments/assets/36e314de-3842-4155-979d-d5fe00e7afaa" />
 
 
-**Sensai** is my production fork of [picoclaw](https://github.com/sipeed/picoclaw), optimized for on-device AI inference on Arduino Uno Q and Arduino Ventuno Q hardware. It bundles [yzma](https://github.com/hybridgroup/yzma) (Go/llama.cpp FFI bindings) as a submodule and documents the full stack required to run a local, cloud-free AI assistant on Qualcomm Dragonwing embedded Linux boards.
+**Sensai** is my fork of [picoclaw](https://github.com/sipeed/picoclaw) for educational purposes, optimized for on-device AI inference on Arduino Uno Q and Arduino Ventuno Q hardware. It bundles [yzma](https://github.com/hybridgroup/yzma) (Go/llama.cpp FFI bindings) as a submodule and documents the full stack required to run a local, cloud-free AI assistant on Qualcomm Dragonwing embedded Linux boards.
 
 Upstream: [sipeed/picoclaw](https://github.com/sipeed/picoclaw) · Yzma submodule: [hybridgroup/yzma](https://github.com/hybridgroup/yzma)
 
