@@ -109,6 +109,52 @@ Sensai starts, displays a welcome banner, and is ready for questions. Keep this 
 
 ---
 
+## Local Network Access (SSH)
+
+Students do not need a keyboard and monitor plugged directly into the board. Any computer on the same Wi-Fi or wired network can reach Sensai by SSH.
+
+**Step 1 — Find the board's IP address**
+
+On the board itself (or via a direct connection at first):
+
+```bash
+hostname -I
+# e.g. 192.168.1.42
+```
+
+Write this address on the board or whiteboard for students. IP addresses on DHCP networks can change on reboot — consider assigning a static IP in your router, or using the hostname:
+
+```bash
+ssh arduino@amanunoq.local   # mDNS hostname (may be unreliable on some networks)
+ssh arduino@192.168.1.42     # IP address — always reliable
+```
+
+**Step 2 — Students connect via SSH**
+
+On any laptop or Chromebook on the same network:
+
+```bash
+ssh arduino@192.168.1.42
+# Password: arduino  (default — change this after first setup)
+```
+
+On Windows, SSH is available in PowerShell, Windows Terminal, or PuTTY. On Mac and Linux it is built in.
+
+**Step 3 — Launch Sensai from the SSH session**
+
+```bash
+cd ~/ArduinoApps/Sensai
+make sensai
+```
+
+The full terminal chat session runs inside the SSH window — identical to sitting at the board. Multiple students can SSH simultaneously; each gets their own independent chat session.
+
+**Tip — run `make sensai` on the board at startup, SSH in for the chat**
+
+If you start `make sensai` directly on the board (attached monitor or serial), the `picoclaw agent` terminal chat runs there. Students who SSH in get a fresh `make sensai` invocation in their own session — llama-server is already running and shared, so their session starts in seconds.
+
+---
+
 ## Daily Classroom Use
 
 ```bash

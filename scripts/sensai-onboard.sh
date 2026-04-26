@@ -92,9 +92,9 @@ except Exception:
 
 if [ -n "$CURRENT_TOKEN" ] && [ "$CURRENT_TOKEN" != "YOUR_TELEGRAM_BOT_TOKEN" ]; then
     echo -e "  Current token: ${DIM}${CURRENT_TOKEN:0:8}...${RESET} (already set)"
-    printf "  Enter new token to replace, or press Enter to keep: "
+    printf "  Enter new token to replace, or press Enter to keep it: "
 else
-    printf "  Telegram bot token: "
+    printf "  Telegram bot token [press Enter to skip and use terminal only]: "
 fi
 
 read -r TOKEN_INPUT

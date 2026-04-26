@@ -38,7 +38,27 @@ Each time you type a question and press Enter, Sensai responds. The conversation
 **Option 2 — Telegram (from your phone or laptop)**
 If your teacher has set up Telegram, message the class bot from your phone or laptop. You will see "Asking Sensai..." appear immediately, then the answer arrives in a few seconds.
 
-Both options work the same way. Sensai does not know or care which one you use.
+**Option 3 — SSH over the local network (from your laptop)**
+
+If your teacher has shared the board's IP address, you can reach the Sensai terminal from your own laptop without touching the board at all.
+
+Open a terminal (PowerShell on Windows, Terminal on Mac/Linux) and type:
+
+```bash
+ssh arduino@192.168.1.42   # use the IP address your teacher provides
+# password: arduino
+```
+
+Once connected, start Sensai:
+
+```bash
+cd ~/ArduinoApps/Sensai
+make sensai
+```
+
+The terminal chat works exactly the same as sitting at the board. If llama-server is already running from another session, yours starts in seconds.
+
+All three options work the same way. Sensai does not know or care which one you use.
 
 ---
 
