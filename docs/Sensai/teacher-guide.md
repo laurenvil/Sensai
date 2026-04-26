@@ -32,11 +32,22 @@ Sensai has **two ways for students to interact:**
 Both work simultaneously once Sensai is running. The terminal session looks like this:
 
 ```
-🥷  Sensai — Arduino AI Assistant
+        .--.
+       ( .. )
+        )__(
+       /|  |\
+      / |  | \
+     /  |__|  \
+        /  \
 
-  Type your question at the 'You:' prompt below.
-  Sensai will respond in a few seconds.
-  Type 'exit' or press Ctrl+C to quit.
+  ┌───────────────────────────────────────────┐
+  │         S  E  N  S  A  I                  │
+  │      Arduino AI Assistant                  │
+  │                                            │
+  │  Type your question at 'You:' and press    │
+  │  Enter. Sensai responds in a few seconds.  │
+  │  Type 'exit' or Ctrl+C to quit.           │
+  └───────────────────────────────────────────┘
 
 Sensai is ready — type your question below (type 'exit' to quit)
 

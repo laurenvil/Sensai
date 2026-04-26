@@ -15,11 +15,22 @@ You have two ways to reach Sensai:
 Once your teacher runs `make sensai`, the terminal shows a welcome banner and then a `You:` prompt. Type your question and press Enter. Sensai thinks for a few seconds, then prints its answer right below.
 
 ```
-🥷  Sensai — Arduino AI Assistant
+        .--.
+       ( .. )
+        )__(
+       /|  |\
+      / |  | \
+     /  |__|  \
+        /  \
 
-  Type your question at the 'You:' prompt below.
-  Sensai will respond in a few seconds.
-  Type 'exit' or press Ctrl+C to quit.
+  ┌───────────────────────────────────────────┐
+  │         S  E  N  S  A  I                  │
+  │      Arduino AI Assistant                  │
+  │                                            │
+  │  Type your question at 'You:' and press    │
+  │  Enter. Sensai responds in a few seconds.  │
+  │  Type 'exit' or Ctrl+C to quit.           │
+  └───────────────────────────────────────────┘
 
 Sensai is ready — type your question below (type 'exit' to quit)
 

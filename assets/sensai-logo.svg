@@ -1,0 +1,126 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 280" width="240" height="280">
+  <defs>
+    <radialGradient id="bgGrad" cx="50%" cy="45%" r="55%">
+      <stop offset="0%" stop-color="#1e1b4b"/>
+      <stop offset="100%" stop-color="#0d0b2a"/>
+    </radialGradient>
+    <radialGradient id="skinGrad" cx="40%" cy="35%" r="60%">
+      <stop offset="0%" stop-color="#e8c99a"/>
+      <stop offset="100%" stop-color="#c8a06a"/>
+    </radialGradient>
+    <linearGradient id="robeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#3b3580"/>
+      <stop offset="100%" stop-color="#25225c"/>
+    </linearGradient>
+    <linearGradient id="lapelGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#4e49a0"/>
+      <stop offset="100%" stop-color="#312e78"/>
+    </linearGradient>
+    <filter id="softShadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#000" flood-opacity="0.35"/>
+    </filter>
+  </defs>
+
+  <!-- Outer glow ring -->
+  <circle cx="120" cy="120" r="116" fill="none" stroke="#7c6fcd" stroke-width="1" opacity="0.4"/>
+
+  <!-- Background circle -->
+  <circle cx="120" cy="120" r="114" fill="url(#bgGrad)"/>
+
+  <!-- Inner ring accent -->
+  <circle cx="120" cy="120" r="108" fill="none" stroke="#4a4580" stroke-width="0.5" opacity="0.6"/>
+
+  <!-- ── MONK FIGURE ── -->
+
+  <!-- Seated base / crossed legs / robe hem -->
+  <ellipse cx="120" cy="190" rx="58" ry="16" fill="#25225c" opacity="0.8"/>
+  <path d="M 62 182 Q 90 200 120 196 Q 150 200 178 182 L 176 192 Q 150 212 120 208 Q 90 212 64 192 Z"
+        fill="#3b3580"/>
+
+  <!-- Robe body — wide, flowing trapezoid -->
+  <path d="M 72 110 Q 120 100 168 110 L 178 188 Q 120 178 62 188 Z"
+        fill="url(#robeGrad)" filter="url(#softShadow)"/>
+
+  <!-- Left lapel -->
+  <path d="M 120 102 L 92 118 L 82 188 L 120 174 Z"
+        fill="url(#lapelGrad)" opacity="0.85"/>
+
+  <!-- Right lapel -->
+  <path d="M 120 102 L 148 118 L 158 188 L 120 174 Z"
+        fill="url(#lapelGrad)" opacity="0.75"/>
+
+  <!-- Sash / belt -->
+  <path d="M 70 148 Q 120 140 170 148 L 168 158 Q 120 150 72 158 Z"
+        fill="#6c5ce7" opacity="0.9"/>
+  <!-- Belt highlight -->
+  <path d="M 80 148 Q 120 142 160 148 L 159 151 Q 120 145 81 151 Z"
+        fill="#a29bf5" opacity="0.4"/>
+
+  <!-- Folded hands (mudra) resting in lap -->
+  <ellipse cx="120" cy="170" rx="24" ry="11" fill="url(#skinGrad)" opacity="0.95"/>
+  <!-- Finger line -->
+  <path d="M 100 170 Q 120 166 140 170" stroke="#b8905a" stroke-width="0.8" fill="none" opacity="0.5"/>
+
+  <!-- Neck -->
+  <rect x="112" y="88" width="16" height="16" rx="4" fill="url(#skinGrad)"/>
+
+  <!-- Head — bald, oval, slightly tilted forward in serenity -->
+  <ellipse cx="120" cy="66" rx="30" ry="33" fill="url(#skinGrad)" filter="url(#softShadow)"/>
+
+  <!-- Subtle head highlight -->
+  <ellipse cx="113" cy="54" rx="10" ry="8" fill="#f0d8a8" opacity="0.25"/>
+
+  <!-- Ears -->
+  <ellipse cx="90" cy="68" rx="5" ry="7" fill="#c09060"/>
+  <ellipse cx="150" cy="68" rx="5" ry="7" fill="#c09060"/>
+  <!-- Ear inner -->
+  <ellipse cx="90" cy="68" rx="3" ry="4.5" fill="#b07850" opacity="0.5"/>
+  <ellipse cx="150" cy="68" rx="3" ry="4.5" fill="#b07850" opacity="0.5"/>
+
+  <!-- Eyebrows — gentle, slightly arched -->
+  <path d="M 104 52 Q 110 49 116 51" stroke="#8B6030" stroke-width="1.6"
+        fill="none" stroke-linecap="round"/>
+  <path d="M 124 51 Q 130 49 136 52" stroke="#8B6030" stroke-width="1.6"
+        fill="none" stroke-linecap="round"/>
+
+  <!-- Eyes — closed in peaceful meditation -->
+  <path d="M 105 59 Q 111 56 117 59" stroke="#5a3a1a" stroke-width="2"
+        fill="none" stroke-linecap="round"/>
+  <path d="M 123 59 Q 129 56 135 59" stroke="#5a3a1a" stroke-width="2"
+        fill="none" stroke-linecap="round"/>
+
+  <!-- Lower eyelid shadow — gives depth -->
+  <path d="M 105 60 Q 111 63 117 60" stroke="#c09060" stroke-width="0.8"
+        fill="none" stroke-linecap="round" opacity="0.5"/>
+  <path d="M 123 60 Q 129 63 135 60" stroke="#c09060" stroke-width="0.8"
+        fill="none" stroke-linecap="round" opacity="0.5"/>
+
+  <!-- Nose — minimal, just a shadow suggestion -->
+  <path d="M 118 66 Q 120 71 122 66" stroke="#b07848" stroke-width="1"
+        fill="none" stroke-linecap="round" opacity="0.5"/>
+
+  <!-- Serene smile — slight, peaceful -->
+  <path d="M 112 76 Q 120 81 128 76" stroke="#8B5030" stroke-width="1.5"
+        fill="none" stroke-linecap="round"/>
+
+  <!-- ── WORDMARK ── -->
+  <!-- Decorative divider -->
+  <line x1="70" y1="222" x2="170" y2="222" stroke="#4a4580" stroke-width="0.8" opacity="0.7"/>
+
+  <!-- "SENSAI" text -->
+  <text x="120" y="244"
+        text-anchor="middle"
+        font-family="Georgia, 'Times New Roman', serif"
+        font-size="22"
+        font-weight="bold"
+        letter-spacing="6"
+        fill="#d0ccff">SENSAI</text>
+
+  <!-- Tagline -->
+  <text x="120" y="262"
+        text-anchor="middle"
+        font-family="'Courier New', Courier, monospace"
+        font-size="8"
+        letter-spacing="2"
+        fill="#6a6490">ARDUINO AI ASSISTANT</text>
+</svg>
