@@ -185,6 +185,30 @@ build-all: generate
 	GOOS=netbsd GOARCH=arm64 $(GO) build $(LDFLAGS) -o $(BUILD_DIR)/$(BINARY_NAME)-netbsd-arm64 ./$(CMD_DIR)
 	@echo "All builds complete"
 
+## sensai-setup: Bootstrap Sensai workspace and config for Arduino Uno Q
+sensai-setup:
+	@echo "Setting up Sensai workspace..."
+	@mkdir -p $(WORKSPACE_DIR)
+	@cp workspace/SOUL.md $(WORKSPACE_DIR)/SOUL.md
+	@echo "  Installed: $(WORKSPACE_DIR)/SOUL.md"
+	@cp workspace/IDENTITY.md $(WORKSPACE_DIR)/IDENTITY.md
+	@echo "  Installed: $(WORKSPACE_DIR)/IDENTITY.md"
+	@if [ ! -f $(PICOCLAW_HOME)/config.json ]; then \
+		cp config/sensai.config.json $(PICOCLAW_HOME)/config.json; \
+		echo "  Installed: $(PICOCLAW_HOME)/config.json"; \
+	else \
+		echo "  Skipped:   $(PICOCLAW_HOME)/config.json (already exists — update manually)"; \
+	fi
+	@echo ""
+	@echo "Sensai workspace ready at $(WORKSPACE_DIR)"
+	@echo ""
+	@echo "Next steps:"
+	@echo "  1. Start llama-server:"
+	@echo "       ./yzma/lib/llama-server -m ~/models/Qwen_Qwen3.5-0.8B-Q6_K.gguf \\"
+	@echo "         --host 127.0.0.1 --port 8080 --ctx-size 12288 --parallel 2"
+	@echo "  2. Set your Telegram bot token in $(PICOCLAW_HOME)/config.json"
+	@echo "  3. Run: make build && ./build/picoclaw agent"
+
 ## install: Install picoclaw to system and copy builtin skills
 install: build
 	@echo "Installing $(BINARY_NAME)..."
