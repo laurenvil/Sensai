@@ -32,16 +32,8 @@ Sensai has **two ways for students to interact:**
 Both work simultaneously once Sensai is running. The terminal session looks like this:
 
 ```
-        .--.
-       ( .. )
-        )__(
-       /|  |\
-      / |  | \
-     /  |__|  \
-        /  \
-
   ┌───────────────────────────────────────────┐
-  │         S  E  N  S  A  I                  │
+  │  🧘  S  E  N  S  A  I                    │
   │      Arduino AI Assistant                  │
   │                                            │
   │  Type your question at 'You:' and press    │

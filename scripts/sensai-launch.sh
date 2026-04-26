@@ -118,16 +118,8 @@ fi
 # ── Terminal Chat ─────────────────────────────────────────────────────────────
 
 echo ""
-echo "        .--."
-echo "       ( .. )"
-echo "        )__("
-echo "       /|  |\\"
-echo "      / |  | \\"
-echo "     /  |__|  \\"
-echo "        /  \\"
-echo ""
 echo "  ┌───────────────────────────────────────────┐"
-echo "  │         S  E  N  S  A  I                  │"
+echo "  │  🧘  S  E  N  S  A  I                    │"
 echo "  │      Arduino AI Assistant                  │"
 echo "  │                                            │"
 echo "  │  Type your question at 'You:' and press    │"

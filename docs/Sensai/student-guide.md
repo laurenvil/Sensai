@@ -15,16 +15,8 @@ You have two ways to reach Sensai:
 Once your teacher runs `make sensai`, the terminal shows a welcome banner and then a `You:` prompt. Type your question and press Enter. Sensai thinks for a few seconds, then prints its answer right below.
 
 ```
-        .--.
-       ( .. )
-        )__(
-       /|  |\
-      / |  | \
-     /  |__|  \
-        /  \
-
   ┌───────────────────────────────────────────┐
-  │         S  E  N  S  A  I                  │
+  │  🧘  S  E  N  S  A  I                    │
   │      Arduino AI Assistant                  │
   │                                            │
   │  Type your question at 'You:' and press    │
