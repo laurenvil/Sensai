@@ -118,11 +118,14 @@ fi
 # ── Terminal Chat ─────────────────────────────────────────────────────────────
 
 echo ""
-echo "┌─────────────────────────────────────────────────┐"
-echo "│           Sensai — Arduino AI Assistant          │"
-echo "│  Ask me anything about your Arduino Uno Q board! │"
-echo "│  Ctrl+C or type 'exit' to quit.                  │"
-echo "└─────────────────────────────────────────────────┘"
+echo "┌──────────────────────────────────────────────────────┐"
+echo "│  🥷  Sensai — Arduino AI Assistant                   │"
+echo "│                                                      │"
+echo "│  Type your question at the 'You:' prompt below.      │"
+echo "│  Sensai will respond in a few seconds.               │"
+echo "│                                                      │"
+echo "│  Type 'exit' or press Ctrl+C to quit.               │"
+echo "└──────────────────────────────────────────────────────┘"
 echo ""
 
 "$BINARY" agent

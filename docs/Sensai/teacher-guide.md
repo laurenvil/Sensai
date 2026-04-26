@@ -26,10 +26,24 @@ It is not a general-purpose chatbot. It stays focused on Arduino, electronics, a
 
 Sensai has **two ways for students to interact:**
 
-1. **Terminal** — connect a keyboard and monitor (or SSH), type questions directly
-2. **Telegram** — send messages from any phone or laptop on the same network (or internet with port forwarding)
+1. **Terminal** — connect a keyboard and monitor (or SSH) and type questions at the `You:` prompt. Sensai prints its response directly below. This is launched automatically by `make sensai`.
+2. **Telegram** — send messages from any phone or laptop on the same network (or internet with port forwarding).
 
-Both work simultaneously once Sensai is running.
+Both work simultaneously once Sensai is running. The terminal session looks like this:
+
+```
+🥷  Sensai — Arduino AI Assistant
+
+  Type your question at the 'You:' prompt below.
+  Sensai will respond in a few seconds.
+  Type 'exit' or press Ctrl+C to quit.
+
+Sensai is ready — type your question below (type 'exit' to quit)
+
+You: blink pin D9 every 500ms
+
+Sensai: Here is a complete sketch that blinks D9 every 500 ms...
+```
 
 ---
 

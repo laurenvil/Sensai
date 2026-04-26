@@ -11,7 +11,26 @@ This guide shows you how to talk to Sensai and how to get the most out of it.
 You have two ways to reach Sensai:
 
 **Option 1 — Terminal (directly on the board)**
-If you are connected to the board with a keyboard and monitor, or via SSH, just type your question at the prompt after `make sensai` is running.
+
+Once your teacher runs `make sensai`, the terminal shows a welcome banner and then a `You:` prompt. Type your question and press Enter. Sensai thinks for a few seconds, then prints its answer right below.
+
+```
+🥷  Sensai — Arduino AI Assistant
+
+  Type your question at the 'You:' prompt below.
+  Sensai will respond in a few seconds.
+  Type 'exit' or press Ctrl+C to quit.
+
+Sensai is ready — type your question below (type 'exit' to quit)
+
+You: how do I blink an LED on D9?
+
+Sensai: Here is a complete sketch...
+
+You:
+```
+
+Each time you type a question and press Enter, Sensai responds. The conversation continues until you type `exit` or press `Ctrl+C`.
 
 **Option 2 — Telegram (from your phone or laptop)**
 If your teacher has set up Telegram, message the class bot from your phone or laptop. You will see "Asking Sensai..." appear immediately, then the answer arrives in a few seconds.
@@ -152,9 +171,13 @@ Here is what a real Sensai exchange looks like:
 
 ---
 
-**You:** My button on D2 works but when I hold it, the LED on D5 flickers instead of staying on.
+```
+You: My button on D2 works but when I hold it, the LED on D5 flickers instead of staying on.
+```
 
-**Sensai:** Your wiring and `digitalRead()` call are correct — the button is being read. The flickering is caused by **contact bounce**: when a physical button closes, the metal contacts briefly vibrate and send dozens of on/off signals before settling. The processor reads them all.
+**Sensai:**
+
+Your wiring and `digitalRead()` call are correct — the button is being read. The flickering is caused by **contact bounce**: when a physical button closes, the metal contacts briefly vibrate and send dozens of on/off signals before settling. The processor reads them all.
 
 Here is a debounced version using `millis()` to ignore signals that arrive faster than 50 ms:
 
