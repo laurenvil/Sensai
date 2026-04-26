@@ -1,4 +1,4 @@
-.PHONY: all build install uninstall clean help test
+.PHONY: all build install uninstall clean help test sensai sensai-install sensai-setup sensai-stop
 
 # Build variables
 BINARY_NAME=picoclaw
@@ -54,6 +54,11 @@ PICOCLAW_HOME?=$(HOME)/.picoclaw
 WORKSPACE_DIR?=$(PICOCLAW_HOME)/workspace
 WORKSPACE_SKILLS_DIR=$(WORKSPACE_DIR)/skills
 BUILTIN_SKILLS_DIR=$(CURDIR)/skills
+
+# Sensai / llama-server
+LLAMA_SERVER?=$(CURDIR)/yzma/lib/llama-server
+LLAMA_PORT?=8080
+SENSAI_MODEL?=$(HOME)/models/Qwen_Qwen3.5-0.8B-Q6_K.gguf
 
 # OS detection
 UNAME_S:=$(shell uname -s)
@@ -185,7 +190,22 @@ build-all: generate
 	GOOS=netbsd GOARCH=arm64 $(GO) build $(LDFLAGS) -o $(BUILD_DIR)/$(BINARY_NAME)-netbsd-arm64 ./$(CMD_DIR)
 	@echo "All builds complete"
 
-## sensai-setup: Bootstrap Sensai workspace and config for Arduino Uno Q
+## sensai-install: One-time setup: build binary and bootstrap Sensai workspace
+sensai-install: build sensai-setup
+	@echo ""
+	@echo "Sensai install complete."
+	@echo ""
+	@echo "Remaining manual steps:"
+	@echo "  1. Download the model (if not already done):"
+	@echo "       mkdir -p ~/models"
+	@echo "       wget -O $(SENSAI_MODEL) \\"
+	@echo "         'https://huggingface.co/Qwen/Qwen3.5-0.8B-GGUF/resolve/main/Qwen3.5-0.8B-Q6_K.gguf'"
+	@echo "  2. Download llama-server (if not already done):"
+	@echo "       cd yzma && make download-llama.cpp && cd .."
+	@echo "  3. (Optional) Set your Telegram bot token in $(PICOCLAW_HOME)/config.json"
+	@echo "  4. Launch Sensai: make sensai"
+
+## sensai-setup: Install Sensai workspace files and config (safe to re-run)
 sensai-setup:
 	@echo "Setting up Sensai workspace..."
 	@mkdir -p $(WORKSPACE_DIR)
@@ -197,17 +217,36 @@ sensai-setup:
 		cp config/sensai.config.json $(PICOCLAW_HOME)/config.json; \
 		echo "  Installed: $(PICOCLAW_HOME)/config.json"; \
 	else \
-		echo "  Skipped:   $(PICOCLAW_HOME)/config.json (already exists — update manually)"; \
+		echo "  Skipped:   $(PICOCLAW_HOME)/config.json (already exists — edit manually to update)"; \
 	fi
-	@echo ""
-	@echo "Sensai workspace ready at $(WORKSPACE_DIR)"
-	@echo ""
-	@echo "Next steps:"
-	@echo "  1. Start llama-server:"
-	@echo "       ./yzma/lib/llama-server -m ~/models/Qwen_Qwen3.5-0.8B-Q6_K.gguf \\"
-	@echo "         --host 127.0.0.1 --port 8080 --ctx-size 12288 --parallel 2"
-	@echo "  2. Set your Telegram bot token in $(PICOCLAW_HOME)/config.json"
-	@echo "  3. Run: make build && ./build/picoclaw agent"
+	@echo "  Workspace ready: $(WORKSPACE_DIR)"
+
+## sensai: Start llama-server + gateway (background) and open Sensai terminal chat
+sensai:
+	@chmod +x scripts/sensai-launch.sh
+	@PICOCLAW_HOME=$(PICOCLAW_HOME) \
+	 SENSAI_MODEL=$(SENSAI_MODEL) \
+	 LLAMA_SERVER=$(LLAMA_SERVER) \
+	 BINARY=$(BUILD_DIR)/$(BINARY_NAME) \
+	 LLAMA_PORT=$(LLAMA_PORT) \
+	 scripts/sensai-launch.sh
+
+## sensai-stop: Stop background llama-server and gateway processes
+sensai-stop:
+	@if [ -f $(PICOCLAW_HOME)/llama-server.pid ]; then \
+		kill $$(cat $(PICOCLAW_HOME)/llama-server.pid) 2>/dev/null || true; \
+		rm -f $(PICOCLAW_HOME)/llama-server.pid; \
+		echo "Stopped llama-server"; \
+	else \
+		echo "llama-server not running (no PID file)"; \
+	fi
+	@if [ -f $(PICOCLAW_HOME)/gateway.pid ]; then \
+		kill $$(cat $(PICOCLAW_HOME)/gateway.pid) 2>/dev/null || true; \
+		rm -f $(PICOCLAW_HOME)/gateway.pid; \
+		echo "Stopped gateway"; \
+	else \
+		echo "Gateway not running (no PID file)"; \
+	fi
 
 ## install: Install picoclaw to system and copy builtin skills
 install: build
