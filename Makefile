@@ -1,4 +1,4 @@
-.PHONY: all build install uninstall clean help test sensai sensai-install sensai-setup sensai-stop
+.PHONY: all build install uninstall clean help test sensai sensai-install sensai-setup sensai-stop sensai-onboard sensai-tui
 
 # Build variables
 BINARY_NAME=picoclaw
@@ -190,20 +190,16 @@ build-all: generate
 	GOOS=netbsd GOARCH=arm64 $(GO) build $(LDFLAGS) -o $(BUILD_DIR)/$(BINARY_NAME)-netbsd-arm64 ./$(CMD_DIR)
 	@echo "All builds complete"
 
-## sensai-install: One-time setup: build binary and bootstrap Sensai workspace
-sensai-install: build sensai-setup
-	@echo ""
-	@echo "Sensai install complete."
-	@echo ""
-	@echo "Remaining manual steps:"
-	@echo "  1. Download the model (if not already done):"
-	@echo "       mkdir -p ~/models"
-	@echo "       wget -O $(SENSAI_MODEL) \\"
-	@echo "         'https://huggingface.co/Qwen/Qwen3.5-0.8B-GGUF/resolve/main/Qwen3.5-0.8B-Q6_K.gguf'"
-	@echo "  2. Download llama-server (if not already done):"
-	@echo "       cd yzma && make download-llama.cpp && cd .."
-	@echo "  3. (Optional) Set your Telegram bot token in $(PICOCLAW_HOME)/config.json"
-	@echo "  4. Launch Sensai: make sensai"
+## sensai-install: One-time setup: build binary, bootstrap workspace, run interactive onboarding
+sensai-install: build sensai-setup sensai-onboard
+
+## sensai-onboard: Interactive setup — checks model/server, configures Telegram token
+sensai-onboard:
+	@chmod +x scripts/sensai-onboard.sh
+	@PICOCLAW_HOME=$(PICOCLAW_HOME) \
+	 SENSAI_MODEL=$(SENSAI_MODEL) \
+	 LLAMA_SERVER=$(LLAMA_SERVER) \
+	 scripts/sensai-onboard.sh
 
 ## sensai-setup: Install Sensai workspace files and config (safe to re-run)
 sensai-setup:
@@ -230,6 +226,14 @@ sensai:
 	 BINARY=$(BUILD_DIR)/$(BINARY_NAME) \
 	 LLAMA_PORT=$(LLAMA_PORT) \
 	 scripts/sensai-launch.sh
+
+## sensai-tui: Build and launch the picoclaw launcher TUI (for advanced channel config)
+sensai-tui:
+	@echo "Building picoclaw-launcher-tui..."
+	@mkdir -p $(BUILD_DIR)
+	@$(GO) build $(GOFLAGS) -o $(BUILD_DIR)/picoclaw-launcher-tui ./cmd/picoclaw-launcher-tui
+	@echo "Launching Sensai TUI..."
+	@$(BUILD_DIR)/picoclaw-launcher-tui
 
 ## sensai-stop: Stop background llama-server and gateway processes
 sensai-stop:
