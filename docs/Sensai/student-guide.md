@@ -181,7 +181,7 @@ Paste your actual code and actual error messages. Sensai diagnoses what you give
 
 ## What Sensai Cannot Do
 
-- **It cannot upload code to your board.** It generates the sketch; you paste it into Arduino IDE and upload yourself.
+- **It can compile and upload sketches** if your teacher has installed `arduino-cli`. Ask Sensai to "upload this sketch" and it will try. If `arduino-cli` is not installed, Sensai will give you the code to paste into Arduino IDE instead.
 - **It cannot see your wiring.** Describe what you have connected — pin numbers, sensor names — so it can help.
 - **It cannot fix hardware problems.** If a wire is loose or a component is broken, it cannot know. Describe what you see (no light, strange reading, smoke) and it will guide you through checking.
 - **Answers take time.** Sensai thinks on the board's processor, not a data center. Short answers arrive in about 5–10 seconds. Long answers with full sketches take up to 30–40 seconds. That is normal.

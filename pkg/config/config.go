@@ -729,6 +729,13 @@ type ReadFileToolConfig struct {
 	MaxReadFileSize int  `json:"max_read_file_size"`
 }
 
+type ArduinoToolConfig struct {
+	ToolConfig `envPrefix:"PICOCLAW_TOOLS_ARDUINO_"`
+	FQBN       string `json:"fqbn"     env:"PICOCLAW_TOOLS_ARDUINO_FQBN"`
+	Port       string `json:"port"     env:"PICOCLAW_TOOLS_ARDUINO_PORT"`
+	Protocol   string `json:"protocol" env:"PICOCLAW_TOOLS_ARDUINO_PROTOCOL"`
+}
+
 type ToolsConfig struct {
 	AllowReadPaths  []string           `json:"allow_read_paths"  env:"PICOCLAW_TOOLS_ALLOW_READ_PATHS"`
 	AllowWritePaths []string           `json:"allow_write_paths" env:"PICOCLAW_TOOLS_ALLOW_WRITE_PATHS"`
@@ -738,6 +745,7 @@ type ToolsConfig struct {
 	Skills          SkillsToolsConfig  `json:"skills"`
 	MediaCleanup    MediaCleanupConfig `json:"media_cleanup"`
 	MCP             MCPConfig          `json:"mcp"`
+	Arduino         ArduinoToolConfig  `json:"arduino"`
 	AppendFile      ToolConfig         `json:"append_file"                                              envPrefix:"PICOCLAW_TOOLS_APPEND_FILE_"`
 	EditFile        ToolConfig         `json:"edit_file"                                                envPrefix:"PICOCLAW_TOOLS_EDIT_FILE_"`
 	FindSkills      ToolConfig         `json:"find_skills"                                              envPrefix:"PICOCLAW_TOOLS_FIND_SKILLS_"`
@@ -1031,6 +1039,8 @@ func (t *ToolsConfig) IsToolEnabled(name string) bool {
 		return t.EditFile.Enabled
 	case "find_skills":
 		return t.FindSkills.Enabled
+	case "arduino":
+		return t.Arduino.Enabled
 	case "i2c":
 		return t.I2C.Enabled
 	case "install_skill":

@@ -143,14 +143,15 @@ Currently, picoclaw waits for the complete LLM response before sending. Implemen
 
 Complexity: Medium (provider + channel changes). High impact for UX.
 
-### Phase 3: Arduino CLI tool
+### Phase 3: Arduino CLI tool ✅ Implemented
 
-Add a skill or built-in tool that:
-1. Writes a sketch to a temp `.ino` file
-2. Runs `arduino-cli compile` and returns the error output
-3. Optionally runs `arduino-cli upload` if a board is connected
+Built-in tool (`pkg/tools/arduino.go`) that:
+1. Writes a sketch to a temp `.ino` file in the correct `<dir>/<dir>.ino` structure
+2. Runs `arduino-cli compile --fqbn <board>` and returns error output to the LLM
+3. Runs `arduino-cli upload` when requested, with configurable port and protocol
+4. Detects connected boards via `arduino-cli board list`
 
-This closes the feedback loop: student asks → sketch generated → compiled → uploaded, all from Telegram. Requires `arduino-cli` installed on the Uno Q.
+Configured in `config/sensai.config.json` with FQBN defaulting to `arduino:zephyr:unoq`. SOUL.md instructs the model when and how to use the tool. Requires `arduino-cli` and the `arduino:zephyr` core installed on the Uno Q.
 
 ### Phase 4: Ventuno Q NPU path
 

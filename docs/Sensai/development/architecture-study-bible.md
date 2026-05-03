@@ -466,11 +466,10 @@ while True:
 
 | Limitation | Reason |
 |-----------|--------|
-| Directly flash an Arduino sketch | No Arduino CLI integration (Phase 3 future work) |
 | Directly control MCU GPIO from Linux | MCU GPIO is controlled by STM32U585; Linux can only call MCU via Bridge |
 | Run faster than ~4 tok/s | Bounded by LPDDR4X memory bandwidth on QRB2210 |
 | Access the internet | Designed for offline-only use; web tools disabled in Sensai config |
-| Compile Arduino sketches automatically | This requires arduino-cli installed; not currently integrated |
+| Compile/upload sketches without arduino-cli | The `arduino` tool requires `arduino-cli` and the `arduino:zephyr` core to be installed |
 
 ### The I2C Tool — Which Bus?
 

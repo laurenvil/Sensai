@@ -39,7 +39,7 @@ fi
 
 # ── Model check ───────────────────────────────────────────────────────────────
 
-echo -e "${BOLD}[1/3] Checking model...${RESET}"
+echo -e "${BOLD}[1/4] Checking model...${RESET}"
 if [ -f "$SENSAI_MODEL" ]; then
     SIZE=$(du -sh "$SENSAI_MODEL" 2>/dev/null | cut -f1)
     echo -e "  ${GREEN}Found:${RESET} $(basename "$SENSAI_MODEL") (${SIZE})"
@@ -57,7 +57,7 @@ echo ""
 
 # ── llama-server check ────────────────────────────────────────────────────────
 
-echo -e "${BOLD}[2/3] Checking llama-server...${RESET}"
+echo -e "${BOLD}[2/4] Checking llama-server...${RESET}"
 if [ -f "$LLAMA_SERVER" ]; then
     echo -e "  ${GREEN}Found:${RESET} $LLAMA_SERVER"
 else
@@ -70,9 +70,38 @@ else
 fi
 echo ""
 
+# ── arduino-cli check ─────────────────────────────────────────────────────────
+
+echo -e "${BOLD}[3/4] Checking arduino-cli...${RESET}"
+ARDUINO_CLI_PATH=""
+if command -v arduino-cli > /dev/null 2>&1; then
+    ARDUINO_CLI_PATH="$(command -v arduino-cli)"
+elif [ -x "$HOME/.local/bin/arduino-cli" ]; then
+    ARDUINO_CLI_PATH="$HOME/.local/bin/arduino-cli"
+fi
+
+if [ -n "$ARDUINO_CLI_PATH" ]; then
+    CLI_VER=$("$ARDUINO_CLI_PATH" version 2>/dev/null | head -1 || echo "unknown")
+    echo -e "  ${GREEN}Found:${RESET} $ARDUINO_CLI_PATH"
+    echo -e "  ${DIM}$CLI_VER${RESET}"
+    # Check for the Uno Q core
+    if "$ARDUINO_CLI_PATH" core list 2>/dev/null | grep -q "^arduino:zephyr"; then
+        CORE_VER=$("$ARDUINO_CLI_PATH" core list 2>/dev/null | grep "^arduino:zephyr" | awk '{print $2}')
+        echo -e "  ${GREEN}Core installed:${RESET} arduino:zephyr @ ${CORE_VER}"
+    else
+        echo -e "  ${YELLOW}arduino:zephyr core not installed${RESET}"
+        echo -e "  Run: ${CYAN}make sensai-arduino-setup${RESET}"
+    fi
+else
+    echo -e "  ${YELLOW}arduino-cli not found${RESET}"
+    echo -e "  Run: ${CYAN}make sensai-arduino-setup${RESET} to install it"
+    echo "  (Sensai will still work — sketch compilation/upload will not be available)"
+fi
+echo ""
+
 # ── Telegram token ────────────────────────────────────────────────────────────
 
-echo -e "${BOLD}[3/3] Telegram bot setup (optional — press Enter to skip)${RESET}"
+echo -e "${BOLD}[4/4] Telegram bot setup (optional — press Enter to skip)${RESET}"
 echo ""
 echo -e "  Sensai works as a ${BOLD}terminal chat assistant${RESET} without Telegram."
 echo "  Add a bot token to also reach Sensai from any phone via Telegram."
@@ -156,5 +185,8 @@ echo ""
 echo "  Start Sensai:     make sensai"
 if [ -f "$LLAMA_SERVER" ] && [ ! -f "$SENSAI_MODEL" ]; then
     echo -e "  ${YELLOW}Remember to download the model before launching.${RESET}"
+fi
+if [ -z "$ARDUINO_CLI_PATH" ]; then
+    echo -e "  ${YELLOW}arduino-cli not installed — run: make sensai-arduino-setup${RESET}"
 fi
 echo ""

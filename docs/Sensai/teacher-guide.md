@@ -90,10 +90,12 @@ make sensai-install
 This single command:
 1. Builds the Sensai binary
 2. Installs the system prompt and identity files
-3. Runs the interactive setup wizard
+3. Downloads and installs `arduino-cli` + the Arduino Uno Q board core
+4. Runs the interactive setup wizard
 
 The wizard will:
 - Confirm whether the model and inference engine are present
+- Confirm whether `arduino-cli` is installed and the board core is ready
 - Ask for an optional Telegram bot token
 - Ask who is allowed to message the bot (leave blank to allow anyone on your network)
 
@@ -185,6 +187,7 @@ Leave "Allow from" blank to allow anyone who knows the bot's username.
 | `make sensai` | Start Sensai for the session |
 | `make sensai-onboard` | Re-run the setup wizard (change Telegram token, allow list) |
 | `make sensai-setup` | Reinstall the system prompt after a git pull |
+| `make sensai-arduino-setup` | Install or update arduino-cli and the Uno Q board core |
 | `make sensai-tui` | Launch the graphical channel configuration panel |
 | `make sensai-stop` | Stop background processes without closing the terminal |
 
@@ -203,11 +206,33 @@ Sensai has been loaded with accurate, datasheet-verified knowledge of the Arduin
 
 ---
 
+## Sketch Compilation and Upload
+
+Sensai can compile and upload Arduino sketches directly to the board using `arduino-cli`. When a student asks Sensai to write a sketch, Sensai can verify it compiles — and if a board is connected, upload it automatically. The student never leaves the chat.
+
+**Prerequisites:** `arduino-cli` and the Uno Q board core are installed automatically as part of `make sensai-install`. If you need to install or reinstall them separately:
+
+```bash
+make sensai-arduino-setup
+```
+
+Once installed, Sensai detects the tool automatically. Students can say things like:
+
+> "Write a blink sketch for D9 and upload it to my board"
+
+> "Compile this code and tell me if there are errors: [paste code]"
+
+> "What boards are connected?"
+
+Sensai will compile the sketch, report any errors in plain language, fix them, and upload when asked.
+
+---
+
 ## What Sensai Cannot Do
 
 | Limitation | Why |
 |---|---|
-| Cannot compile and upload sketches autonomously | `arduino-cli` integration is planned (Phase 3) but not yet implemented |
+| Sketch upload requires `arduino-cli` installed | Install with `curl -fsSL https://raw.githubusercontent.com/arduino/arduino-cli/master/install.sh \| sh` and add the Uno Q core |
 | Responses take 5–30 seconds | The 0.8B model generates at ~4 tokens/second on the board's ARM CPU |
 | Cannot answer questions outside Arduino/electronics | By design — keeps it focused for classroom use |
 | No internet access | All inference is local; web tools are disabled in configuration |
@@ -309,4 +334,4 @@ All student questions and responses are processed on the Arduino Uno Q board its
 - **Source code and issues:** `https://github.com/laurenvil/Sensai` (branch: `sensai`)
 - **Architecture details:** `docs/Sensai/development/architecture-study-bible.md`
 - **Setup walkthrough:** `docs/Sensai/development/sensai-setup-walkthrough.md`
-- **Planned features:** Autonomous sketch compilation and upload (Phase 3), streaming responses (Phase 2), classroom multi-board orchestration (Phase 5)
+- **Planned features:** Streaming responses (Phase 2), Ventuno Q NPU acceleration (Phase 4), classroom multi-board orchestration (Phase 5)

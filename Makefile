@@ -1,4 +1,4 @@
-.PHONY: all build install uninstall clean help test sensai sensai-install sensai-setup sensai-stop sensai-onboard sensai-tui
+.PHONY: all build install uninstall clean help test sensai sensai-install sensai-setup sensai-stop sensai-onboard sensai-tui sensai-arduino-setup
 
 # Build variables
 BINARY_NAME=picoclaw
@@ -190,8 +190,13 @@ build-all: generate
 	GOOS=netbsd GOARCH=arm64 $(GO) build $(LDFLAGS) -o $(BUILD_DIR)/$(BINARY_NAME)-netbsd-arm64 ./$(CMD_DIR)
 	@echo "All builds complete"
 
-## sensai-install: One-time setup: build binary, bootstrap workspace, run interactive onboarding
-sensai-install: build sensai-setup sensai-onboard
+## sensai-install: One-time setup: build binary, bootstrap workspace, install arduino-cli, run onboarding
+sensai-install: build sensai-setup sensai-arduino-setup sensai-onboard
+
+## sensai-arduino-setup: Install arduino-cli and the Arduino Uno Q board core
+sensai-arduino-setup:
+	@chmod +x scripts/arduino-cli-setup.sh
+	@scripts/arduino-cli-setup.sh
 
 ## sensai-onboard: Interactive setup — checks model/server, configures Telegram token
 sensai-onboard:

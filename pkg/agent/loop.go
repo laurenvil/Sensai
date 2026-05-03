@@ -172,6 +172,13 @@ func registerSharedTools(
 		if cfg.Tools.IsToolEnabled("spi") {
 			agent.Tools.Register(tools.NewSPITool())
 		}
+		if cfg.Tools.IsToolEnabled("arduino") {
+			agent.Tools.Register(tools.NewArduinoTool(
+				cfg.Tools.Arduino.FQBN,
+				cfg.Tools.Arduino.Port,
+				cfg.Tools.Arduino.Protocol,
+			))
+		}
 
 		// Message tool
 		if cfg.Tools.IsToolEnabled("message") {
