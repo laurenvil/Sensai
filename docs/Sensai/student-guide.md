@@ -179,12 +179,17 @@ Paste your actual code and actual error messages. Sensai diagnoses what you give
 
 ---
 
-## What Sensai Cannot Do
+## What Sensai Can and Cannot Do
 
-- **It can compile and upload sketches** if your teacher has installed `arduino-cli`. Ask Sensai to "upload this sketch" and it will try. If `arduino-cli` is not installed, Sensai will give you the code to paste into Arduino IDE instead.
-- **It cannot see your wiring.** Describe what you have connected — pin numbers, sensor names — so it can help.
-- **It cannot fix hardware problems.** If a wire is loose or a component is broken, it cannot know. Describe what you see (no light, strange reading, smoke) and it will guide you through checking.
-- **Answers take time.** Sensai thinks on the board's processor, not a data center. Short answers arrive in about 5–10 seconds. Long answers with full sketches take up to 30–40 seconds. That is normal.
+**Sensai can:**
+- **Write, compile, and upload sketches directly to your board.** Just ask — "Write a blink sketch for D9 and upload it." Sensai will generate the code, compile it, and flash it. If there is a compile error, it reads the output, explains what went wrong, fixes it, and tries again.
+- **Detect which boards are connected** — ask "What boards are connected?" and Sensai will check.
+- **Explain errors and fix broken code** — paste an error message and your code, and Sensai diagnoses the problem.
+
+**Sensai cannot:**
+- **See your wiring.** Describe what you have connected — pin numbers, sensor names — so it can help.
+- **Fix hardware problems.** If a wire is loose or a component is broken, it cannot know. Describe what you see (no light, strange reading, smoke) and it will guide you through checking.
+- **Answer instantly.** Sensai thinks on the board's processor, not a data center. Short answers arrive in about 5–10 seconds. Full sketches take up to 30–40 seconds. That is normal.
 
 ---
 
@@ -263,7 +268,7 @@ When in doubt, ask Sensai: *"Is it safe to connect [sensor name] directly to the
 
 Connect to Sensai and try one of these:
 
-1. **"Blink pin D9 every half second"** — your first sketch
+1. **"Write a sketch that blinks D9 every half second and upload it"** — write and flash your first sketch in one step
 2. **"Read A0 and print the value to Serial every second"** — learn analog reading
 3. **"What is the difference between delay() and millis()?"** — learn the most important concept in embedded programming
 4. **"I connected an LED to D3 and nothing happens"** — practice debugging
