@@ -28,16 +28,35 @@ Downloaded from `bartowski/Qwen_Qwen3.5-0.8B-GGUF` → `Qwen_Qwen3.5-0.8B-Q4_0.g
 
 **Prompt:** breathing LED on pin 9 + SOUL.md rules inline (same as v1.2 quality benchmark).
 
+### Run 1
+
 | Metric | Value |
 |---|---|
 | Prompt tokens | 273 |
 | Completion tokens | 800 (hit limit) |
 | Finish reason | `length` |
-| TTFT | 36.89s — **7.40 tok/s** |
+| TTFT | 36.89s — 7.40 tok/s |
 | Generation | 355.83s — **2.25 tok/s** |
 | End-to-end | 392.89s |
 | Thinking suppressed | ✓ |
 | Swap | 0 |
+
+### Run 2
+
+| Metric | Value |
+|---|---|
+| Prompt tokens | 273 |
+| Completion tokens | 208 |
+| Finish reason | `stop` |
+| TTFT | 40.18s — 6.80 tok/s |
+| Generation | 98.98s — **2.10 tok/s** |
+| End-to-end | 139.38s |
+| Thinking suppressed | ✓ |
+| Swap | 0 |
+
+### Speed summary across both runs
+
+Generation speed is consistent: **2.10–2.25 tok/s**. TTFT varies slightly (6.80–7.40 tok/s prefill) due to KV cache state between runs.
 
 ---
 
@@ -68,24 +87,43 @@ The 0.8B Q4_0 is **slower than the 0.6B Q4_0** on the A53:
 
 ## Quality Analysis
 
-### For-loop structure — ✅ attempted, ❌ broken
+The 0.8B Q4_0 produced different broken output on each run — indicating high output variance in addition to incorrect results.
 
-The 0.8B model did recognise the for-loop instruction and produced the correct ascending/descending structure:
+### Run 1 — For-loop structure attempted, but recursive crash
+
+The model recognised the for-loop instruction and produced the correct ascending/descending structure, but wrapped it inside a helper function (`ledColor`) that **called itself recursively**, filling all 800 tokens with duplicate redefinitions. The sketch would crash the MCU at runtime with a stack overflow.
 
 ```cpp
-for (int i = 0; i <= 255; i++) { ledColor(i); delay(8); }
-for (int i = 255; i >= 0; i--) { ledColor(i); delay(8); }
+// What it produced (simplified):
+void ledColor(int color) {
+    for (int i = 0; i <= 255; i++) { ledColor(i); delay(8); }  // ← calls itself
+    for (int i = 255; i >= 0; i--) { ledColor(i); delay(8); }
+}
 ```
 
-However it wrapped the loops inside a helper function (`ledColor`) that **called itself recursively** — causing infinite recursion and filling all 800 tokens with duplicate function redefinitions. The sketch would crash the MCU at runtime.
+### Run 2 — Hallucinated libraries, global-scope code
 
-### `pinMode` in `setup()` — ❌ missing
+The model invented non-existent libraries (`LedLed.h`, `Diod.h`) and placed `pinMode` and `analogWrite` at global scope outside any function — code that will not compile:
 
-`setup()` was not emitted at all. The SOUL.md `pinMode` rule that worked for the 0.6B in v1.2 did not carry over to the 0.8B.
+```cpp
+#include <LedLed.h>   // does not exist
+#include <Diod.h>      // does not exist
+
+pinMode(9, OUTPUT);    // ← global scope, invalid C++
+analogWrite(9, 255);   // ← global scope, invalid C++
+
+Diod ledLED(9, 10);    // hallucinated object
+```
+
+No `setup()` or `loop()` functions were emitted at all.
+
+### `pinMode` in `setup()` — ❌ missing in both runs
+
+The SOUL.md `pinMode` rule that resolved this for the 0.6B in v1.2 had no effect on the 0.8B.
 
 ### Root cause
 
-The 0.8B model has a stronger "helper function" instinct than the 0.6B — it attempts to abstract code into functions, which is generally desirable but here produces recursive self-calls. The recursion is a hallucination: `ledColor(int color)` calls `ledColor(i)` inside itself, which the model generates as if the inner call were `analogWrite`. This is a different failure mode from the 0.6B's toggle pattern, but equally incorrect.
+Two distinct failure modes across two runs indicates the 0.8B model has **high output variance** on structured code tasks — its temperature-sampled outputs are not converging on a stable (even if wrong) pattern the way the 0.6B's toggle does. The hallucinated libraries in run 2 are a particularly concerning sign: the model is fabricating APIs rather than using real Arduino functions. This is worse than a structural error.
 
 ---
 
@@ -93,14 +131,15 @@ The 0.8B model has a stronger "helper function" instinct than the 0.6B — it at
 
 | Criterion | 0.6B Q4_0 | 0.8B Q4_0 |
 |---|---|---|
-| Generation speed | **3.14–3.64 tok/s** | 2.25 tok/s |
-| Completes response | **Yes** (`stop`) | No (hits 800-token cap) |
-| `pinMode` correct (with rule) | **Yes** | No |
-| For-loop structure | No (toggle) | Yes — but recursive crash |
+| Generation speed | **3.14–3.64 tok/s** | 2.10–2.25 tok/s |
+| Completes response | **Yes** (`stop`) | Inconsistent (1× limit, 1× stop) |
+| `pinMode` correct (with rule) | **Yes** | No (both runs) |
+| For-loop structure | No (consistent toggle) | Run 1: recursive crash · Run 2: hallucinated libs |
+| Output consistency | **Stable failure mode** | High variance — different bug each run |
 | Model size on disk | **448 MB** | 490 MB |
-| Classroom viability | **Good** (~130s/response) | Poor (~356s/response) |
+| Classroom viability | **Good** (~130s/response) | Poor (~245s avg, unpredictable output) |
 
-The 0.8B Q4_0 offers no quality improvement over the 0.6B Q4_0 and is 38% slower. Its for-loop attempt is arguably worse — a sketch that compiles but crashes at runtime is more dangerous than one that blinks instead of fades.
+The 0.8B Q4_0 is slower, larger, and produces inconsistent output — different broken code each run. The 0.6B Q4_0's consistent toggle is a better-defined failure: predictable, safe (won't crash the MCU), and targetable with a template fix. The 0.8B's hallucinated libraries are a harder problem to mitigate.
 
 **Active model remains:** `Qwen_Qwen3-0.6B-Q4_0.gguf`
 
