@@ -188,9 +188,6 @@ Sensai/
 | `docs/Sensai/development/architecture-study-bible.md` | Deep-dive: dual-processor architecture, pin tables, hardware constants |
 | `docs/Sensai/development/implementation-plan.md` | Phase-by-phase feature roadmap and implementation status |
 | `docs/Sensai/development/UnoQ-datasheet.pdf` | Official Arduino Uno Q hardware datasheet |
-| `docs/Sensai/Adreno_702_OpenCL_Prefill_Acceleration_Whitepaper.md` | Adreno 702 OpenCL backend: 5–13× TTFT reduction |
-| `docs/Sensai/Decode_Throughput_Optimization_Whitepaper_Yzma_Qwen3_Arduino_Uno_Q.md` | Maximizing decode tok/s on LPDDR4X bandwidth ceiling |
-| `docs/Sensai/Ventuno_Q_GPU_Enhanced_Prefill_Decode_Whitepaper_Yzma_Qwen3.md` | Ventuno Q inference: Adreno 623 + Hexagon NPU path |
 
 ---
 

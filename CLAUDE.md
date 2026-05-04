@@ -143,8 +143,8 @@ The yzma binaries (`llama-cli`, `llama-server`) live at `yzma/lib/`.
 - **Primary target**: Arduino Uno Q — 4× Cortex-A53, 4 GB LPDDR4X, Adreno 702 (OpenCL 2.0). Build with `make build-linux-arm64`.
 - MCU side (where sketches run): STM32U585, Zephyr OS + Arduino Core. FQBN: `arduino:zephyr:unoq`.
 - Optimal llama-server flags: `--ctx-size 12288 --parallel 2`
-- OpenCL prefill acceleration (5–13× TTFT) requires building llama.cpp with the OpenCL backend; see `docs/Sensai/Adreno_702_OpenCL_Prefill_Acceleration_Whitepaper.md`.
-- **Upcoming**: Arduino Ventuno Q — ARMv9, Hexagon NPU (40 TOPS), 16 GB LPDDR5; see `docs/Sensai/Ventuno_Q_GPU_Enhanced_Prefill_Decode_Whitepaper_Yzma_Qwen3.md`.
+- OpenCL prefill acceleration (5–13× TTFT) requires building llama.cpp with the OpenCL backend.
+- **Upcoming**: Arduino Ventuno Q — ARMv9, Hexagon NPU (40 TOPS), 16 GB LPDDR5.
 
 ## Docs (`docs/Sensai/`)
 
@@ -156,6 +156,3 @@ The yzma binaries (`llama-cli`, `llama-server`) live at `yzma/lib/`.
 | `development/architecture-study-bible.md` | Hardware architecture, pin tables, voltage rules |
 | `development/implementation-plan.md` | Feature roadmap and phase status |
 | `development/UnoQ-datasheet.pdf` | Official Uno Q hardware datasheet |
-| `Adreno_702_OpenCL_Prefill_Acceleration_Whitepaper.md` | GPU prefill acceleration research |
-| `Decode_Throughput_Optimization_Whitepaper_Yzma_Qwen3_Arduino_Uno_Q.md` | Decode throughput optimization |
-| `Ventuno_Q_GPU_Enhanced_Prefill_Decode_Whitepaper_Yzma_Qwen3.md` | Ventuno Q future inference path |
