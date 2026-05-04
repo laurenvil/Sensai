@@ -31,6 +31,7 @@ type Provider struct {
 	apiKey         string
 	apiBase        string
 	maxTokensField string // Field name for max tokens (e.g., "max_completion_tokens" for o1/glm models)
+	extraBody      map[string]any
 	httpClient     *http.Client
 }
 
@@ -49,6 +50,12 @@ func WithRequestTimeout(timeout time.Duration) Option {
 		if timeout > 0 {
 			p.httpClient.Timeout = timeout
 		}
+	}
+}
+
+func WithExtraBody(extraBody map[string]any) Option {
+	return func(p *Provider) {
+		p.extraBody = extraBody
 	}
 }
 
@@ -145,6 +152,10 @@ func (p *Provider) Chat(
 		if supportsPromptCacheKey(p.apiBase) {
 			requestBody["prompt_cache_key"] = cacheKey
 		}
+	}
+
+	for k, v := range p.extraBody {
+		requestBody[k] = v
 	}
 
 	jsonData, err := json.Marshal(requestBody)

@@ -87,12 +87,13 @@ func CreateProviderFromConfig(cfg *config.ModelConfig) (LLMProvider, string, err
 		if apiBase == "" {
 			apiBase = getDefaultAPIBase(protocol)
 		}
-		return NewHTTPProviderWithMaxTokensFieldAndRequestTimeout(
+		return NewHTTPProviderWithOptions(
 			cfg.APIKey,
 			apiBase,
 			cfg.Proxy,
 			cfg.MaxTokensField,
 			cfg.RequestTimeout,
+			cfg.ExtraBody,
 		), modelID, nil
 
 	case "azure", "azure-openai":
@@ -125,12 +126,13 @@ func CreateProviderFromConfig(cfg *config.ModelConfig) (LLMProvider, string, err
 		if apiBase == "" {
 			apiBase = getDefaultAPIBase(protocol)
 		}
-		return NewHTTPProviderWithMaxTokensFieldAndRequestTimeout(
+		return NewHTTPProviderWithOptions(
 			cfg.APIKey,
 			apiBase,
 			cfg.Proxy,
 			cfg.MaxTokensField,
 			cfg.RequestTimeout,
+			cfg.ExtraBody,
 		), modelID, nil
 
 	case "anthropic":
