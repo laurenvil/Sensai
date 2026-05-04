@@ -209,45 +209,110 @@ Run 5 explanation text also contradicts its own code: *"The breathing happens be
 
 ### Updated quality summary across all runs
 
-| Run | Temp | For-loops | `setup()`/`loop()` | `pinMode` | Compilable |
-|---|---|---|---|---|---|
-| 1 | 0.6 | Recursive crash | No | No | No |
-| 2 | 0.6 | Hallucinated | No | No | No |
-| 3 | 0.6 | Correct but misplaced | Partial | No | No |
-| 4 | **0.1** | **Correct** | **No** | No | No |
-| 5 | **0.1** | **Correct** | **No** | No | No |
-
-Temperature=0.1 surfaces the model's true stable failure: correct loop logic, wrong structural scaffold. This is a better starting point for prompt engineering than random hallucinations.
+| Run | Temp | Scaffold template | For-loops | `setup()`/`loop()` | `pinMode` | Compilable |
+|---|---|---|---|---|---|---|
+| 1 | 0.6 | No | Recursive crash | No | No | No |
+| 2 | 0.6 | No | Hallucinated | No | No | No |
+| 3 | 0.6 | No | Correct but misplaced | Partial | No | No |
+| 4 | 0.1 | No | Correct | No | No | No |
+| 5 | 0.1 | No | Correct | No | No | No |
+| **6** | **0.1** | **Yes** | **✅ Correct** | **✅ Yes** | **✅ Yes** | **✅ Yes** |
+| **7** | **0.1** | **Yes** | **✅ Correct** | **✅ Yes** | **✅ Yes** | **✅ Yes** |
 
 ---
 
-## Verdict: 0.6B Q4_0 Remains the Better Model for Uno Q
+## Scaffold Template Benchmark (Runs 6–7)
 
-| Criterion | 0.6B Q4_0 (temp=0.6) | 0.8B Q4_0 (temp=0.1) |
+Fresh server restart before run 6.
+
+### Run 6 (temp=0.1, scaffold injected, fresh server)
+
+| Metric | Value |
+|---|---|
+| Prompt tokens | 406 (+133 from scaffold) |
+| Completion tokens | 193 |
+| Finish reason | `stop` |
+| TTFT | 58.03s — 7.00 tok/s |
+| Generation | 77.25s — **2.50 tok/s** |
+| End-to-end | 135.46s |
+
+### Run 7 (temp=0.1, scaffold injected, same server)
+
+| Metric | Value |
+|---|---|
+| Prompt tokens | 406 |
+| Completion tokens | 192 |
+| Finish reason | `stop` |
+| TTFT | 59.12s — 6.87 tok/s |
+| Generation | 106.89s — **1.80 tok/s** |
+| End-to-end | 166.19s |
+
+### Response (identical across both runs)
+
+```cpp
+void setup() {
+    pinMode(9, OUTPUT);
+}
+
+void loop() {
+    for (int i = 0; i <= 255; i++) {
+        analogWrite(9, i);
+        delay(8);
+    }
+    for (int i = 255; i >= 0; i--) {
+        analogWrite(9, i);
+        delay(8);
+    }
+}
+```
+
+**First fully correct, compilable sketch produced across all 7 runs.** Both scaffold runs are identical. The model copied the canonical pattern exactly and placed `pinMode` correctly inside `setup()`.
+
+### TTFT cost of scaffold template
+
+| Config | Prompt tokens | TTFT |
 |---|---|---|
-| Generation speed | **3.14–3.64 tok/s** | 1.86–2.24 tok/s |
-| Completes response | **Yes** (`stop`) | Yes (`stop`) |
-| `pinMode` correct (with rule) | **Yes** | No |
-| For-loop logic | No (toggle) | **Yes** (at temp=0.1) |
-| `setup()`/`loop()` scaffold | **Yes** | No |
-| Output consistency | Stable | Stable at temp=0.1 |
-| Model size on disk | **448 MB** | 490 MB |
-| Classroom viability | **Good** (~130s/response) | Marginal (~155–210s) |
+| No scaffold (temp=0.1) | 273 | 41s |
+| With scaffold (temp=0.1) | 406 | 58–59s |
+| Delta | +133 tokens | +17–18s |
 
-At temperature=0.1, the 0.8B produces correct for-loop logic but no sketch scaffold. The 0.6B at temperature=0.6 produces correct scaffold but wrong loop logic. Neither alone produces a working sketch. Template injection (embedding a verbatim reference sketch in SOUL.md) is the practical fix for both.
+17–18s extra TTFT for guaranteed correct output is a clear trade-off win for a classroom context.
 
-**Active model remains:** `Qwen_Qwen3-0.6B-Q4_0.gguf` — faster, completes within budget, scaffold is correct.
+---
+
+## Final Verdict
+
+| Criterion | 0.6B Q4_0 temp=0.6 | 0.8B Q4_0 temp=0.1 + scaffold |
+|---|---|---|
+| Generation speed | **3.14–3.64 tok/s** | 1.80–2.50 tok/s |
+| TTFT (406-token prompt) | ~34s | ~58s |
+| Correct for-loops | No | **Yes** |
+| `setup()`/`loop()` scaffold | **Yes** | **Yes** |
+| `pinMode` correct | Yes (with rule) | **Yes** |
+| Compilable | No | **Yes** |
+| Output consistency | Stable (wrong) | **Stable (correct)** |
+| Classroom viability | Faster but wrong | Correct, ~135–166s |
+
+The 0.8B Q4_0 at temperature=0.1 with scaffold template injection **produces correct, compilable sketches consistently**. The 0.6B Q4_0 is faster but still requires the same template fix to resolve its for-loop failure.
+
+**Recommended active config:** 0.8B Q4_0, temperature=0.1, scaffold in SOUL.md — until the TTFT cost (~58s) becomes unacceptable for classroom use, at which point revert to 0.6B with the same SOUL.md.
+
+---
+
+## Changes Implemented
+
+| File | Change |
+|---|---|
+| `~/.picoclaw/workspace/SOUL.md` | Added `## Canonical Sketch Templates` section with scaffold and breathing LED verbatim pattern |
 
 ---
 
 ## Recommended Next Steps
 
-1. **Lower temperature to 0.1 in config** — applies to both models. Eliminates hallucination variance with no speed cost.
+1. **Update `config/sensai.config.json` and `~/.picoclaw/config.json`** to set `temperature: 0.1` and switch active model to `Qwen_Qwen3.5-0.8B-Q4_0.gguf`.
 
-2. **Sketch template injection** — inject verbatim reference implementations for common patterns into SOUL.md. At temp=0.1 the 0.6B model reliably copies verbatim examples. This fixes the for-loop issue without a model swap.
+2. **Add blink and button debounce templates** to SOUL.md — the two next most common patterns after breathing LED.
 
-3. **Re-evaluate 0.8B Q4_0 at temp=0.1 with template injection** — with correct loop logic already stable, adding the scaffold template may produce a fully correct sketch. Worth one more test before ruling it out.
+3. **Evaluate Qwen3-1.7B-Q4_0** — with template injection now proven effective, a 1.7B model at temp=0.1 + scaffold is the natural next candidate. Trade-off: ~1.4 tok/s, ~2 min per response.
 
-4. **Evaluate Qwen3-1.7B-Q4_0** — the next step up in the Qwen3 family. At ~1.1 GB it would decode at ~1.4–1.8 tok/s. Worth benchmarking after the template injection fix is in place.
-
-5. **Clean up systemd unit** — `sudo rm /etc/systemd/system/llama-server.service && sudo systemctl daemon-reload`.
+4. **Clean up systemd unit** — `sudo rm /etc/systemd/system/llama-server.service && sudo systemctl daemon-reload`.

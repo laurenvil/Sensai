@@ -5,8 +5,9 @@
       "workspace": "~/.picoclaw/workspace",
       "restrict_to_workspace": false,
       "allow_read_outside_workspace": true,
-      "model_name": "Qwen_Qwen3-0.6B-Q4_0.gguf",
+      "model_name": "Qwen_Qwen3.5-0.8B-Q4_0.gguf",
       "max_tokens": 800,
+      "temperature": 0.1,
       "max_tool_iterations": 8,
       "summarize_message_threshold": 10,
       "summarize_token_percent": 70
@@ -14,8 +15,8 @@
   },
   "model_list": [
     {
-      "model_name": "Qwen_Qwen3-0.6B-Q4_0.gguf",
-      "model": "openai/qwen",
+      "model_name": "Qwen_Qwen3.5-0.8B-Q4_0.gguf",
+      "model": "openai/Qwen_Qwen3.5-0.8B-Q4_0.gguf",
       "api_base": "http://127.0.0.1:8080/v1",
       "api_key": "local",
       "request_timeout": 1200,

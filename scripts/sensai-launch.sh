@@ -4,7 +4,7 @@
 set -euo pipefail
 
 PICOCLAW_HOME="${PICOCLAW_HOME:-$HOME/.picoclaw}"
-SENSAI_MODEL="${SENSAI_MODEL:-$HOME/models/Qwen_Qwen3-0.6B-Q4_0.gguf}"
+SENSAI_MODEL="${SENSAI_MODEL:-$HOME/models/Qwen_Qwen3.5-0.8B-Q4_0.gguf}"
 LLAMA_SERVER="${LLAMA_SERVER:-./yzma/lib/llama-server}"
 BINARY="${BINARY:-./build/picoclaw}"
 LLAMA_PORT="${LLAMA_PORT:-8080}"
