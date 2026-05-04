@@ -54,9 +54,28 @@ Downloaded from `bartowski/Qwen_Qwen3.5-0.8B-GGUF` → `Qwen_Qwen3.5-0.8B-Q4_0.g
 | Thinking suppressed | ✓ |
 | Swap | 0 |
 
-### Speed summary across both runs
+### Run 3
 
-Generation speed is consistent: **2.10–2.25 tok/s**. TTFT varies slightly (6.80–7.40 tok/s prefill) due to KV cache state between runs.
+| Metric | Value |
+|---|---|
+| Prompt tokens | 273 |
+| Completion tokens | 389 |
+| Finish reason | `stop` |
+| TTFT | 44.72s — 6.11 tok/s |
+| Generation | 206.10s — **1.89 tok/s** |
+| End-to-end | 250.98s |
+| Thinking suppressed | ✓ |
+| Swap | 0 |
+
+### Speed summary across all runs
+
+| Run | Generation | TTFT |
+|---|---|---|
+| 1 | 2.25 tok/s | 7.40 tok/s prefill |
+| 2 | 2.10 tok/s | 6.80 tok/s prefill |
+| 3 | 1.89 tok/s | 6.11 tok/s prefill |
+
+Generation speed trends down across runs without a server restart (2.25 → 2.10 → 1.89 tok/s). This is consistent with the KV cache slot accumulating history across requests — each run sees a larger effective context load. A fresh server start would reset to the run 1 baseline.
 
 ---
 
@@ -101,7 +120,7 @@ void ledColor(int color) {
 }
 ```
 
-### Run 2 — Hallucinated libraries, global-scope code
+### Run 2 — Hallucinated libraries, global-scope code (worst output)
 
 The model invented non-existent libraries (`LedLed.h`, `Diod.h`) and placed `pinMode` and `analogWrite` at global scope outside any function — code that will not compile:
 
@@ -121,9 +140,27 @@ No `setup()` or `loop()` functions were emitted at all.
 
 The SOUL.md `pinMode` rule that resolved this for the 0.6B in v1.2 had no effect on the 0.8B.
 
+### Run 3 — Correct for-loops, global-scope `pinMode`, spurious delay (best output)
+
+Run 3 produced the closest result to correct. The ascending/descending for-loops use `analogWrite` properly:
+
+```cpp
+for (int i = 0; i <= 255; i++) { analogWrite(LED_PIN, i); delay(8); }
+for (int i = 255; i >= 0; i--) { analogWrite(LED_PIN, i); delay(8); }
+```
+
+Remaining bugs:
+- `pinMode(LED_PIN, OUTPUT)` placed at global scope outside any function — will not compile
+- `loop()` adds a spurious `delay(1000)` before calling `blinkLed()`, breaking the smooth continuous cycle
+- `setup()` calls `blinkLed()` once before `loop()` takes over — harmless but unnecessary
+
+### `pinMode` in `setup()` — ❌ missing in all three runs
+
+Never correctly placed inside `setup()` across any run.
+
 ### Root cause
 
-Two distinct failure modes across two runs indicates the 0.8B model has **high output variance** on structured code tasks — its temperature-sampled outputs are not converging on a stable (even if wrong) pattern the way the 0.6B's toggle does. The hallucinated libraries in run 2 are a particularly concerning sign: the model is fabricating APIs rather than using real Arduino functions. This is worse than a structural error.
+Three runs show three different failure modes: recursive crash, hallucinated libraries, near-correct with global-scope errors. The **high output variance** confirms the 0.8B model has not reliably internalised Arduino sketch structure at this parameter count and quantization. Run 3's near-success is encouraging but not reproducible — the same prompt produced completely broken output in runs 1 and 2. The hallucinated libraries in run 2 are a particularly concerning sign: the model fabricates APIs rather than using real Arduino functions.
 
 ---
 
@@ -131,15 +168,15 @@ Two distinct failure modes across two runs indicates the 0.8B model has **high o
 
 | Criterion | 0.6B Q4_0 | 0.8B Q4_0 |
 |---|---|---|
-| Generation speed | **3.14–3.64 tok/s** | 2.10–2.25 tok/s |
-| Completes response | **Yes** (`stop`) | Inconsistent (1× limit, 1× stop) |
-| `pinMode` correct (with rule) | **Yes** | No (both runs) |
-| For-loop structure | No (consistent toggle) | Run 1: recursive crash · Run 2: hallucinated libs |
+| Generation speed | **3.14–3.64 tok/s** | 1.89–2.25 tok/s (degrades without restart) |
+| Completes response | **Yes** (`stop`) | Inconsistent (1× limit, 2× stop) |
+| `pinMode` correct (with rule) | **Yes** | No (all three runs) |
+| For-loop structure | No (consistent toggle) | Run 1: recursive crash · Run 2: hallucinated libs · Run 3: near-correct |
 | Output consistency | **Stable failure mode** | High variance — different bug each run |
 | Model size on disk | **448 MB** | 490 MB |
-| Classroom viability | **Good** (~130s/response) | Poor (~245s avg, unpredictable output) |
+| Classroom viability | **Good** (~130s/response) | Poor (~200–350s, unpredictable output) |
 
-The 0.8B Q4_0 is slower, larger, and produces inconsistent output — different broken code each run. The 0.6B Q4_0's consistent toggle is a better-defined failure: predictable, safe (won't crash the MCU), and targetable with a template fix. The 0.8B's hallucinated libraries are a harder problem to mitigate.
+The 0.8B Q4_0 is slower, larger, and produces a different broken sketch on every run. Run 3 came close — correct for-loops, wrong placement — but runs 1 and 2 were worse. The 0.6B Q4_0's consistent toggle is a better-defined and safer failure: predictable, won't crash the MCU, and directly fixable with template injection.
 
 **Active model remains:** `Qwen_Qwen3-0.6B-Q4_0.gguf`
 
