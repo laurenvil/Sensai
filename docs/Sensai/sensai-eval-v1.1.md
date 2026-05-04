@@ -158,9 +158,62 @@ void loop() {
 
 ---
 
+## v1.1 Benchmark (Qwen3-0.6B-Q4_0 — Measured)
+
+**Date:** 2026-05-04 · Fresh llama-server start, same breathing-LED prompt as v1 (102 prompt tokens).
+
+| Metric | v1 (Q6_K) | v1.1 (Q4_0) | Improvement |
+|---|---|---|---|
+| Prompt tokens | 92 | 102 | — |
+| Completion tokens | 400 (hit limit) | 454 | Completed naturally |
+| Finish reason | `length` | `stop` | ✓ |
+| TTFT | 16.02s — 5.74 tok/s | 7.66s — 13.31 tok/s | **2.1× faster** |
+| Generation | 319.43s — 1.25 tok/s | 124.61s — **3.64 tok/s** | **2.9× faster** |
+| End-to-end | 335.45s | 132.39s | **2.5× faster** |
+| Thinking suppressed | ✓ | ✓ | — |
+| Swap | 0 | 0 | — |
+
+3.64 tok/s is within the projected 3.5–6 tok/s range. The model completes the response naturally (finish_reason `stop`) and no longer truncates at the token cap.
+
+### max_tokens raised to 800
+
+`config/sensai.config.json` and `~/.picoclaw/config.json` updated from 4096/1024 → **800**. With Q4_0 at 3.64 tok/s, an 800-token response takes ~220s — acceptable for a single student session. The 454-token breathing-LED response completed in 132s.
+
+### Quality: breathing LED pattern still incorrect
+
+The 0.6B model continues to generate a toggle (write 255, write 0) rather than ascending/descending `for` loops, despite explicit SOUL.md rules. The issue is a fundamental capacity limitation of the 0.6B parameter count — the model pattern-matches "toggle" for any LED task and does not reliably follow multi-step format constraints.
+
+**`pinMode` is now correct** (the SOUL.md rule fixed that regression).
+
+The for-loop issue requires either a larger model (1.7B+ would likely resolve it) or a sketch template injected into the system prompt for common patterns. Documented as an open issue.
+
+---
+
+## SOUL.md Updates (2026-05-04)
+
+Two pattern rules added to `~/.picoclaw/workspace/SOUL.md`:
+
+**In "What You Know":**
+```
+- Breathing/fading LED pattern — ALWAYS use analogWrite inside ascending then
+  descending for loops:
+    for (int i = 0; i <= 255; i++) { analogWrite(pin, i); delay(8); }
+    for (int i = 255; i >= 0; i--) { analogWrite(pin, i); delay(8); }
+  Never toggle between 255 and 0 — that is a blink, not a fade.
+```
+
+**In "Rules":**
+```
+- ALWAYS include `pinMode(<pin>, OUTPUT)` in `setup()` for every pin used with
+  `analogWrite` or `digitalWrite`. An empty `setup()` is a bug.
+- Breathing/fading LED = analogWrite in ascending then descending for loops.
+  A boolean toggle is a blink, not a fade — never confuse the two.
+```
+
+---
+
 ## Recommended Next Steps
 
-1. **Run v1.1 benchmark** — start fresh server with new model and flags, repeat the 400-token prompt, confirm 3.5–6 tok/s sustained.
-2. **Tune SOUL.md** — add PWM breathing pattern and `pinMode` boilerplate rules.
-3. **Raise `max_tokens`** to 600–800 in config — 400 tokens truncates a sketch + explanation.
-4. **Clean up systemd unit** — `/etc/systemd/system/llama-server.service` still references the old AI Town embedding config: `sudo rm /etc/systemd/system/llama-server.service`.
+1. **Sketch template injection** — for common patterns (breathing LED, blink, button debounce), inject a reference implementation into the system prompt. Bypasses the 0.6B model's unreliable instruction following for structural code patterns.
+2. **Test 1.7B model** — bartowski's `Qwen_Qwen3-1.7B-Q4_0.gguf` (~1 GB) would reach ~1.5–2 tok/s but should reliably follow for-loop instructions. Trade-off: 3–4× slower generation.
+3. **Clean up systemd unit** — `/etc/systemd/system/llama-server.service` still references the old AI Town embedding config: `sudo rm /etc/systemd/system/llama-server.service`.

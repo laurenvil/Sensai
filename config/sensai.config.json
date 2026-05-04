@@ -6,7 +6,7 @@
       "restrict_to_workspace": false,
       "allow_read_outside_workspace": true,
       "model_name": "Qwen_Qwen3-0.6B-Q4_0.gguf",
-      "max_tokens": 4096,
+      "max_tokens": 800,
       "max_tool_iterations": 8,
       "summarize_message_threshold": 10,
       "summarize_token_percent": 70
