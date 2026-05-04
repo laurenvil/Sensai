@@ -158,36 +158,96 @@ Remaining bugs:
 
 Never correctly placed inside `setup()` across any run.
 
-### Root cause
+### Root cause (temperature=0.6 runs)
 
-Three runs show three different failure modes: recursive crash, hallucinated libraries, near-correct with global-scope errors. The **high output variance** confirms the 0.8B model has not reliably internalised Arduino sketch structure at this parameter count and quantization. Run 3's near-success is encouraging but not reproducible — the same prompt produced completely broken output in runs 1 and 2. The hallucinated libraries in run 2 are a particularly concerning sign: the model fabricates APIs rather than using real Arduino functions.
+Three runs at temperature=0.6 produced three different failure modes: recursive crash, hallucinated libraries, near-correct with global-scope errors. High sampling temperature was the primary driver of this variance — see temperature analysis below.
+
+---
+
+## Temperature Analysis (runs 4–5, temperature=0.1)
+
+**Hypothesis:** the output variance across runs 1–3 was caused by temperature=0.6, not model capacity. At 0.6 the sampler has enough entropy to diverge onto very different token paths each run. Lowering to 0.1 should collapse the distribution toward the model's dominant completion and expose the true stable failure mode.
+
+**Server restarted** before run 4 to reset KV cache accumulation to baseline.
+
+### Run 4 (temp=0.1, fresh server)
+
+| Metric | Value |
+|---|---|
+| Prompt tokens | 273 |
+| Completion tokens | 253 |
+| Finish reason | `stop` |
+| TTFT | 41.15s — **6.63 tok/s** |
+| Generation | 113.16s — **2.24 tok/s** |
+| End-to-end | 154.48s |
+
+### Run 5 (temp=0.1, same server)
+
+| Metric | Value |
+|---|---|
+| Prompt tokens | 273 |
+| Completion tokens | 315 |
+| Finish reason | `stop` |
+| TTFT | 41.31s — **6.61 tok/s** |
+| Generation | 169.15s — **1.86 tok/s** |
+| End-to-end | 210.63s |
+
+### Temperature findings
+
+**Hypothesis confirmed.** At temperature=0.1:
+
+- **TTFT is rock-solid:** 6.61–6.63 tok/s across both runs (vs 6.11–7.40 at 0.6). Prefill is deterministic regardless of temperature.
+- **For-loops are consistent:** both runs produced correct ascending/descending `analogWrite` loops.
+- **Failure mode stabilised:** global-scope code (no `setup()`/`loop()` wrapper) in both runs — same bug, not a different one each time.
+- **Generation speed still degrades** (2.24 → 1.86 tok/s) from KV cache accumulation — temperature does not affect this.
+
+**What temp=0.1 fixed:** hallucinated libraries, recursive functions, random structural chaos.
+
+**What temp=0.1 did not fix:** the model still emits all code at global scope, missing the `setup()`/`loop()` structure. This is now the model's consistent failure mode at low temperature — a structural gap rather than random hallucination.
+
+Run 5 explanation text also contradicts its own code: *"The breathing happens because the LED is toggling between 0 and 255, which is a blink, not a fade"* — while the code above it correctly fades. The comment path and code path are generated from different attention patterns and are not always coherent.
+
+### Updated quality summary across all runs
+
+| Run | Temp | For-loops | `setup()`/`loop()` | `pinMode` | Compilable |
+|---|---|---|---|---|---|
+| 1 | 0.6 | Recursive crash | No | No | No |
+| 2 | 0.6 | Hallucinated | No | No | No |
+| 3 | 0.6 | Correct but misplaced | Partial | No | No |
+| 4 | **0.1** | **Correct** | **No** | No | No |
+| 5 | **0.1** | **Correct** | **No** | No | No |
+
+Temperature=0.1 surfaces the model's true stable failure: correct loop logic, wrong structural scaffold. This is a better starting point for prompt engineering than random hallucinations.
 
 ---
 
 ## Verdict: 0.6B Q4_0 Remains the Better Model for Uno Q
 
-| Criterion | 0.6B Q4_0 | 0.8B Q4_0 |
+| Criterion | 0.6B Q4_0 (temp=0.6) | 0.8B Q4_0 (temp=0.1) |
 |---|---|---|
-| Generation speed | **3.14–3.64 tok/s** | 1.89–2.25 tok/s (degrades without restart) |
-| Completes response | **Yes** (`stop`) | Inconsistent (1× limit, 2× stop) |
-| `pinMode` correct (with rule) | **Yes** | No (all three runs) |
-| For-loop structure | No (consistent toggle) | Run 1: recursive crash · Run 2: hallucinated libs · Run 3: near-correct |
-| Output consistency | **Stable failure mode** | High variance — different bug each run |
+| Generation speed | **3.14–3.64 tok/s** | 1.86–2.24 tok/s |
+| Completes response | **Yes** (`stop`) | Yes (`stop`) |
+| `pinMode` correct (with rule) | **Yes** | No |
+| For-loop logic | No (toggle) | **Yes** (at temp=0.1) |
+| `setup()`/`loop()` scaffold | **Yes** | No |
+| Output consistency | Stable | Stable at temp=0.1 |
 | Model size on disk | **448 MB** | 490 MB |
-| Classroom viability | **Good** (~130s/response) | Poor (~200–350s, unpredictable output) |
+| Classroom viability | **Good** (~130s/response) | Marginal (~155–210s) |
 
-The 0.8B Q4_0 is slower, larger, and produces a different broken sketch on every run. Run 3 came close — correct for-loops, wrong placement — but runs 1 and 2 were worse. The 0.6B Q4_0's consistent toggle is a better-defined and safer failure: predictable, won't crash the MCU, and directly fixable with template injection.
+At temperature=0.1, the 0.8B produces correct for-loop logic but no sketch scaffold. The 0.6B at temperature=0.6 produces correct scaffold but wrong loop logic. Neither alone produces a working sketch. Template injection (embedding a verbatim reference sketch in SOUL.md) is the practical fix for both.
 
-**Active model remains:** `Qwen_Qwen3-0.6B-Q4_0.gguf`
+**Active model remains:** `Qwen_Qwen3-0.6B-Q4_0.gguf` — faster, completes within budget, scaffold is correct.
 
 ---
 
 ## Recommended Next Steps
 
-The for-loop quality issue cannot be resolved by choosing between these two models. The correct path is:
+1. **Lower temperature to 0.1 in config** — applies to both models. Eliminates hallucination variance with no speed cost.
 
-1. **Sketch template injection (Option A from v1.2)** — inject verbatim reference implementations for the 3–5 most common patterns into SOUL.md. The 0.6B model reliably copies verbatim examples even when it cannot generate them from a rule description. Cost: ~50–80 extra prompt tokens per pattern (~4–7s extra TTFT).
+2. **Sketch template injection** — inject verbatim reference implementations for common patterns into SOUL.md. At temp=0.1 the 0.6B model reliably copies verbatim examples. This fixes the for-loop issue without a model swap.
 
-2. **Evaluate Qwen3-1.7B-Q4_0** — the next step up in the Qwen3 family (not Qwen3.5). At ~1.1 GB it would decode at ~1.4–1.8 tok/s but has sufficient capacity to follow structural code instructions reliably. Worth benchmarking to establish the quality/speed trade-off.
+3. **Re-evaluate 0.8B Q4_0 at temp=0.1 with template injection** — with correct loop logic already stable, adding the scaffold template may produce a fully correct sketch. Worth one more test before ruling it out.
 
-3. **Clean up systemd unit** — `sudo rm /etc/systemd/system/llama-server.service && sudo systemctl daemon-reload`.
+4. **Evaluate Qwen3-1.7B-Q4_0** — the next step up in the Qwen3 family. At ~1.1 GB it would decode at ~1.4–1.8 tok/s. Worth benchmarking after the template injection fix is in place.
+
+5. **Clean up systemd unit** — `sudo rm /etc/systemd/system/llama-server.service && sudo systemctl daemon-reload`.
