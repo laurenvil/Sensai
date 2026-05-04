@@ -58,7 +58,7 @@ BUILTIN_SKILLS_DIR=$(CURDIR)/skills
 # Sensai / llama-server
 LLAMA_SERVER?=$(CURDIR)/yzma/lib/llama-server
 LLAMA_PORT?=8080
-SENSAI_MODEL?=$(HOME)/models/Qwen_Qwen3.5-0.8B-Q6_K.gguf
+SENSAI_MODEL?=$(HOME)/models/Qwen_Qwen3-0.6B-Q4_0.gguf
 
 # OS detection
 UNAME_S:=$(shell uname -s)

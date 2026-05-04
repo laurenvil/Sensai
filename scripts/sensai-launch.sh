@@ -4,7 +4,7 @@
 set -euo pipefail
 
 PICOCLAW_HOME="${PICOCLAW_HOME:-$HOME/.picoclaw}"
-SENSAI_MODEL="${SENSAI_MODEL:-$HOME/models/Qwen_Qwen3.5-0.8B-Q6_K.gguf}"
+SENSAI_MODEL="${SENSAI_MODEL:-$HOME/models/Qwen_Qwen3-0.6B-Q4_0.gguf}"
 LLAMA_SERVER="${LLAMA_SERVER:-./yzma/lib/llama-server}"
 BINARY="${BINARY:-./build/picoclaw}"
 LLAMA_PORT="${LLAMA_PORT:-8080}"
@@ -80,6 +80,10 @@ echo "Starting llama-server (model: $(basename "$SENSAI_MODEL"))..."
     --port "$LLAMA_PORT" \
     --ctx-size 12288 \
     --parallel 2 \
+    -t 4 \
+    --mlock \
+    --cache-type-k q8_0 \
+    --cache-type-v q8_0 \
     >> "$LLAMA_LOG" 2>&1 &
 echo $! > "$LLAMA_PID_FILE"
 

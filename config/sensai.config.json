@@ -5,7 +5,7 @@
       "workspace": "~/.picoclaw/workspace",
       "restrict_to_workspace": false,
       "allow_read_outside_workspace": true,
-      "model_name": "qwen-local",
+      "model_name": "Qwen_Qwen3-0.6B-Q4_0.gguf",
       "max_tokens": 4096,
       "max_tool_iterations": 8,
       "summarize_message_threshold": 10,
@@ -14,7 +14,7 @@
   },
   "model_list": [
     {
-      "model_name": "qwen-local",
+      "model_name": "Qwen_Qwen3-0.6B-Q4_0.gguf",
       "model": "openai/qwen",
       "api_base": "http://127.0.0.1:8080/v1",
       "api_key": "local",
