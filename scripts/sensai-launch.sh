@@ -78,7 +78,7 @@ echo "Starting llama-server (model: $(basename "$SENSAI_MODEL"))..."
     -m "$SENSAI_MODEL" \
     --host 127.0.0.1 \
     --port "$LLAMA_PORT" \
-    --ctx-size 4096 \
+    --ctx-size 12288 \
     --parallel 1 \
     -t 4 \
     --flash-attn on \

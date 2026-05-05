@@ -491,7 +491,7 @@ Practical implication:
 | `model_name` | `qwen-local` | Local llama-server, no cloud |
 | `api_base` | `http://127.0.0.1:8080/v1` | llama-server loopback |
 | `request_timeout` | 1200 | 0.8B model @ 4 tok/s needs headroom |
-| `max_tokens` | 4096 | Bounds max response length |
+| `max_tokens` | 12288 | Sets context window size |
 | `max_tool_iterations` | 8 | Limits round-trips to the model |
 | `summarize_message_threshold` | 10 | Compress history at 10 messages |
 | Web tools | disabled | Offline use; eliminates DNS latency |
