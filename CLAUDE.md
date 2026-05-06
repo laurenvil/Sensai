@@ -213,6 +213,7 @@ The CPU is currently faster for this model size on the Adreno 702's single Compu
 | `development/UnoQ-datasheet.pdf` | Official Uno Q hardware datasheet |
 | `Adreno_702_OpenCL_Prefill_Acceleration_Whitepaper.md` | Original March 2026 GPU whitepaper (Qualcomm proprietary ICD plan) |
 | `opencl-gpu-improvement-roadmap.md` | Gap analysis + improvement roadmap (Mesa RustiCL actual results) |
+| `kgsl-proprietary-icd-investigation.md` | Deep-dive: KGSL vs DRM_MSM driver stacks, why proprietary ICD is unavailable on Debian BSP |
 | `adreno-702-optimization-consolidated.md` | Engineering journey: blockers, breakthroughs, benchmarks |
 | `adreno-gpu-comparative-analysis.md` | Proprietary vs open-source driver path comparison |
 | `eval/` | Sensai evaluation results (v2 through v4.4) |

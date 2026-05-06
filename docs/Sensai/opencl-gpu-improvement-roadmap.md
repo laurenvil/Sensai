@@ -316,30 +316,50 @@ On the A702's single CU, barriers stall the entire compute pipeline.
 
 ### 3.7 Priority 7 — Proprietary OpenCL ICD (Long-term, Highest Impact)
 
-**What:** Get `/dev/kgsl-3d0` loaded and use `libOpenCL_adreno.so` instead of rusticl.
+**What:** Get the Qualcomm proprietary `libOpenCL_adreno.so` ICD running via KGSL instead of Mesa RustiCL.
 
 **Why:** This is the path the whitepaper was actually designed for. With the proprietary ICD:
-- SVM zero-copy eliminates the ~340 MB model duplication
 - Native subgroups eliminate the `__local` tree-reduction overhead
+- SVM zero-copy eliminates the ~340 MB model RAM duplication
 - `cl_qcom_dot_product_8bit_integer` enables hardware INT8 acceleration
 - GMEM on-chip cache reduces attention memory traffic
-- True prefill speedup: 5–13× (vs ~1× we have now on tg)
+- True prefill speedup: 5–13× (vs the ~21% we see on tg today)
 
-**How to unlock:**
+**Current status (researched May 2026):** This path is structurally blocked on the Debian BSP.
+See **`docs/Sensai/kgsl-proprietary-icd-investigation.md`** for the full deep-dive. Summary:
+
+- The Arduino Uno Q Debian BSP uses the **mainline Linux DRM_MSM driver** (`/dev/dri/renderD128`).
+  KGSL (`/dev/kgsl-3d0`) is the Android-lineage out-of-tree driver and **cannot coexist** with DRM_MSM
+  on the same kernel.
+- KGSL source is available at https://github.com/qualcomm-linux/kgsl (GPL-2.0) but enabling it
+  requires replacing the entire kernel/BSP — not a module install.
+- The `libOpenCL_adreno.so` ICD packages (`qti-adreno_*.deb`) are not publicly distributed for
+  Debian on QRB2210. They exist in Qualcomm's proprietary LE Yocto BSP.
+- Qualcomm's own IWOCL 2025 presentation confirms that the **Adreno 702 (RB1) is not yet an
+  officially validated target** for their OpenCL llama.cpp backend. Only the RB5 (Adreno 650) is
+  listed; the Adreno 702 is categorized as "ongoing optimization / low tier."
+
+**How to unlock (three paths):**
+
+1. **Contact Arduino/Qualcomm** — request access to `qsc-deb-releases` overlay apt packages
+   (referenced in `qualcomm-linux/qcom-deb-images`) which may contain GPU firmware or
+   `qti-adreno` packages for QRB2210 Debian.
+
+2. **Replace kernel with KGSL-based build** — use `qualcomm-linux/kernel` +
+   `qualcomm-linux/kgsl` to build a KGSL-capable kernel. Obtain `qti-adreno` packages from
+   Qualcomm's proprietary LE BSP. This is a full BSP swap.
+
+3. **Wait for Mesa subgroups** — Mesa 25.3+ is tracking `cl_khr_subgroups` support for
+   Freedreno. When this lands, our existing RustiCL path gains native subgroup instructions,
+   closing the largest single performance gap without any kernel changes.
+
+**Immediate diagnostic** (confirm GPU is actually initializing under DRM_MSM):
 ```bash
-# Check if kgsl module exists but isn't loaded
-find / -name "kgsl.ko" 2>/dev/null
-modprobe kgsl 2>/dev/null && echo "loaded"
-
-# Check vendor partition for OpenCL ICD
-ls /vendor/lib64/libOpenCL* 2>/dev/null
+ls /lib/firmware/qcom/qcm2290/a702_zap.mbn   # required firmware for GPU init
+dmesg | grep -iE "adreno|a702|msm_gpu"        # confirm DRM_MSM brought up the GPU
+RUSTICL_ENABLE=freedreno clinfo | head -20    # confirm RustiCL sees FD702
+ls /etc/OpenCL/vendors/                       # only mesa.icd / rusticl.icd expected
 ```
-
-Contact Arduino/Qualcomm for a BSP update that includes the KGSL kernel module. The QRB2210
-ships with proprietary OpenCL on Android-based images — the Debian BSP is missing it.
-
-**Alternative:** Build a custom kernel with `CONFIG_DRM_MSM_GPU_SCHEDULER` and the KGSL out-of-tree
-module from the Qualcomm Linux kernel tree.
 
 ---
 
