@@ -42,11 +42,13 @@ Build uses `CGO_ENABLED=0` and `-tags stdjson`. The binary is named `picoclaw-<p
 
 ```bash
 make sensai-install       # Full first-time setup: build + workspace + arduino-cli + wizard
-make sensai               # Start llama-server + gateway + terminal chat
+make sensai               # Start CPU llama-server (yzma) + gateway + terminal chat
+make sensai-gpu           # Start GPU llama-server (Wang/OpenCL, Adreno 702) + gateway + terminal chat
 make sensai-setup         # Reinstall SOUL.md and IDENTITY.md (safe to re-run)
 make sensai-onboard       # Interactive wizard: Telegram token, allow list
 make sensai-arduino-setup # Install arduino-cli + arduino:zephyr core (idempotent)
-make sensai-stop          # Kill background llama-server and gateway PIDs
+make sensai-stop          # Kill background llama-server and gateway PIDs (CPU path)
+make sensai-gpu-stop      # Kill background GPU llama-server and gateway PIDs
 make sensai-tui           # Launch picoclaw-launcher TUI
 ```
 
@@ -142,9 +144,62 @@ The yzma binaries (`llama-cli`, `llama-server`) live at `yzma/lib/`.
 
 - **Primary target**: Arduino Uno Q — 4× Cortex-A53, 4 GB LPDDR4X, Adreno 702 (OpenCL 2.0). Build with `make build-linux-arm64`.
 - MCU side (where sketches run): STM32U585, Zephyr OS + Arduino Core. FQBN: `arduino:zephyr:unoq`.
-- Optimal llama-server flags: `--ctx-size 12288 --parallel 2`
-- OpenCL prefill acceleration (5–13× TTFT) requires building llama.cpp with the OpenCL backend.
+- Optimal CPU llama-server flags: `--ctx-size 12288 --parallel 2`
 - **Upcoming**: Arduino Ventuno Q — ARMv9, Hexagon NPU (40 TOPS), 16 GB LPDDR5.
+
+## GPU Inference (Adreno 702 / Mesa RustiCL)
+
+Two distinct llama-server binaries serve the CPU and GPU paths:
+
+| Path | Binary | Launch |
+|---|---|---|
+| **CPU** (production) | `yzma/lib/llama-server` (pre-compiled, CPU-only) | `make sensai` |
+| **GPU** (research/experimental) | `~/ArduinoApps/llama-wang/build/bin/llama-server` (Wang/OpenCL build) | `make sensai-gpu` |
+
+### GPU quick start
+
+```bash
+# 1. Build Wang's llama-server with OpenCL + Adreno patches
+git clone https://github.com/wanghqc/llama.cpp -b opencl/nvidia ~/ArduinoApps/llama-wang
+cd ~/ArduinoApps/llama-wang
+# Apply Adreno 702 patches — see docs/Sensai/opencl-gpu-improvement-roadmap.md
+cmake -B build -DGGML_OPENCL=ON -DCMAKE_BUILD_TYPE=Release
+cmake --build build --target llama-server -j4
+
+# 2. Ensure Mesa rusticl is installed
+sudo apt install mesa-opencl-icd
+
+# 3. Use a pure Q4_0 model (no Q6_K tensors — required for FD702 stability)
+# Model: ~/models/Qwen_Qwen3.5-0.8B-Q4_0.gguf
+
+# 4. Launch
+make sensai-gpu
+```
+
+### GPU environment
+
+`make sensai-gpu` sets these automatically via `scripts/sensai-gpu-launch.sh`:
+
+```bash
+RUSTICL_ENABLE=freedreno      # activates Mesa rusticl for FD702
+MESA_OPENCL_OVERRIDE=1        # suppresses non-Freedreno device warnings
+LD_LIBRARY_PATH=<wang-build>  # Wang-branch OpenCL runtime libs
+```
+
+Key GPU flags: `--ctx-size 512 --parallel 1 -t 2 -ngl 999 --no-flash-attn`
+
+- `--no-flash-attn` — flash-attn kernel exceeds 16 KB local mem limit on FD702
+- `--ctx-size 512` — keeps batch within single-CU GPU TDR watchdog budget (~5s)
+- `-ngl 999` — offload all layers; Q6_K tensors auto-fall-back to CPU via `supports_op()`
+
+### GPU vs CPU performance (v4.4 benchmark)
+
+| Metric | CPU (`-t 4`) | GPU (`-ngl 999`, `-p 32`) |
+|---|---|---|
+| Prefill | 8.1 t/s | 4.23 t/s |
+| Generation | 3.2 t/s | ~2.7 t/s |
+
+The CPU is currently faster for this model size on the Adreno 702's single Compute Unit. GPU remains valuable as a research path toward Mesa driver maturation and the future Hexagon NPU. See `docs/Sensai/opencl-gpu-improvement-roadmap.md` for the full gap analysis and roadmap.
 
 ## Docs (`docs/Sensai/`)
 
@@ -156,3 +211,8 @@ The yzma binaries (`llama-cli`, `llama-server`) live at `yzma/lib/`.
 | `development/architecture-study-bible.md` | Hardware architecture, pin tables, voltage rules |
 | `development/implementation-plan.md` | Feature roadmap and phase status |
 | `development/UnoQ-datasheet.pdf` | Official Uno Q hardware datasheet |
+| `Adreno_702_OpenCL_Prefill_Acceleration_Whitepaper.md` | Original March 2026 GPU whitepaper (Qualcomm proprietary ICD plan) |
+| `opencl-gpu-improvement-roadmap.md` | Gap analysis + improvement roadmap (Mesa RustiCL actual results) |
+| `adreno-702-optimization-consolidated.md` | Engineering journey: blockers, breakthroughs, benchmarks |
+| `adreno-gpu-comparative-analysis.md` | Proprietary vs open-source driver path comparison |
+| `eval/` | Sensai evaluation results (v2 through v4.4) |

@@ -1,4 +1,4 @@
-.PHONY: all build install uninstall clean help test sensai sensai-install sensai-setup sensai-stop sensai-onboard sensai-tui sensai-arduino-setup
+.PHONY: all build install uninstall clean help test sensai sensai-install sensai-setup sensai-stop sensai-onboard sensai-tui sensai-arduino-setup sensai-gpu sensai-gpu-stop
 
 # Build variables
 BINARY_NAME=picoclaw
@@ -55,10 +55,16 @@ WORKSPACE_DIR?=$(PICOCLAW_HOME)/workspace
 WORKSPACE_SKILLS_DIR=$(WORKSPACE_DIR)/skills
 BUILTIN_SKILLS_DIR=$(CURDIR)/skills
 
-# Sensai / llama-server
+# Sensai / llama-server (CPU path — yzma pre-compiled binary)
 LLAMA_SERVER?=$(CURDIR)/yzma/lib/llama-server
 LLAMA_PORT?=8080
 SENSAI_MODEL?=$(HOME)/models/Qwen_Qwen3.5-0.8B-Q4_0.gguf
+
+# Sensai GPU / Wang-branch llama-server (OpenCL / Adreno 702 path)
+WANG_LLAMA_SERVER?=$(HOME)/ArduinoApps/llama-wang/build/bin/llama-server
+WANG_LIB_DIR?=$(HOME)/ArduinoApps/llama-wang/build/bin
+GPU_PORT?=8080
+SENSAI_GPU_MODEL?=$(HOME)/models/Qwen_Qwen3.5-0.8B-Q4_0.gguf
 
 # OS detection
 UNAME_S:=$(shell uname -s)
@@ -239,6 +245,34 @@ sensai-tui:
 	@$(GO) build $(GOFLAGS) -o $(BUILD_DIR)/picoclaw-launcher-tui ./cmd/picoclaw-launcher-tui
 	@echo "Launching Sensai TUI..."
 	@$(BUILD_DIR)/picoclaw-launcher-tui
+
+## sensai-gpu: Start Adreno 702 GPU-accelerated llama-server (Wang/OpenCL) + gateway + terminal chat
+sensai-gpu:
+	@chmod +x scripts/sensai-gpu-launch.sh
+	@PICOCLAW_HOME=$(PICOCLAW_HOME) \
+	 SENSAI_GPU_MODEL=$(SENSAI_GPU_MODEL) \
+	 WANG_LLAMA_SERVER=$(WANG_LLAMA_SERVER) \
+	 WANG_LIB_DIR=$(WANG_LIB_DIR) \
+	 BINARY=$(BUILD_DIR)/$(BINARY_NAME) \
+	 GPU_PORT=$(GPU_PORT) \
+	 scripts/sensai-gpu-launch.sh
+
+## sensai-gpu-stop: Stop background GPU llama-server and gateway processes
+sensai-gpu-stop:
+	@if [ -f $(PICOCLAW_HOME)/llama-gpu-server.pid ]; then \
+		kill $$(cat $(PICOCLAW_HOME)/llama-gpu-server.pid) 2>/dev/null || true; \
+		rm -f $(PICOCLAW_HOME)/llama-gpu-server.pid; \
+		echo "Stopped llama-server (GPU)"; \
+	else \
+		echo "GPU llama-server not running (no PID file)"; \
+	fi
+	@if [ -f $(PICOCLAW_HOME)/gateway.pid ]; then \
+		kill $$(cat $(PICOCLAW_HOME)/gateway.pid) 2>/dev/null || true; \
+		rm -f $(PICOCLAW_HOME)/gateway.pid; \
+		echo "Stopped gateway"; \
+	else \
+		echo "Gateway not running (no PID file)"; \
+	fi
 
 ## sensai-stop: Stop background llama-server and gateway processes
 sensai-stop:

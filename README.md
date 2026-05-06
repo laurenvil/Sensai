@@ -125,12 +125,19 @@ Model: `Qwen3.5-0.8B-Q6_K` · `--ctx-size 12288 --parallel 2` · `/no_think` act
 
 ### Adreno 702 OpenCL Prefill Acceleration
 
-| Phase | CPU-only | OpenCL | Gain |
-|---|---|---|---|
-| Prefill TTFT | ~28s | ~4–9s | 5–13× |
-| Decode tok/s | ~8–12 | ~8–12 | No change* |
+The Adreno 702 GPU is supported via the **Mesa/RustiCL** open-source OpenCL driver (`RUSTICL_ENABLE=freedreno`). GPU acceleration requires a custom build of llama.cpp (Wang's `opencl/nvidia` branch) with Adreno-specific patches applied. See [`docs/Sensai/opencl-gpu-improvement-roadmap.md`](docs/Sensai/opencl-gpu-improvement-roadmap.md) for the full technical analysis.
 
-*Decode is memory-bandwidth-bound; GPU shares the same LPDDR4X bus.
+| Configuration | Prefill (t/s) | Generate (t/s) | Notes |
+|---|---|---|---|
+| CPU baseline (`-t 4`) | 8.1 | 3.2 | yzma `lib/llama-server`, no GPU |
+| GPU (`-ngl 999`, `-p 32`) | 4.23 | ~2.7 | Wang-branch, Mesa RustiCL, Q4_0 only |
+
+> **GPU vs CPU reality**: The Adreno 702 has 1 Compute Unit and shares LPDDR4X bandwidth with the CPU. GPU acceleration provides prefill benefit primarily at larger batch sizes (`-p 32`). For interactive single-turn use, the CPU path (`make sensai`) remains the recommended production choice. See [eval v4.4](docs/Sensai/eval/sensai-eval-v4-4-results.md).
+
+**Quick GPU start** (after building Wang's llama-server):
+```bash
+make sensai-gpu
+```
 
 ---
 
@@ -138,12 +145,14 @@ Model: `Qwen3.5-0.8B-Q6_K` · `--ctx-size 12288 --parallel 2` · `/no_think` act
 
 | Command | What it does |
 |---|---|
-| `make sensai` | Start Sensai for the session |
+| `make sensai` | Start Sensai (CPU path — yzma llama-server) |
+| `make sensai-gpu` | Start Sensai (GPU path — Wang/OpenCL llama-server, Adreno 702) |
 | `make sensai-install` | Full first-time setup |
 | `make sensai-onboard` | Re-run setup wizard (update Telegram token, allow list) |
 | `make sensai-setup` | Reinstall system prompt after a git pull |
 | `make sensai-arduino-setup` | Install or update arduino-cli and the Uno Q board core |
-| `make sensai-stop` | Stop background processes |
+| `make sensai-stop` | Stop background processes (CPU path) |
+| `make sensai-gpu-stop` | Stop background processes (GPU path) |
 | `make build` | Build the picoclaw binary for current platform |
 | `make build-linux-arm64` | Cross-compile for Uno Q (ARM64) |
 
@@ -168,9 +177,10 @@ Sensai/
 │   ├── SOUL.md             # System prompt: Sensai persona + hardware knowledge
 │   └── IDENTITY.md         # Identity file
 ├── scripts/
-│   ├── sensai-launch.sh    # Starts llama-server + gateway + terminal chat
-│   ├── sensai-onboard.sh   # Interactive setup wizard
-│   └── arduino-cli-setup.sh  # Installs arduino-cli + arduino:zephyr core
+│   ├── sensai-launch.sh        # Starts CPU llama-server + gateway + terminal chat
+│   ├── sensai-gpu-launch.sh    # Starts GPU llama-server (Wang/OpenCL) + gateway + terminal chat
+│   ├── sensai-onboard.sh       # Interactive setup wizard
+│   └── arduino-cli-setup.sh    # Installs arduino-cli + arduino:zephyr core
 ├── assets/sensai-logo.svg  # Sensai brand logo
 ├── docs/Sensai/            # Guides and technical references (see below)
 └── Makefile
