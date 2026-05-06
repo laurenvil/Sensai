@@ -29,6 +29,49 @@ and is used by the normal `make sensai` flow. It loads via yzma's purego/FFI pat
 Go application directly (`picoclaw gateway`), but for the Sensai chat use case, the binary itself
 runs the server — yzma's Go FFI bindings are not involved in normal operation.
 
+#### Why yzma's Go FFI Is Not Used in the Sensai Chat Path
+
+The picoclaw gateway is **provider-agnostic** — it speaks OpenAI-compatible HTTP to whatever
+backend is configured. Using `llama-server` as a separate process means the same `openai_compat`
+provider code works identically whether inference is local or cloud, with zero special-casing.
+The gateway has no inference logic at all.
+
+The secondary reason is **lifecycle independence**: the model load on the Uno Q is expensive
+(~30s cold start). Running `llama-server` as a separate process means the gateway can restart,
+crash, or be reconfigured without re-loading the model. The two processes are independently
+managed via PID files.
+
+Yzma's Go FFI (`purego`/`jupiterrider/ffi` → `libllama.so`) exists for use cases where you want
+*in-process* inference from Go — embedding the LLM directly in a Go binary. That is a different
+application shape than the gateway-over-HTTP model Sensai uses. To adopt the FFI path in Sensai,
+you would need to pull all of the context management, streaming, parallel slots, and OpenCL
+dispatch (currently handled by `llama-server`) into the gateway itself — a significant rewrite
+with no practical benefit on a single-user embedded board.
+
+#### Yzma's Two Roles: Binary Distributor vs. Go FFI Layer
+
+In Sensai today, **yzma is used only as a binary distribution mechanism**. The submodule at
+`yzma/lib/llama-server` is a convenient, version-pinned pre-compiled llama.cpp server for the
+target platform. You could replace it with any llama.cpp build — which is exactly what
+`make sensai-gpu` does, swapping in Wang's binary instead. Yzma's actual Go FFI code is unused
+by the gateway.
+
+**Yzma's real value** is its CGo-free Go binding layer. The reason this matters for edge/Arduino
+targets is not model-level optimization — it is **cross-compilation**. CGo breaks standard Go
+cross-compilation (`GOARCH=arm64 go build` fails when C libraries are involved). Yzma's pure-Go
+FFI approach lets you build the entire agent binary on an x86 dev machine and drop the ARM64
+binary onto the board, with the llama.cpp shared library shipped separately.
+
+| Role | What it provides |
+|---|---|
+| **yzma (lib binaries)** | A pre-built `llama-server` to run as an HTTP process — replaceable |
+| **yzma (Go FFI)** | CGo-free in-process inference for Go — essential if you want to eliminate the HTTP boundary entirely |
+
+If you wanted a truly unified single-binary Sensai (gateway + inference in one process, no HTTP
+overhead), yzma's FFI bindings are exactly the right tool. On a constrained 4 GB board, that
+architecture is worth considering — but it would require integrating `yzma/pkg/llama` directly
+into the agent loop rather than delegating to an HTTP server.
+
 ### 1.2 Wang-branch `llama-wang/build/bin/llama-server` — The GPU Research Binary
 
 ```
