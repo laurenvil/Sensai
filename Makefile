@@ -1,4 +1,4 @@
-.PHONY: all build install uninstall clean help test sensai sensai-install sensai-setup sensai-stop sensai-onboard sensai-tui sensai-arduino-setup sensai-gpu sensai-gpu-stop
+.PHONY: all build install uninstall clean help test sensai sensai-install sensai-setup sensai-stop sensai-onboard sensai-tui sensai-arduino-setup sensai-gpu sensai-gpu-stop sensai-vulkan sensai-vulkan-stop sensai-vulkan-download
 
 # Build variables
 BINARY_NAME=picoclaw
@@ -65,6 +65,14 @@ WANG_LLAMA_SERVER?=$(HOME)/ArduinoApps/llama-wang/build/bin/llama-server
 WANG_LIB_DIR?=$(HOME)/ArduinoApps/llama-wang/build/bin
 GPU_PORT?=8080
 SENSAI_GPU_MODEL?=$(HOME)/models/Qwen_Qwen3.5-0.8B-Q4_0.gguf
+
+# Sensai Vulkan / Mesa Turnip llama-server (Vulkan Lite / Adreno 702 path)
+# Binary: hybridgroup/llama-cpp-builder llama-b9049-bin-ubuntu-trixie-vulkan-arm64
+# Download: make sensai-vulkan-download (uses yzma install)
+VULKAN_LLAMA_SERVER?=$(CURDIR)/yzma/lib-vulkan/llama-server
+VULKAN_LIB_DIR?=$(CURDIR)/yzma/lib-vulkan
+VULKAN_VERSION?=b9049
+VULKAN_PORT?=8080
 
 # OS detection
 UNAME_S:=$(shell uname -s)
@@ -265,6 +273,46 @@ sensai-gpu-stop:
 		echo "Stopped llama-server (GPU)"; \
 	else \
 		echo "GPU llama-server not running (no PID file)"; \
+	fi
+	@if [ -f $(PICOCLAW_HOME)/gateway.pid ]; then \
+		kill $$(cat $(PICOCLAW_HOME)/gateway.pid) 2>/dev/null || true; \
+		rm -f $(PICOCLAW_HOME)/gateway.pid; \
+		echo "Stopped gateway"; \
+	else \
+		echo "Gateway not running (no PID file)"; \
+	fi
+
+## sensai-vulkan-download: Download Vulkan llama-server from hybridgroup/llama-cpp-builder
+sensai-vulkan-download:
+	@echo "Downloading llama-$(VULKAN_VERSION)-bin-ubuntu-trixie-vulkan-arm64..."
+	@mkdir -p $(CURDIR)/yzma/lib-vulkan
+	@TARBALL=llama-$(VULKAN_VERSION)-bin-ubuntu-trixie-vulkan-arm64.tar.gz; \
+	 URL=https://github.com/hybridgroup/llama-cpp-builder/releases/download/$(VULKAN_VERSION)/$$TARBALL; \
+	 DEST=$(CURDIR)/yzma/lib-vulkan; \
+	 wget -q --show-progress -O $$DEST/$$TARBALL "$$URL" && \
+	 tar -xzf $$DEST/$$TARBALL -C $$DEST --strip-components=1 && \
+	 rm -f $$DEST/$$TARBALL
+	@echo "Done. Binary: $(VULKAN_LLAMA_SERVER)"
+
+## sensai-vulkan: Start Adreno 702 GPU-accelerated llama-server (Vulkan Lite / Mesa Turnip) + gateway + terminal chat
+sensai-vulkan:
+	@chmod +x scripts/sensai-vulkan-launch.sh
+	@PICOCLAW_HOME=$(PICOCLAW_HOME) \
+	 SENSAI_GPU_MODEL=$(SENSAI_GPU_MODEL) \
+	 VULKAN_LLAMA_SERVER=$(VULKAN_LLAMA_SERVER) \
+	 VULKAN_LIB_DIR=$(VULKAN_LIB_DIR) \
+	 BINARY=$(BUILD_DIR)/$(BINARY_NAME) \
+	 VULKAN_PORT=$(VULKAN_PORT) \
+	 scripts/sensai-vulkan-launch.sh
+
+## sensai-vulkan-stop: Stop background Vulkan llama-server and gateway processes
+sensai-vulkan-stop:
+	@if [ -f $(PICOCLAW_HOME)/llama-vulkan-server.pid ]; then \
+		kill $$(cat $(PICOCLAW_HOME)/llama-vulkan-server.pid) 2>/dev/null || true; \
+		rm -f $(PICOCLAW_HOME)/llama-vulkan-server.pid; \
+		echo "Stopped llama-server (Vulkan)"; \
+	else \
+		echo "Vulkan llama-server not running (no PID file)"; \
 	fi
 	@if [ -f $(PICOCLAW_HOME)/gateway.pid ]; then \
 		kill $$(cat $(PICOCLAW_HOME)/gateway.pid) 2>/dev/null || true; \
