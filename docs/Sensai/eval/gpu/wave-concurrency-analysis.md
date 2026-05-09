@@ -17,7 +17,12 @@ This error is unique to Vulkan; it did not appear in the OpenCL path because Ope
 
 ## 2. Technical Root Cause
 
-### 2.1. Workgroup Residency Requirement
+### 2.1. A "Success Milestone"
+It is critical to note that this error did **not** come from our pruning patches. In fact, it is a **mainline constraint** of `llama.cpp` that only became visible after our "Vulkan Lite Phase 1" patches successfully bypassed the 16KB shared memory wall. 
+
+Previously, the backend would abort immediately due to shared memory size. By fixing the memory issue, we allowed the Mesa compiler to proceed to the next stage—register allocation—where it hit the Adreno 702's final hardware ceiling: its **low register occupancy**.
+
+### 2.2. Workgroup Residency Requirement
 In Vulkan, a **workgroup barrier** (`controlBarrier`) requires that all threads in a workgroup reach the barrier before any can proceed. For this to work, the hardware must be able to fit the **entire workgroup** on a single Shader Processor (Compute Unit) simultaneously.
 
 ### 2.2. Wave Occupancy Calculation
