@@ -1,0 +1,246 @@
+diff --git a/ggml/src/ggml-vulkan/CMakeLists.txt b/ggml/src/ggml-vulkan/CMakeLists.txt
+index 715a263..5486026 100644
+--- a/ggml/src/ggml-vulkan/CMakeLists.txt
++++ b/ggml/src/ggml-vulkan/CMakeLists.txt
+@@ -112,6 +112,11 @@ if (Vulkan_FOUND)
+         list(APPEND VULKAN_SHADER_GEN_CMAKE_ARGS -DGGML_VULKAN_SHADER_DEBUG_INFO=ON)
+     endif()
+ 
++    if (GGML_VULKAN_SENSAI_TRIM)
++        add_compile_definitions(GGML_VULKAN_SENSAI_TRIM)
++        list(APPEND VULKAN_SHADER_GEN_CMAKE_ARGS -DGGML_VULKAN_SENSAI_TRIM=ON)
++    endif()
++
+     if (GGML_VULKAN_VALIDATE)
+         add_compile_definitions(GGML_VULKAN_VALIDATE)
+     endif()
+diff --git a/ggml/src/ggml-vulkan/ggml-vulkan.cpp b/ggml/src/ggml-vulkan/ggml-vulkan.cpp
+index 423e01d..abdb7c1 100644
+--- a/ggml/src/ggml-vulkan/ggml-vulkan.cpp
++++ b/ggml/src/ggml-vulkan/ggml-vulkan.cpp
+@@ -3418,12 +3418,34 @@ static void ggml_vk_load_shaders(vk_device& device) {
+         m_align =  64;
+         s_align =  32;
+ 
++        // Adreno 702 (16 KB) tuning: force s_warptile for all matmul tile profiles
++        // so the largest pipeline still fits in shared memory.
++        if (device->properties.limits.maxComputeSharedMemorySize <= 16384) {
++            l_warptile         = m_warptile         = s_warptile;
++            l_warptile_mmq     = m_warptile_mmq     = s_warptile_mmq;
++            l_warptile_mmq_int = m_warptile_mmq_int = s_warptile_mmq_int;
++            l_warptile_mmq_int_k = m_warptile_mmq_int_k = s_warptile_mmq_int_k;
++            l_warptile_id      = m_warptile_id      = s_warptile_id;
++            l_warptile_mmqid   = m_warptile_mmqid   = s_warptile_mmqid;
++            l_warptile_mmqid_int   = m_warptile_mmqid_int   = s_warptile_mmqid_int;
++            l_warptile_mmqid_int_k = m_warptile_mmqid_int_k = s_warptile_mmqid_int_k;
++            l_mmq_wg_denoms = m_mmq_wg_denoms = s_mmq_wg_denoms;
++            l_wg_denoms     = m_wg_denoms     = s_wg_denoms;
++            l_align = m_align = s_align;
++        }
++
+         for (uint32_t i = 0; i < GGML_TYPE_COUNT; ++i) {
+             ggml_type t = (ggml_type)i;
+             // Disable medium and large matrix multiplication if not enough shared memory is available
+             // Check mmq warptiles as the largest configuration
+-            // Throw an error if not enough for any matrix multiplication is available
++            // On 16 KB devices, gracefully disable per-type instead of aborting (covers IQ1 LUTs).
+             if (!ggml_vk_matmul_shmem_support(device, s_warptile_mmq, false, t)) {
++                if (device->properties.limits.maxComputeSharedMemorySize <= 16384) {
++                    device->mul_mat_s[i] = false;
++                    device->mul_mat_m[i] = false;
++                    device->mul_mat_l[i] = false;
++                    continue;
++                }
+                 std::cerr << "ggml_vulkan: Error: Shared memory size too small for matrix multiplication." << std::endl;
+                 throw std::runtime_error("Shared memory size too small for matrix multiplication.");
+             } else if (!ggml_vk_matmul_shmem_support(device, m_warptile_mmq, false, t)) {
+@@ -4461,17 +4483,20 @@ static void ggml_vk_load_shaders(vk_device& device) {
+     }
+     ggml_vk_create_pipeline(device, device->pipeline_mul_mat_vec_nc_f16_f32, "mul_mat_vec_nc_f16_f32", mul_mat_vec_nc_f16_f32_len, mul_mat_vec_nc_f16_f32_data, "main", mul_mat_vec_num_bindings, sizeof(vk_mat_vec_nc_push_constants), {1, 1, 1}, {}, 1);
+ 
+-    ggml_vk_create_pipeline(device, device->pipeline_norm_f32, "norm_f32", norm_f32_len, norm_f32_data, "main", 2, sizeof(vk_op_push_constants), {1, 1, 1}, {}, 1);
++    // Adreno 702: BLOCK_SIZE drops to 1 wave (32) to satisfy wave-occupancy budget for barrier().
++    // norm.comp uses constant_id 0 for BLOCK_SIZE; rms_norm.comp uses constant_id 2.
++    const uint32_t norm_block_size = device->properties.limits.maxComputeSharedMemorySize <= 16384 ? 32u : 512u;
++    ggml_vk_create_pipeline(device, device->pipeline_norm_f32, "norm_f32", norm_f32_len, norm_f32_data, "main", 2, sizeof(vk_op_push_constants), {1, 1, 1}, { norm_block_size }, 1);
+     ggml_vk_create_pipeline(device, device->pipeline_group_norm_f32, "group_norm_f32", group_norm_f32_len, group_norm_f32_data, "main", 2, sizeof(vk_op_push_constants), {1, 1, 1}, {}, 1);
+ 
+-    ggml_vk_create_pipeline(device, device->pipeline_rms_norm_f32, "rms_norm_f32", rms_norm_f32_len, rms_norm_f32_data, "main", 4, sizeof(vk_op_binary_push_constants), {1, 1, 1}, {0, 0}, 1, true);
+-    ggml_vk_create_pipeline(device, device->pipeline_rms_norm_mul_f32, "rms_norm_mul_f32", rms_norm_f32_len, rms_norm_f32_data, "main", 4, sizeof(vk_op_binary_push_constants), {1, 1, 1}, {0, 1}, 1, true);
++    ggml_vk_create_pipeline(device, device->pipeline_rms_norm_f32, "rms_norm_f32", rms_norm_f32_len, rms_norm_f32_data, "main", 4, sizeof(vk_op_binary_push_constants), {1, 1, 1}, {0, 0, norm_block_size}, 1, true);
++    ggml_vk_create_pipeline(device, device->pipeline_rms_norm_mul_f32, "rms_norm_mul_f32", rms_norm_f32_len, rms_norm_f32_data, "main", 4, sizeof(vk_op_binary_push_constants), {1, 1, 1}, {0, 1, norm_block_size}, 1, true);
+     ggml_vk_create_pipeline(device, device->pipeline_rms_norm_partials_f32, "rms_norm_partials_f32", rms_norm_partials_f32_len, rms_norm_partials_f32_data, "main", 4, sizeof(vk_op_binary_push_constants), {1, 1, 1}, {0, 0}, 1, true);
+     ggml_vk_create_pipeline(device, device->pipeline_rms_norm_mul_partials_f32, "rms_norm_mul_partials_f32", rms_norm_partials_f32_len, rms_norm_partials_f32_data, "main", 4, sizeof(vk_op_binary_push_constants), {1, 1, 1}, {0, 1}, 1, true);
+ 
+     if (sizeof(vk_op_rms_norm_mul_rope_push_constants) <= device->properties.limits.maxPushConstantsSize) {
+-        ggml_vk_create_pipeline(device, device->pipeline_rms_norm_mul_rope_f32_f32, "rms_norm_mul_rope_f32_f32", rms_norm_mul_rope_f32_f32_len, rms_norm_mul_rope_f32_f32_data, "main", 7, sizeof(vk_op_rms_norm_mul_rope_push_constants), {1, 1, 1}, {0, 1}, 1, true);
+-        ggml_vk_create_pipeline(device, device->pipeline_rms_norm_mul_rope_f32_f16, "rms_norm_mul_rope_f32_f16", rms_norm_mul_rope_f32_f16_len, rms_norm_mul_rope_f32_f16_data, "main", 7, sizeof(vk_op_rms_norm_mul_rope_push_constants), {1, 1, 1}, {0, 1}, 1, true);
++        ggml_vk_create_pipeline(device, device->pipeline_rms_norm_mul_rope_f32_f32, "rms_norm_mul_rope_f32_f32", rms_norm_mul_rope_f32_f32_len, rms_norm_mul_rope_f32_f32_data, "main", 7, sizeof(vk_op_rms_norm_mul_rope_push_constants), {1, 1, 1}, {0, 1, norm_block_size}, 1, true);
++        ggml_vk_create_pipeline(device, device->pipeline_rms_norm_mul_rope_f32_f16, "rms_norm_mul_rope_f32_f16", rms_norm_mul_rope_f32_f16_len, rms_norm_mul_rope_f32_f16_data, "main", 7, sizeof(vk_op_rms_norm_mul_rope_push_constants), {1, 1, 1}, {0, 1, norm_block_size}, 1, true);
+     }
+ 
+     ggml_vk_create_pipeline(device, device->pipeline_rms_norm_back_f32, "rms_norm_back_f32", rms_norm_back_f32_len, rms_norm_back_f32_data, "main", 3, sizeof(vk_op_push_constants), {1, 1, 1}, {}, 1);
+@@ -4654,10 +4679,12 @@ static void ggml_vk_load_shaders(vk_device& device) {
+ 
+     ggml_vk_create_pipeline(device, device->pipeline_diag_mask_inf_f32, "diag_mask_inf_f32", diag_mask_inf_f32_len, diag_mask_inf_f32_data, "main", 2, sizeof(vk_op_diag_mask_push_constants), {1, 512, 1}, {}, 1, true);
+ 
++    // Adreno 702 (16 KB) cannot resident 16 waves for wg=512 — clamp to subgroup size (32).
++    const uint32_t softmax_wg_large = device->properties.limits.maxComputeSharedMemorySize <= 16384 ? device->subgroup_size : 512u;
+     ggml_vk_create_pipeline(device, device->pipeline_soft_max_f32, "soft_max_f32", soft_max_f32_len, soft_max_f32_data, "main", 4, sizeof(vk_op_soft_max_push_constants), {1, 1, 1}, { device->subgroup_size }, 1);
+-    ggml_vk_create_pipeline(device, device->pipeline_soft_max_f32_wg512, "soft_max_f32_wg512", soft_max_f32_len, soft_max_f32_data, "main", 4, sizeof(vk_op_soft_max_push_constants), {1, 1, 1}, { 512 }, 1);
++    ggml_vk_create_pipeline(device, device->pipeline_soft_max_f32_wg512, "soft_max_f32_wg512", soft_max_f32_len, soft_max_f32_data, "main", 4, sizeof(vk_op_soft_max_push_constants), {1, 1, 1}, { softmax_wg_large }, 1);
+     ggml_vk_create_pipeline(device, device->pipeline_soft_max_f32_f16, "soft_max_f32_f16", soft_max_f32_f16_len, soft_max_f32_f16_data, "main", 4, sizeof(vk_op_soft_max_push_constants), {1, 1, 1}, { device->subgroup_size }, 1);
+-    ggml_vk_create_pipeline(device, device->pipeline_soft_max_f32_f16_wg512, "soft_max_f32_f16_wg512", soft_max_f32_f16_len, soft_max_f32_f16_data, "main", 4, sizeof(vk_op_soft_max_push_constants), {1, 1, 1}, { 512 }, 1);
++    ggml_vk_create_pipeline(device, device->pipeline_soft_max_f32_f16_wg512, "soft_max_f32_f16_wg512", soft_max_f32_f16_len, soft_max_f32_f16_data, "main", 4, sizeof(vk_op_soft_max_push_constants), {1, 1, 1}, { softmax_wg_large }, 1);
+     ggml_vk_create_pipeline(device, device->pipeline_soft_max_back_f32, "soft_max_back_f32", soft_max_back_f32_len, soft_max_back_f32_data, "main", 3, sizeof(vk_op_push_constants), {1, 1, 1}, { device->subgroup_size }, 1, true);
+ 
+     ggml_vk_create_pipeline(device, device->pipeline_soft_max_large1_f32,     "soft_max_large1_f32",     soft_max_large1_f32_len,     soft_max_large1_f32_data,     "main", 6, sizeof(vk_op_soft_max_push_constants), {1, 1, 1}, { 128, 4 }, 1, true);
+@@ -15562,6 +15589,12 @@ static bool ggml_backend_vk_device_supports_op(ggml_backend_dev_t dev, const ggm
+         case GGML_OP_MUL_MAT_ID:
+             {
+                 ggml_type src0_type = op->src[0]->type;
++                if (op->op == GGML_OP_MUL_MAT) {
++                    // 16 KB devices may have per-type matmul disabled (e.g. IQ1 LUTs); fall back to CPU.
++                    if (!device->mul_mat_s[src0_type] && !device->mul_mat_m[src0_type] && !device->mul_mat_l[src0_type]) {
++                        return false;
++                    }
++                }
+                 if (op->op == GGML_OP_MUL_MAT_ID) {
+                     if (!device->mul_mat_id_s[src0_type] && !device->mul_mat_id_m[src0_type] && !device->mul_mat_id_l[src0_type]) {
+                         // If there's not enough shared memory for row_ids and the result tile, fallback to CPU
+@@ -15624,6 +15657,10 @@ static bool ggml_backend_vk_device_supports_op(ggml_backend_dev_t dev, const ggm
+             }
+         case GGML_OP_FLASH_ATTN_EXT:
+             {
++                // FA kernel exceeds 16 KB shared memory on Adreno 702; route to CPU.
++                if (device->properties.limits.maxComputeSharedMemorySize <= 16384) {
++                    return false;
++                }
+                 bool coopmat2 = device->coopmat2;
+                 uint32_t HSK = op->src[1]->ne[0];
+                 uint32_t HSV = op->src[2]->ne[0];
+diff --git a/ggml/src/ggml-vulkan/vulkan-shaders/CMakeLists.txt b/ggml/src/ggml-vulkan/vulkan-shaders/CMakeLists.txt
+index e1f613f..5f42e6f 100644
+--- a/ggml/src/ggml-vulkan/vulkan-shaders/CMakeLists.txt
++++ b/ggml/src/ggml-vulkan/vulkan-shaders/CMakeLists.txt
+@@ -23,6 +23,10 @@ if (GGML_VULKAN_SHADER_DEBUG_INFO)
+     add_compile_definitions(GGML_VULKAN_SHADER_DEBUG_INFO)
+     message(STATUS "Enabling shader debug info")
+ endif()
++if (GGML_VULKAN_SENSAI_TRIM)
++    add_compile_definitions(GGML_VULKAN_SENSAI_TRIM)
++    message(STATUS "Enabling Sensai matmul permutation trim (Q4_0/Q6_K/F32 only)")
++endif()
+ 
+ set(TARGET vulkan-shaders-gen)
+ add_executable(${TARGET} vulkan-shaders-gen.cpp)
+diff --git a/ggml/src/ggml-vulkan/vulkan-shaders/norm.comp b/ggml/src/ggml-vulkan/vulkan-shaders/norm.comp
+index cc3ea0b..997f91d 100644
+--- a/ggml/src/ggml-vulkan/vulkan-shaders/norm.comp
++++ b/ggml/src/ggml-vulkan/vulkan-shaders/norm.comp
+@@ -4,9 +4,9 @@
+ #include "types.glsl"
+ 
+ #extension GL_EXT_control_flow_attributes : enable
+-#define BLOCK_SIZE 512
+ 
+-layout(local_size_x = BLOCK_SIZE, local_size_y = 1, local_size_z = 1) in;
++layout(constant_id = 0) const uint BLOCK_SIZE = 512;
++layout(local_size_x_id = 0, local_size_y = 1, local_size_z = 1) in;
+ 
+ layout (binding = 0) readonly buffer X {A_TYPE data_a[];};
+ layout (binding = 1) writeonly buffer D {D_TYPE data_d[];};
+diff --git a/ggml/src/ggml-vulkan/vulkan-shaders/rms_norm.comp b/ggml/src/ggml-vulkan/vulkan-shaders/rms_norm.comp
+index 55b89f1..54a6c42 100644
+--- a/ggml/src/ggml-vulkan/vulkan-shaders/rms_norm.comp
++++ b/ggml/src/ggml-vulkan/vulkan-shaders/rms_norm.comp
+@@ -30,11 +30,11 @@ layout (binding = 6) readonly buffer R_I {uvec2 rope_data_i[];}; // indices for
+ #endif
+ 
+ #extension GL_EXT_control_flow_attributes : enable
+-#define BLOCK_SIZE 512
+ 
+ layout (constant_id = 1) const bool do_multiply = false;
++layout (constant_id = 2) const uint BLOCK_SIZE = 512;
+ 
+-layout(local_size_x = BLOCK_SIZE, local_size_y = 1, local_size_z = 1) in;
++layout(local_size_x_id = 2, local_size_y = 1, local_size_z = 1) in;
+ 
+ shared FLOAT_TYPE sumsh[BLOCK_SIZE];
+ 
+diff --git a/ggml/src/ggml-vulkan/vulkan-shaders/vulkan-shaders-gen.cpp b/ggml/src/ggml-vulkan/vulkan-shaders/vulkan-shaders-gen.cpp
+index 6f2a929..794f2df 100644
+--- a/ggml/src/ggml-vulkan/vulkan-shaders/vulkan-shaders-gen.cpp
++++ b/ggml/src/ggml-vulkan/vulkan-shaders/vulkan-shaders-gen.cpp
+@@ -76,6 +76,15 @@ enum MatMulIdType {
+     SUBGROUP,
+ };
+ 
++#ifdef GGML_VULKAN_SENSAI_TRIM
++// Sensai (Adreno 702): only emit matmul variants we actually use:
++//   src0 ∈ {f32, f16, q4_0, q6_k}, dst = f32, no MatMul-ID (no MoE), no coopmat.
++// Models tested: Qwen3.5-0.8B-Q4_0.gguf, Qwen3.5-0.8B-Q6_K.gguf.
++static bool sensai_keep_type(const std::string& tname) {
++    return tname == "f32" || tname == "f16" || tname == "q4_0" || tname == "q6_k";
++}
++#endif
++
+ namespace {
+ 
+ void execute_command(std::vector<std::string>& command, std::string& stdout_str, std::string& stderr_str) {
+@@ -530,6 +539,10 @@ void matmul_shaders(bool fp16, MatMulIdType matmul_id_type, bool coopmat, bool c
+     string_to_spv(shader_name + "_f16_aligned",     source_name, merge_maps(merge_maps(base_dict, float_type_dict_f16), {{"DATA_A_F16", "1"}, {"LOAD_VEC_A", load_vec}, {"LOAD_VEC_B", load_vec}, {"B_TYPE", aligned_b_type_f16}, {"D_TYPE", "float"}, {"ALIGNED", "1"}}), fp16, coopmat, coopmat2, f16acc);
+ 
+     // bf16
++#ifdef GGML_VULKAN_SENSAI_TRIM
++    // Skip bf16 entirely under Sensai trim — Adreno 702 has no bf16 use case.
++    if (false)
++#endif
+     {
+         // For aligned matmul loads
+         std::string load_vec_a = coopmat2 ? "1" : "4";
+@@ -554,6 +567,9 @@ void matmul_shaders(bool fp16, MatMulIdType matmul_id_type, bool coopmat, bool c
+     }
+ 
+     for (const auto& tname : type_names) {
++#ifdef GGML_VULKAN_SENSAI_TRIM
++        if (!sensai_keep_type(tname)) continue;
++#endif
+         std::string load_vec_quant = "2";
+         if ((tname == "q1_0") || (tname == "q4_0") || (tname == "q4_1") || (tname == "q5_1") || (tname == "iq1_s") || (tname == "iq1_m") || (tname == "iq2_xxs") || (tname == "iq2_xs") || (tname == "iq2_s"))
+             load_vec_quant = "8";
+@@ -600,15 +616,26 @@ void matmul_shaders(bool fp16, MatMulIdType matmul_id_type, bool coopmat, bool c
+ void process_shaders() {
+     // matmul
+     for (const MatMulIdType& matmul_id_type : {MatMulIdType::NONE, MatMulIdType::DEFAULT, MatMulIdType::SUBGROUP}) {
++#ifdef GGML_VULKAN_SENSAI_TRIM
++        // Sensai trim: skip MoE permutations (Qwen3.5 has no MoE).
++        if (matmul_id_type != MatMulIdType::NONE) continue;
++#endif
+         // No coopmats
+         // fp32
+         matmul_shaders(false, matmul_id_type, false, false, false);
+ 
+         // fp16, fp32acc and fp16acc
+         matmul_shaders(true, matmul_id_type, false, false, false);
++#ifdef GGML_VULKAN_SENSAI_TRIM
++        // Sensai trim: skip f16 accumulator (Adreno 702 → F32 acc only).
++#else
+         matmul_shaders(true, matmul_id_type, false, false, true);
++#endif
+ 
+         if (matmul_id_type != MatMulIdType::DEFAULT) {
++#ifdef GGML_VULKAN_SENSAI_TRIM
++            // Sensai trim: Adreno 702 has no coopmat hardware; skip coopmat permutations.
++#else
+ #if defined(GGML_VULKAN_COOPMAT_GLSLC_SUPPORT)
+             // Coopmat, fp32acc and fp16acc
+             matmul_shaders(true, matmul_id_type, true, false, false);
+@@ -619,6 +646,7 @@ void process_shaders() {
+             // Coopmat2, fp32acc and fp16acc
+             matmul_shaders(true, matmul_id_type, false, true, false);
+             matmul_shaders(true, matmul_id_type, false, true, true);
++#endif
+ #endif
+         }
+     }
