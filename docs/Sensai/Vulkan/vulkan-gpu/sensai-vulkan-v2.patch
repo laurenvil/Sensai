@@ -135,7 +135,7 @@ index e1f613f..5f42e6f 100644
  set(TARGET vulkan-shaders-gen)
  add_executable(${TARGET} vulkan-shaders-gen.cpp)
 diff --git a/ggml/src/ggml-vulkan/vulkan-shaders/norm.comp b/ggml/src/ggml-vulkan/vulkan-shaders/norm.comp
-index cc3ea0b..997f91d 100644
+index cc3ea0b..fd96a68 100644
 --- a/ggml/src/ggml-vulkan/vulkan-shaders/norm.comp
 +++ b/ggml/src/ggml-vulkan/vulkan-shaders/norm.comp
 @@ -4,9 +4,9 @@
@@ -150,8 +150,17 @@ index cc3ea0b..997f91d 100644
  
  layout (binding = 0) readonly buffer X {A_TYPE data_a[];};
  layout (binding = 1) writeonly buffer D {D_TYPE data_d[];};
+@@ -27,7 +27,7 @@ void main() {
+ 
+     // sum up partial sums and write back result
+     barrier();
+-    [[unroll]] for (int s = BLOCK_SIZE / 2; s > 0; s >>= 1) {
++    [[unroll]] for (uint s = BLOCK_SIZE / 2; s > 0; s >>= 1) {
+         if (tid < s) {
+             sum[tid] += sum[tid + s];
+         }
 diff --git a/ggml/src/ggml-vulkan/vulkan-shaders/rms_norm.comp b/ggml/src/ggml-vulkan/vulkan-shaders/rms_norm.comp
-index 55b89f1..54a6c42 100644
+index 55b89f1..80c241e 100644
 --- a/ggml/src/ggml-vulkan/vulkan-shaders/rms_norm.comp
 +++ b/ggml/src/ggml-vulkan/vulkan-shaders/rms_norm.comp
 @@ -30,11 +30,11 @@ layout (binding = 6) readonly buffer R_I {uvec2 rope_data_i[];}; // indices for
@@ -168,79 +177,12 @@ index 55b89f1..54a6c42 100644
  
  shared FLOAT_TYPE sumsh[BLOCK_SIZE];
  
-diff --git a/ggml/src/ggml-vulkan/vulkan-shaders/vulkan-shaders-gen.cpp b/ggml/src/ggml-vulkan/vulkan-shaders/vulkan-shaders-gen.cpp
-index 6f2a929..794f2df 100644
---- a/ggml/src/ggml-vulkan/vulkan-shaders/vulkan-shaders-gen.cpp
-+++ b/ggml/src/ggml-vulkan/vulkan-shaders/vulkan-shaders-gen.cpp
-@@ -76,6 +76,15 @@ enum MatMulIdType {
-     SUBGROUP,
- };
- 
-+#ifdef GGML_VULKAN_SENSAI_TRIM
-+// Sensai (Adreno 702): only emit matmul variants we actually use:
-+//   src0 ∈ {f32, f16, q4_0, q6_k}, dst = f32, no MatMul-ID (no MoE), no coopmat.
-+// Models tested: Qwen3.5-0.8B-Q4_0.gguf, Qwen3.5-0.8B-Q6_K.gguf.
-+static bool sensai_keep_type(const std::string& tname) {
-+    return tname == "f32" || tname == "f16" || tname == "q4_0" || tname == "q6_k";
-+}
-+#endif
-+
- namespace {
- 
- void execute_command(std::vector<std::string>& command, std::string& stdout_str, std::string& stderr_str) {
-@@ -530,6 +539,10 @@ void matmul_shaders(bool fp16, MatMulIdType matmul_id_type, bool coopmat, bool c
-     string_to_spv(shader_name + "_f16_aligned",     source_name, merge_maps(merge_maps(base_dict, float_type_dict_f16), {{"DATA_A_F16", "1"}, {"LOAD_VEC_A", load_vec}, {"LOAD_VEC_B", load_vec}, {"B_TYPE", aligned_b_type_f16}, {"D_TYPE", "float"}, {"ALIGNED", "1"}}), fp16, coopmat, coopmat2, f16acc);
- 
-     // bf16
-+#ifdef GGML_VULKAN_SENSAI_TRIM
-+    // Skip bf16 entirely under Sensai trim — Adreno 702 has no bf16 use case.
-+    if (false)
-+#endif
-     {
-         // For aligned matmul loads
-         std::string load_vec_a = coopmat2 ? "1" : "4";
-@@ -554,6 +567,9 @@ void matmul_shaders(bool fp16, MatMulIdType matmul_id_type, bool coopmat, bool c
-     }
- 
-     for (const auto& tname : type_names) {
-+#ifdef GGML_VULKAN_SENSAI_TRIM
-+        if (!sensai_keep_type(tname)) continue;
-+#endif
-         std::string load_vec_quant = "2";
-         if ((tname == "q1_0") || (tname == "q4_0") || (tname == "q4_1") || (tname == "q5_1") || (tname == "iq1_s") || (tname == "iq1_m") || (tname == "iq2_xxs") || (tname == "iq2_xs") || (tname == "iq2_s"))
-             load_vec_quant = "8";
-@@ -600,15 +616,26 @@ void matmul_shaders(bool fp16, MatMulIdType matmul_id_type, bool coopmat, bool c
- void process_shaders() {
-     // matmul
-     for (const MatMulIdType& matmul_id_type : {MatMulIdType::NONE, MatMulIdType::DEFAULT, MatMulIdType::SUBGROUP}) {
-+#ifdef GGML_VULKAN_SENSAI_TRIM
-+        // Sensai trim: skip MoE permutations (Qwen3.5 has no MoE).
-+        if (matmul_id_type != MatMulIdType::NONE) continue;
-+#endif
-         // No coopmats
-         // fp32
-         matmul_shaders(false, matmul_id_type, false, false, false);
- 
-         // fp16, fp32acc and fp16acc
-         matmul_shaders(true, matmul_id_type, false, false, false);
-+#ifdef GGML_VULKAN_SENSAI_TRIM
-+        // Sensai trim: skip f16 accumulator (Adreno 702 → F32 acc only).
-+#else
-         matmul_shaders(true, matmul_id_type, false, false, true);
-+#endif
- 
-         if (matmul_id_type != MatMulIdType::DEFAULT) {
-+#ifdef GGML_VULKAN_SENSAI_TRIM
-+            // Sensai trim: Adreno 702 has no coopmat hardware; skip coopmat permutations.
-+#else
- #if defined(GGML_VULKAN_COOPMAT_GLSLC_SUPPORT)
-             // Coopmat, fp32acc and fp16acc
-             matmul_shaders(true, matmul_id_type, true, false, false);
-@@ -619,6 +646,7 @@ void process_shaders() {
-             // Coopmat2, fp32acc and fp16acc
-             matmul_shaders(true, matmul_id_type, false, true, false);
-             matmul_shaders(true, matmul_id_type, false, true, true);
-+#endif
- #endif
-         }
-     }
+@@ -73,7 +73,7 @@ void rms_norm(uint num_iters) {
+     sumsh[tid] = sum;
+     // sum up partial sums and write back result
+     barrier();
+-    [[unroll]] for (int s = BLOCK_SIZE / 2; s > 0; s >>= 1) {
++    [[unroll]] for (uint s = BLOCK_SIZE / 2; s > 0; s >>= 1) {
+         if (tid < s) {
+             sum += sumsh[tid + s];
+             sumsh[tid] = sum;
