@@ -42,31 +42,41 @@ v2 corrects the mistakes. Key differences:
 
 ---
 
-## 2. Build-without-OOM strategy: shader-gen permutation trim
+## 2. Build-without-OOM strategy: shader-gen permutation stub
 
-> **Empirical finding (2026-05-10):** in b9049 the generator emits **per-shader** `.comp.cpp`
-> files, not a single 86 MB monolith. Even with the full untrimmed permutation set,
-> `mul_mm.comp.cpp` is **~1.7 MB**; the largest file (`mul_mat_vec.comp.cpp`) is **~13 MB**. The
-> "86 MB single file" described in `vulkan-gpu/whitepaper.md` reflected an older codebase or the
-> path before per-shader split. The cc1plus OOM still happens with `-j2` because two parallel
-> compilations of large files share the 4 GB budget, but a single-threaded build (`-j1`) fits.
+> **Empirical findings (2026-05-10):**
+> - In b9049 the generator emits **per-shader** `.comp.cpp` files. Without the trim,
+>   `mul_mm.comp.cpp` is **140 MB** (matches the figure in `vulkan-gpu/whitepaper.md`); the
+>   largest mat-vec file (`mul_mat_vec.comp.cpp`) is **~13 MB**.
+> - cc1plus on the 140 MB `mul_mm.comp.cpp` exceeds 4 GB even at `-O0` and even single-threaded;
+>   the OOM killer fires regardless. The Uno Q's 1.8 GB zram swap is not enough.
+> - Aggressive cc1plus GC tuning (`--param=ggc-min-expand=1 --param=ggc-min-heapsize=1 -O0
+>   -g0 -fno-var-tracking-assignments`) is sufficient for the 13 MB `mul_mat_vec.comp.cpp` but
+>   not for the 140 MB `mul_mm.comp.cpp`.
+> - The **stub-emission permutation trim** (this section) shrinks `mul_mm.comp.cpp` from 140 MB
+>   to **2.0 MB** (70× reduction) by emitting zero-byte SPIR-V stubs for permutations the
+>   Adreno 702 cannot use. Build then completes in ~90 min at `-j2` with zero errors. This is
+>   the only path that produces a working binary on-device.
 >
-> Net effect: the permutation trim below is preserved as a **CMake option**
-> (`GGML_VULKAN_SENSAI_TRIM`, off by default) but is **not required for the build to succeed** on
-> the Uno Q. The minimal change that makes b9049 build on-device is `-j1`. The trim remains
-> useful as a future safety valve if upstream re-monolithises shader generation.
+> Conclusion: `GGML_VULKAN_SENSAI_TRIM` is **required** for on-device build on the 4 GB Uno Q.
 
 The cc1plus OOM is caused by combinatorial explosion in `vulkan-shaders-gen.cpp`. The generator
-emits a `(src0_type × dst_type × matmul_id × align × coopmat)` Cartesian product of matmul
-variants and bakes each one's SPIR-V into a static array.
+emits a `(src0_type × dst_type × matmul_id × align × coopmat × f16acc)` Cartesian product of
+matmul variants and bakes each one's SPIR-V into a static array in a single C++ file
+(`mul_mm.comp.cpp`).
 
-> **Caveat:** if you ever turn `GGML_VULKAN_SENSAI_TRIM` on, you must also gate **every**
-> matching `CREATE_MM(GGML_TYPE_X, …)` invocation in `ggml-vulkan.cpp` with the same
-> `#ifdef GGML_VULKAN_SENSAI_TRIM`. The host code references the per-type
-> `matmul_<tname>_*_len`/`_data` symbols by name; if the generator skips them, ggml-vulkan.cpp
-> fails to link with messages like `error: 'matmul_id_bf16_fp32_data' was not declared`. The v2
-> branch leaves the host-side gating undone and the option off because the per-shader split
-> already keeps cc1plus within budget.
+The trim drops permutations the Adreno 702 cannot use, but does so at the **wrapper-emission
+level**: stubbed names still get a symbol declaration (`extern const uint64_t name_len;`
+`extern const unsigned char name_data[];`) and a zero-byte definition (`name_len = 0;
+name_data[1] = {0};`). This means:
+
+- **Linkage works**: every CREATE_MM invocation in `ggml-vulkan.cpp` resolves; no host-side
+  gating needed.
+- **File size collapses**: 140 MB → 2.0 MB on `mul_mm.comp.cpp`.
+- **Runtime safety**: `ggml_vk_create_pipeline_func` short-circuits on `spv_size == 0` (defensive
+  patch in §3.1) and `ggml_vk_load_shaders` marks the trimmed-type matmul flags
+  (`mul_mat_s/m/l[t]`, `mul_mat_id_*[t]`) as false, so `supports_op` falls back to CPU for the
+  affected ops. No null-pipeline dereference can happen.
 
 ### 2.1 Variants Sensai needs
 
@@ -91,51 +101,47 @@ both production models. F32 is the activation/result type.
 Estimated reduction: 86 MB → roughly 6–10 MB of generated `mul_mm.comp.cpp`. cc1plus footprint
 should drop to ~150–250 MB, well within the 4 GB budget.
 
-### 2.2 Patch shape (to be applied to `ggml/src/ggml-vulkan/vulkan-shaders/vulkan-shaders-gen.cpp`)
+### 2.2 Patch shape (applied to `ggml/src/ggml-vulkan/vulkan-shaders/vulkan-shaders-gen.cpp`)
 
-Locate the matmul permutation loop (the one that emits `mul_mm_*` variants). Add a
-build-time guard, gated on a CMake option so non-Adreno builds remain full:
+Three additions, all gated on `#ifdef GGML_VULKAN_SENSAI_TRIM`:
+
+**(a)** A predicate `sensai_should_stub(name)` that matches names produced by the matmul
+generator:
 
 ```cpp
-// vulkan-shaders-gen.cpp (sketch — to be written against the real generator)
-#ifdef GGML_VULKAN_SENSAI_TRIM
-static const std::set<std::string> sensai_keep_src0 = {
-    "f32", "f16", "q4_0", "q6_k"
-};
-static const std::set<std::string> sensai_keep_dst = { "f32" };
-static const bool sensai_drop_matmul_id = true;
-static const bool sensai_drop_coopmat   = true;
-#endif
-
-for (auto src0 : src0_types) {
-    for (auto dst : dst_types) {
-        for (auto mmid : { false, true }) {
-            for (auto cm : coopmat_modes) {
-#ifdef GGML_VULKAN_SENSAI_TRIM
-                if (!sensai_keep_src0.count(src0))           continue;
-                if (!sensai_keep_dst.count(dst))             continue;
-                if (sensai_drop_matmul_id && mmid)           continue;
-                if (sensai_drop_coopmat  && cm != COOPMAT_NONE) continue;
-#endif
-                emit_matmul_variant(src0, dst, mmid, cm);
-            }
-        }
-    }
+static bool sensai_should_stub(const std::string& name) {
+    if (name.find("_cm1") != std::string::npos) return true;     // no coopmat HW
+    if (name.find("_cm2") != std::string::npos) return true;     // no coopmat HW
+    if (name.find("_f16acc") != std::string::npos) return true;  // F32 acc only
+    if (name.rfind("matmul_id_", 0) == 0) return true;           // no MoE
+    if (name.rfind("matmul_", 0) != 0) return false;
+    static const std::vector<std::string> keep = {
+        "matmul_f32_", "matmul_f16_", "matmul_bf16_",
+        "matmul_q4_0_", "matmul_q6_k_",
+    };
+    for (const auto& k : keep) if (name.rfind(k, 0) == 0) return false;
+    return true;
 }
 ```
 
-Wire the option into `ggml/src/ggml-vulkan/CMakeLists.txt`:
+**(b)** In `string_to_spv()`, if the predicate fires, write an empty `.spv` file and register the
+name without invoking glslc. This satisfies the dependency tracking and keeps `shader_fnames`
+populated for the wrapper-emission step.
 
-```cmake
-option(GGML_VULKAN_SENSAI_TRIM
-       "Adreno 702: emit only Q4_0/Q6_K/F32 matmul variants" OFF)
-if (GGML_VULKAN_SENSAI_TRIM)
-    target_compile_definitions(vulkan-shaders-gen PRIVATE GGML_VULKAN_SENSAI_TRIM)
-endif()
+**(c)** In `write_output_files()`, when reading the .spv yields empty data, emit a zero-byte
+stub instead of skipping:
+
+```cpp
+if (data.empty()) {
+    src << "const uint64_t " << name << "_len = 0;\n";
+    src << "const unsigned char " << name << "_data[1] = {0};\n\n";
+    continue;
+}
 ```
 
-The `coopmat` shader stubbing already in `sensai-gpu-vulkan` is correct and lives in the same
-generator — port that part forward. The `mul_mm` / `mul_mmq` stubbing must be removed.
+The CMake option lives in both `ggml/src/ggml-vulkan/CMakeLists.txt` and
+`ggml/src/ggml-vulkan/vulkan-shaders/CMakeLists.txt` (the shader-gen subproject is built as an
+ExternalProject and inherits the flag via `VULKAN_SHADER_GEN_CMAKE_ARGS`).
 
 ### 2.3 Cross-compile alternative (preferred when a build host is available)
 
@@ -291,16 +297,15 @@ mkdir staging && cp build-vulkan/bin/llama-server build-vulkan/bin/llama-bench \
 scp staging/* arduino@unoq:~/ArduinoApps/Sensai/yzma/lib-vulkan/
 ```
 
-### 4.2 Path B — on-device build with permutation trim (fallback)
+### 4.2 Path B — on-device build with permutation trim (the working path)
 
-On the Uno Q itself:
+This is the path that actually produces a working binary on the Uno Q. Verified end-to-end on
+2026-05-10.
 
 ```bash
-git clone https://github.com/ggml-org/llama.cpp ~/ArduinoApps/llama-cpp-vulkan
-cd ~/ArduinoApps/llama-cpp-vulkan
-git checkout b9049
-
-# Apply the Sensai v2 patches, INCLUDING §2.2 generator trim + CMake option.
+git clone --depth 1 --branch b9049 https://github.com/ggml-org/llama.cpp ~/ArduinoApps/llama-vulkan-v2
+cd ~/ArduinoApps/llama-vulkan-v2
+git apply ~/ArduinoApps/Sensai/docs/Sensai/Vulkan/vulkan-gpu/sensai-vulkan-v2.patch
 
 cmake -S . -B build-vulkan \
     -DGGML_VULKAN=ON \
@@ -309,23 +314,30 @@ cmake -S . -B build-vulkan \
     -DCMAKE_BUILD_TYPE=Release \
     -DGGML_NATIVE=OFF \
     -DLLAMA_BUILD_SERVER=ON \
+    -DLLAMA_BUILD_TESTS=OFF \
+    -DLLAMA_BUILD_EXAMPLES=OFF \
+    -DLLAMA_BUILD_TOOLS=ON \
     -DBUILD_SHARED_LIBS=ON
 
-cmake --build build-vulkan --target llama-server llama-bench -j1
+cmake --build build-vulkan --target llama-server llama-bench -j2
 
-# Symlink into the Sensai layout
+# Stage to the Sensai layout
 mkdir -p ~/ArduinoApps/Sensai/yzma/lib-vulkan
 cp build-vulkan/bin/llama-server build-vulkan/bin/llama-bench \
-   build-vulkan/lib/libggml*.so build-vulkan/lib/libllama.so \
+   build-vulkan/bin/lib*.so \
    ~/ArduinoApps/Sensai/yzma/lib-vulkan/
 ```
 
-> **Use `-j1`, not `-j2`, on the 4 GB Uno Q.** `mul_mat_vec.comp.cpp` (~13 MB) and
-> `mul_mm.comp.cpp` (~1.7 MB) compiling concurrently exhaust the 4 GB + 1.8 GB swap budget;
-> sequentially each fits. A `-j1` full build takes 30–60 min on the QRB2210.
+`-j2` works because the per-source CMake flags from the v2 patch
+(`-O0 -g0 -fno-var-tracking-assignments --param=ggc-min-expand=1 --param=ggc-min-heapsize=1`) cap
+cc1plus RAM on the largest wrapper files. With `GGML_VULKAN_SENSAI_TRIM=ON`, `mul_mm.comp.cpp`
+shrinks from 140 MB to 2.0 MB; `mul_mat_vec.comp.cpp` stays at 13 MB but compiles cleanly under
+the GC tuning. Total wall-clock build time on the Uno Q: ~90 min. Total on-disk build artifacts:
+~16 MB `libggml-vulkan.so`, 8.7 MB `llama-server`.
 
-If even `-j1` OOMs (unlikely with 1.8 GB swap available), a one-shot zram swap during the build
-will close the gap:
+If anything goes wrong with cc1plus OOM (it shouldn't with the patch applied), zram swap is
+already configured (1.8 GB) and the GC tuning makes it usable. Add a one-shot file-backed swap
+only if both fail:
 
 ```bash
 sudo modprobe zram && \

@@ -1,5 +1,5 @@
 diff --git a/ggml/src/ggml-vulkan/CMakeLists.txt b/ggml/src/ggml-vulkan/CMakeLists.txt
-index 715a263..5486026 100644
+index 715a263..9ec404f 100644
 --- a/ggml/src/ggml-vulkan/CMakeLists.txt
 +++ b/ggml/src/ggml-vulkan/CMakeLists.txt
 @@ -112,6 +112,11 @@ if (Vulkan_FOUND)
@@ -14,11 +14,38 @@ index 715a263..5486026 100644
      if (GGML_VULKAN_VALIDATE)
          add_compile_definitions(GGML_VULKAN_VALIDATE)
      endif()
+@@ -213,6 +218,13 @@ if (Vulkan_FOUND)
+             COMMENT "Generate vulkan shaders for ${file}"
+         )
+         target_sources(ggml-vulkan PRIVATE ${_ggml_vk_target_cpp})
++        # Sensai: shader wrappers are large static-data files with no
++        # functional code; -O0 + aggressive cc1plus GC keeps RAM under
++        # the Uno Q's 4 GB budget while compiling mul_mm.comp.cpp (~140 MB).
++        if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
++            set_source_files_properties(${_ggml_vk_target_cpp} PROPERTIES
++                COMPILE_OPTIONS "-O0;-g0;-fno-var-tracking-assignments;--param=ggc-min-expand=1;--param=ggc-min-heapsize=1")
++        endif()
+     endforeach()
+ 
+ else()
 diff --git a/ggml/src/ggml-vulkan/ggml-vulkan.cpp b/ggml/src/ggml-vulkan/ggml-vulkan.cpp
-index 423e01d..abdb7c1 100644
+index 423e01d..9bed98f 100644
 --- a/ggml/src/ggml-vulkan/ggml-vulkan.cpp
 +++ b/ggml/src/ggml-vulkan/ggml-vulkan.cpp
-@@ -3418,12 +3418,34 @@ static void ggml_vk_load_shaders(vk_device& device) {
+@@ -2138,6 +2138,12 @@ static std::condition_variable compile_count_cond;
+ static void ggml_vk_create_pipeline_func(vk_device& device, vk_pipeline& pipeline, size_t spv_size, const void* spv_data, const std::string entrypoint,
+                                          uint32_t parameter_count, std::array<uint32_t, 3> wg_denoms, std::vector<uint32_t> specialization_constants,
+                                          bool disable_robustness, bool require_full_subgroups, uint32_t required_subgroup_size) {
++    // Sensai: Vulkan-shaders-gen may emit zero-byte SPIR-V stubs for trimmed
++    // permutations (e.g. coopmat / f16acc / non-essential quant types on Adreno).
++    // Skip pipeline creation; supports_op falls back to CPU for the affected ops.
++    if (spv_size == 0) {
++        return;
++    }
+     VK_LOG_DEBUG("ggml_vk_create_pipeline(" << device->name << ", " << pipeline->name << ", " << entrypoint << ", " << parameter_count <<
+                  ", (" << wg_denoms[0] << "," << wg_denoms[1] << "," << wg_denoms[2] << "), specialization_constants, " <<
+                  disable_robustness << ", " << require_full_subgroups << ", " << required_subgroup_size << ")");
+@@ -3418,12 +3424,55 @@ static void ggml_vk_load_shaders(vk_device& device) {
          m_align =  64;
          s_align =  32;
  
@@ -38,6 +65,27 @@ index 423e01d..abdb7c1 100644
 +            l_align = m_align = s_align;
 +        }
 +
++#ifdef GGML_VULKAN_SENSAI_TRIM
++        // Sensai trim: shader generator stubbed matmul shaders for non-essential
++        // types and all matmul_id (MoE) variants. Mark them unavailable here so
++        // supports_op falls back to CPU.
++        for (uint32_t i = 0; i < GGML_TYPE_COUNT; ++i) {
++            ggml_type t = (ggml_type)i;
++            const bool keep =
++                t == GGML_TYPE_F32 || t == GGML_TYPE_F16 || t == GGML_TYPE_BF16 ||
++                t == GGML_TYPE_Q4_0 || t == GGML_TYPE_Q6_K;
++            if (!keep) {
++                device->mul_mat_s[i] = false;
++                device->mul_mat_m[i] = false;
++                device->mul_mat_l[i] = false;
++            }
++            // All MoE pipelines stubbed regardless of type.
++            device->mul_mat_id_s[i] = false;
++            device->mul_mat_id_m[i] = false;
++            device->mul_mat_id_l[i] = false;
++        }
++#endif
++
          for (uint32_t i = 0; i < GGML_TYPE_COUNT; ++i) {
              ggml_type t = (ggml_type)i;
              // Disable medium and large matrix multiplication if not enough shared memory is available
@@ -54,7 +102,7 @@ index 423e01d..abdb7c1 100644
                  std::cerr << "ggml_vulkan: Error: Shared memory size too small for matrix multiplication." << std::endl;
                  throw std::runtime_error("Shared memory size too small for matrix multiplication.");
              } else if (!ggml_vk_matmul_shmem_support(device, m_warptile_mmq, false, t)) {
-@@ -4461,17 +4483,20 @@ static void ggml_vk_load_shaders(vk_device& device) {
+@@ -4461,17 +4510,20 @@ static void ggml_vk_load_shaders(vk_device& device) {
      }
      ggml_vk_create_pipeline(device, device->pipeline_mul_mat_vec_nc_f16_f32, "mul_mat_vec_nc_f16_f32", mul_mat_vec_nc_f16_f32_len, mul_mat_vec_nc_f16_f32_data, "main", mul_mat_vec_num_bindings, sizeof(vk_mat_vec_nc_push_constants), {1, 1, 1}, {}, 1);
  
@@ -80,7 +128,7 @@ index 423e01d..abdb7c1 100644
      }
  
      ggml_vk_create_pipeline(device, device->pipeline_rms_norm_back_f32, "rms_norm_back_f32", rms_norm_back_f32_len, rms_norm_back_f32_data, "main", 3, sizeof(vk_op_push_constants), {1, 1, 1}, {}, 1);
-@@ -4654,10 +4679,12 @@ static void ggml_vk_load_shaders(vk_device& device) {
+@@ -4654,10 +4706,12 @@ static void ggml_vk_load_shaders(vk_device& device) {
  
      ggml_vk_create_pipeline(device, device->pipeline_diag_mask_inf_f32, "diag_mask_inf_f32", diag_mask_inf_f32_len, diag_mask_inf_f32_data, "main", 2, sizeof(vk_op_diag_mask_push_constants), {1, 512, 1}, {}, 1, true);
  
@@ -95,7 +143,7 @@ index 423e01d..abdb7c1 100644
      ggml_vk_create_pipeline(device, device->pipeline_soft_max_back_f32, "soft_max_back_f32", soft_max_back_f32_len, soft_max_back_f32_data, "main", 3, sizeof(vk_op_push_constants), {1, 1, 1}, { device->subgroup_size }, 1, true);
  
      ggml_vk_create_pipeline(device, device->pipeline_soft_max_large1_f32,     "soft_max_large1_f32",     soft_max_large1_f32_len,     soft_max_large1_f32_data,     "main", 6, sizeof(vk_op_soft_max_push_constants), {1, 1, 1}, { 128, 4 }, 1, true);
-@@ -15562,6 +15589,12 @@ static bool ggml_backend_vk_device_supports_op(ggml_backend_dev_t dev, const ggm
+@@ -15562,6 +15616,12 @@ static bool ggml_backend_vk_device_supports_op(ggml_backend_dev_t dev, const ggm
          case GGML_OP_MUL_MAT_ID:
              {
                  ggml_type src0_type = op->src[0]->type;
@@ -108,7 +156,7 @@ index 423e01d..abdb7c1 100644
                  if (op->op == GGML_OP_MUL_MAT_ID) {
                      if (!device->mul_mat_id_s[src0_type] && !device->mul_mat_id_m[src0_type] && !device->mul_mat_id_l[src0_type]) {
                          // If there's not enough shared memory for row_ids and the result tile, fallback to CPU
-@@ -15624,6 +15657,10 @@ static bool ggml_backend_vk_device_supports_op(ggml_backend_dev_t dev, const ggm
+@@ -15624,6 +15684,10 @@ static bool ggml_backend_vk_device_supports_op(ggml_backend_dev_t dev, const ggm
              }
          case GGML_OP_FLASH_ATTN_EXT:
              {
@@ -186,3 +234,73 @@ index 55b89f1..80c241e 100644
          if (tid < s) {
              sum += sumsh[tid + s];
              sumsh[tid] = sum;
+diff --git a/ggml/src/ggml-vulkan/vulkan-shaders/vulkan-shaders-gen.cpp b/ggml/src/ggml-vulkan/vulkan-shaders/vulkan-shaders-gen.cpp
+index 6f2a929..d941162 100644
+--- a/ggml/src/ggml-vulkan/vulkan-shaders/vulkan-shaders-gen.cpp
++++ b/ggml/src/ggml-vulkan/vulkan-shaders/vulkan-shaders-gen.cpp
+@@ -76,6 +76,36 @@ enum MatMulIdType {
+     SUBGROUP,
+ };
+ 
++#ifdef GGML_VULKAN_SENSAI_TRIM
++// Sensai (Adreno 702): emit zero-byte stubs for matmul variants we won't run.
++// Symbols still resolve (linkage works), but the runtime spv_size==0 check in
++// ggml_vk_create_pipeline_func skips pipeline creation. Host code marks these
++// types as unavailable so supports_op falls back to CPU.
++//
++// Keep on GPU: src0 ∈ {f32, f16, bf16, q4_0, q6_k}, F32 acc only, no MoE
++// (matmul_id, matmul_id_subgroup), no coopmat. bf16 stays because host code
++// references it inside coopmat-gated blocks (still inert at runtime on Adreno).
++static bool sensai_should_stub(const std::string& name) {
++    // Coopmat hardware not present on Adreno 702.
++    if (name.find("_cm1") != std::string::npos) return true;
++    if (name.find("_cm2") != std::string::npos) return true;
++    // F16 accumulators not used on Adreno (F32 path only).
++    if (name.find("_f16acc") != std::string::npos) return true;
++    // MoE / matmul_id (Qwen3.5 has no MoE).
++    if (name.rfind("matmul_id_", 0) == 0) return true;
++    // Per-type filter: only act on plain matmul shaders, not other ops that
++    // happen to embed a type name. Tokenize by '_' starting after "matmul_".
++    if (name.rfind("matmul_", 0) != 0) return false;
++    static const std::vector<std::string> keep = {
++        "matmul_f32_", "matmul_f16_", "matmul_bf16_", "matmul_q4_0_", "matmul_q6_k_",
++    };
++    for (const auto& k : keep) {
++        if (name.rfind(k, 0) == 0) return false;
++    }
++    return true;
++}
++#endif
++
+ namespace {
+ 
+ void execute_command(std::vector<std::string>& command, std::string& stdout_str, std::string& stderr_str) {
+@@ -420,6 +450,17 @@ void string_to_spv(std::string name, const std::string& source, const std::map<s
+         return;
+     }
+ 
++#ifdef GGML_VULKAN_SENSAI_TRIM
++    if (sensai_should_stub(name)) {
++        // Touch an empty .spv file so dependency tracking is satisfied.
++        // write_output_files() emits a zero-byte stub when data is empty.
++        write_binary_file(out_path, std::string());
++        std::lock_guard<std::mutex> guard(lock);
++        shader_fnames.push_back(std::make_pair(name, out_path));
++        return;
++    }
++#endif
++
+     compile_count_guard slot = acquire_compile_slot();
+     compiles.push_back(std::async(
+         string_to_spv_func, name, input_filepath, out_path, defines, coopmat, generate_dep_file, std::move(slot)));
+@@ -1053,6 +1094,10 @@ void write_output_files() {
+         if (input_filepath != "") {
+             std::string data = read_binary_file(path);
+             if (data.empty()) {
++                // Sensai trim path: keep symbols available with zero-byte data.
++                // ggml_vk_create_pipeline_func() skips pipelines with spv_size == 0.
++                src << "const uint64_t " << name << "_len = 0;\n";
++                src << "const unsigned char " << name << "_data[1] = {0};\n\n";
+                 continue;
+             }
+ 
