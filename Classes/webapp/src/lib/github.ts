@@ -39,7 +39,7 @@ export async function listModulesFromRepo(
     const { data } = await octokit.repos.getContent({
       owner,
       repo,
-      path: "curriculum-master/modules",
+      path: "Classes/curriculum-master/modules",
     });
 
     if (!Array.isArray(data)) return [];
@@ -75,7 +75,7 @@ export async function getModuleContent(
   repo: string,
   moduleSlug: string
 ): Promise<ModuleContent | null> {
-  const basePath = `curriculum-master/modules/${moduleSlug}`;
+  const basePath = `Classes/curriculum-master/modules/${moduleSlug}`;
 
   const [readme, resources] = await Promise.all([
     getFileContent(octokit, owner, repo, `${basePath}/README.md`),
