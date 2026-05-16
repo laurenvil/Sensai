@@ -118,7 +118,14 @@ Classes/
 │   └── modules/
 │       ├── module-01-welcome/     # Arduino intro, first sketch
 │       ├── module-02-circuits/    # LEDs, breadboards, blink
-│       └── module-03-logic/       # Buttons, variables, if/else
+│       ├── module-03-logic/       # Buttons, variables, if/else
+│       ├── module-04-analog/      # Analog In/Out, PWM, Pots
+│       ├── module-05-sensors/     # Env Sensors, DHT, LDR
+│       ├── module-06-serial/      # Advanced Serial Comm
+│       ├── module-07-actuators/   # Servos, Motors, Relays
+│       ├── module-08-i2c/         # I2C Protocol, Displays
+│       ├── module-09-iot/         # WiFi, HTTP, IoT basics
+│       └── module-10-capstone/    # Final Arduino hardware project
 ├── docs/
 │   ├── AI Agents/Agentic.md       # Sensai AI architecture documentation
 │   ├── TEACHER_SETUP.md           # Full teacher deployment guide

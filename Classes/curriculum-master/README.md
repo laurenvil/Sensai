@@ -21,13 +21,13 @@ This curriculum is built on three principles from the Open Classroom model:
 | [01 — Welcome to Arduino](./modules/module-01-welcome/README.md) | Microcontrollers, Uno Q anatomy, first sketch | ✅ | Required |
 | [02 — Your First Circuit](./modules/module-02-circuits/README.md) | Breadboards, LEDs, resistors, blink | ✅ | Required |
 | [03 — Variables & Logic](./modules/module-03-logic/README.md) | Buttons, if/else, state, reaction timer | ✅ | Required |
-| 04 — Reading the World *(coming soon)* | analogRead, potentiometers, map() | 🔜 | Required |
-| 05 — Sensing the Environment *(coming soon)* | DHT sensors, libraries, alerts | 🔜 | Required |
-| 06 — Talking to the Computer *(coming soon)* | Serial communication, CSV logging | 🔜 | Required |
-| 07 — Making Things Move *(coming soon)* | PWM, servos, buzzers | 🔜 | Required |
-| 08 — Advanced Communication *(coming soon)* | I2C, OLED displays, SPI | 🔜 | Required |
-| 09 — IoT Projects *(coming soon)* | Smart plant, weather station, Bridge API | 🔜 | Required |
-| 10 — 🎓 Demo Day *(coming soon)* | Capstone project, presentation, entrepreneurship | 🔜 | Required |
+| [04 — Reading the World](./modules/module-04-analog/README.md) | analogRead, potentiometers, map() | ✅ | Required |
+| [05 — Sensing the Environment](./modules/module-05-sensors/README.md) | DHT sensors, libraries, alerts | ✅ | Required |
+| [06 — Talking to the Computer](./modules/module-06-serial/README.md) | Serial communication, CSV logging | ✅ | Required |
+| [07 — Making Things Move](./modules/module-07-actuators/README.md) | PWM, servos, buzzers | ✅ | Required |
+| [08 — Advanced Communication](./modules/module-08-i2c/README.md) | I2C, OLED displays, SPI | ✅ | Required |
+| [09 — IoT Projects](./modules/module-09-iot/README.md) | Smart plant, weather station, Bridge API | ✅ | Required |
+| [10 — 🎓 Demo Day](./modules/module-10-capstone/README.md) | Capstone project, presentation, entrepreneurship | ✅ | Required |
 
 > 📚 **Full lesson content** is in the companion [`curriculum/`](../../curriculum/) directory. These modules contain the graded assignments and starter code that integrate with GitHub Classroom.
 
@@ -88,10 +88,17 @@ curriculum-master/
     │   │   └── blink.ino
     │   └── tests/
     │       └── test_sketch.py
-    └── module-03-logic/         # Buttons, variables, if/else
-        ├── README.md
-        ├── starter-code/
-        │   └── button_led.ino
-        └── tests/
-            └── test_sketch.py
+    ├── module-03-logic/         # Buttons, variables, if/else
+    │   ├── README.md
+    │   ├── starter-code/
+    │   │   └── button_led.ino
+    │   └── tests/
+    │       └── test_sketch.py
+    ├── module-04-analog/
+    ├── module-05-sensors/
+    ├── module-06-serial/
+    ├── module-07-actuators/
+    ├── module-08-i2c/
+    ├── module-09-iot/
+    └── module-10-capstone/
 ```
