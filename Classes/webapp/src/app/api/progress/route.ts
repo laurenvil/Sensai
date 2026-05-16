@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getAuthenticatedContext } from "@/lib/api-auth";
-import { isTeacher, env } from "@/lib/env";
+import { isTeacher } from "@/lib/env";
 import { db } from "@/lib/db";
 import { getWorkflowRunsByActor } from "@/lib/github";
 import { MODULE_META } from "@/lib/constants";

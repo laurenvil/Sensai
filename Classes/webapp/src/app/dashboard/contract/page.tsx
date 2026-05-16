@@ -36,7 +36,6 @@ export default function LearningContractPage() {
   async function submit() {
     setStatus("loading");
 
-    const pathLabel = PATHS.find((p) => p.id === path);
     const body = `## Student Information
 
 - **Full Name:** ${session!.user?.name || session!.user?.githubUsername}

@@ -12,14 +12,15 @@ export async function GET() {
 
   const octokit = createOctokit(session.accessToken);
   const owner = process.env.NEXT_PUBLIC_GITHUB_ORG || "laurenvil";
-  const repo = "Arduino Classes";
+  const repo = "Sensai";
 
   try {
     const drafts = await listDraftModules(octokit, owner, repo);
     return NextResponse.json(drafts);
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "Failed to fetch drafts";
     return NextResponse.json(
-      { error: error.message || "Failed to fetch drafts" },
+      { error: message },
       { status: 500 }
     );
   }

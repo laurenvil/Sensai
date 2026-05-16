@@ -37,14 +37,14 @@ export async function PUT(
 
   const octokit = createOctokit(session.accessToken);
   const owner = process.env.NEXT_PUBLIC_GITHUB_ORG || "laurenvil";
-  const repo = "Classes";
+  const repo = "Sensai";
 
   try {
     await updateDraftFile(octokit, owner, repo, branch, path, content, sha);
     return NextResponse.json({ success: true });
-  } catch (error: any) {
+  } catch (error: unknown) {
     return NextResponse.json(
-      { error: error.message || "Failed to update draft file" },
+      { error: error instanceof Error ? error.message : "Failed to update draft file" },
       { status: 500 }
     );
   }

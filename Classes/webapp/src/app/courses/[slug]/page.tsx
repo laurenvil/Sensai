@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import { useSession } from "next-auth/react";
+
 import Link from "next/link";
 import {
   BookOpen,
@@ -11,7 +11,6 @@ import {
   TestTube,
   ChevronLeft,
   Bot,
-  ExternalLink,
 } from "lucide-react";
 import { clsx } from "clsx";
 import { MarkdownRenderer } from "@/components/markdown-renderer";
@@ -22,7 +21,7 @@ type Tab = "readme" | "starter-code" | "tests" | "resources";
 export default function ModuleDetailPage() {
   const params = useParams();
   const slug = params.slug as string;
-  const { data: session } = useSession();
+
   const [content, setContent] = useState<ModuleContent | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<Tab>("readme");

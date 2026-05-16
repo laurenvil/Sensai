@@ -7,19 +7,20 @@ import { Bot, Loader2, GitPullRequest, Clock, ChevronRight } from "lucide-react"
 
 export default function DraftsPage() {
   const { data: session, status } = useSession();
-  const [drafts, setDrafts] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [drafts, setDrafts] = useState<Array<{ number: number; title: string; createdAt: string; branch: string }>>([]);
+  const [loading, setLoading] = useState(status === "loading" || status === "authenticated");
 
   useEffect(() => {
-    if (status === "authenticated") {
-      fetch("/api/admin/drafts")
-        .then((res) => res.json())
-        .then((data) => setDrafts(data || []))
-        .catch(console.error)
-        .finally(() => setLoading(false));
-    } else if (status === "unauthenticated") {
-      setLoading(false);
+    if (status !== "authenticated") {
+      return;
     }
+    let cancelled = false;
+    fetch("/api/admin/drafts")
+      .then((res) => res.json())
+      .then((data) => { if (!cancelled) setDrafts(data || []); })
+      .catch(console.error)
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
   }, [status]);
 
   if (loading) {

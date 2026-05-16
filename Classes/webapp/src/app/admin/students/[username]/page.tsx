@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, use } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import {
   ArrowLeft,
@@ -104,9 +105,11 @@ export default function StudentDetailPage({
       {/* Student Header */}
       <div className="mt-6 flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-4">
-          <img
+          <Image
             src={student.avatarUrl}
             alt={student.username}
+            width={64}
+            height={64}
             className="h-16 w-16 rounded-full ring-4 ring-white shadow-lg dark:ring-gray-900"
           />
           <div>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import {
   Users,
@@ -18,7 +19,6 @@ import {
   Send,
   Loader2,
   X,
-  Copy,
   ExternalLink,
 } from "lucide-react";
 import { StatCard } from "@/components/stat-card";
@@ -104,34 +104,6 @@ export default function AdminDashboard() {
       setInviteError(err instanceof Error ? err.message : "Unknown error");
       setInviteStatus("error");
     }
-  }
-
-  async function handleBulkInvite() {
-    const usernames = inviteInput.split(/[,\n]+/).map(u => u.trim()).filter(Boolean);
-    if (usernames.length === 0) return;
-    setInviteStatus("loading");
-    setInviteError("");
-    const errors: string[] = [];
-    for (const u of usernames) {
-      try {
-        const res = await fetch("/api/admin/invite", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ usernameOrEmail: u }),
-        });
-        const data = await res.json();
-        if (!res.ok) errors.push(`${u}: ${data.error}`);
-      } catch { errors.push(`${u}: Network error`); }
-    }
-    if (errors.length > 0) {
-      setInviteError(errors.join(" · "));
-      setInviteStatus("error");
-    } else {
-      setInviteStatus("success");
-      setInviteInput("");
-      setTimeout(() => setInviteStatus("idle"), 3000);
-    }
-    fetch("/api/admin/invite").then(r => r.json()).then(d => setPendingInvites(d.invitations || []));
   }
 
   async function handleCancelInvite(invitationId: number) {
@@ -476,9 +448,11 @@ export default function AdminDashboard() {
                     >
                       <td className="py-3 pr-4">
                         <div className="flex items-center gap-3">
-                          <img
+                          <Image
                             src={student.avatarUrl}
                             alt={student.username}
+                            width={32}
+                            height={32}
                             className="h-8 w-8 rounded-full"
                           />
                           <div>

@@ -21,7 +21,7 @@ export async function GET(
 
   const octokit = createOctokit(session.accessToken);
   const owner = process.env.NEXT_PUBLIC_GITHUB_ORG || "laurenvil";
-  const repo = "Classes";
+  const repo = "Sensai";
 
   try {
     const details = await getDraftModuleDetails(octokit, owner, repo, prNumber);
@@ -29,9 +29,9 @@ export async function GET(
       return NextResponse.json({ error: "Draft not found" }, { status: 404 });
     }
     return NextResponse.json(details);
-  } catch (error: any) {
+  } catch (error: unknown) {
     return NextResponse.json(
-      { error: error.message || "Failed to fetch draft details" },
+      { error: error instanceof Error ? error.message : "Failed to fetch draft details" },
       { status: 500 }
     );
   }
@@ -55,14 +55,14 @@ export async function POST(
 
   const octokit = createOctokit(session.accessToken);
   const owner = process.env.NEXT_PUBLIC_GITHUB_ORG || "laurenvil";
-  const repo = "Classes";
+  const repo = "Sensai";
 
   try {
     await mergeDraftModule(octokit, owner, repo, prNumber);
     return NextResponse.json({ success: true });
-  } catch (error: any) {
+  } catch (error: unknown) {
     return NextResponse.json(
-      { error: error.message || "Failed to merge draft" },
+      { error: error instanceof Error ? error.message : "Failed to merge draft" },
       { status: 500 }
     );
   }

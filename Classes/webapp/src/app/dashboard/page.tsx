@@ -26,24 +26,28 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (session) {
-      Promise.all([
-        fetch("/api/github/workflow-runs")
-          .then((r) => r.json())
-          .catch(() => ({ runs: [] })),
-        fetch("/api/progress")
-          .then((r) => r.json())
-          .catch(() => ({ progress: null, isTeacher: false })),
-      ])
-        .then(([runsData, progressData]) => {
-          setRuns(runsData.runs || []);
-          setProgress(progressData.progress || null);
-          setIsTeacher(progressData.isTeacher === true);
-        })
-        .finally(() => setLoading(false));
-    } else {
-      setLoading(false);
+    if (!session) {
+      return;
     }
+    let cancelled = false;
+    Promise.all([
+      fetch("/api/github/workflow-runs")
+        .then((r) => r.json())
+        .catch(() => ({ runs: [] })),
+      fetch("/api/progress")
+        .then((r) => r.json())
+        .catch(() => ({ progress: null, isTeacher: false })),
+    ])
+      .then(([runsData, progressData]) => {
+        if (cancelled) return;
+        setRuns(runsData.runs || []);
+        setProgress(progressData.progress || null);
+        setIsTeacher(progressData.isTeacher === true);
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => { cancelled = true; };
   }, [session]);
 
   if (status === "loading") {

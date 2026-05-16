@@ -1,6 +1,6 @@
 export type UserRole = "teacher" | "student" | "admin";
 
-export interface Arduino ClassesUser {
+export interface ArduinoClassesUser {
   id: string;
   name: string;
   email: string;

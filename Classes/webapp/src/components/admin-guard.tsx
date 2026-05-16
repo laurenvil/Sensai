@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useSession } from "next-auth/react";
 import { Shield, AlertTriangle } from "lucide-react";
 import Link from "next/link";
@@ -12,24 +12,30 @@ interface AdminGuardProps {
 export function AdminGuard({ children }: AdminGuardProps) {
   const { data: session, status } = useSession();
   const [isTeacher, setIsTeacher] = useState<boolean | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [fetchDone, setFetchDone] = useState(false);
 
   useEffect(() => {
     if (!session) {
-      setLoading(false);
       return;
     }
-
+    let cancelled = false;
     fetch("/api/progress")
       .then((r) => r.json())
       .then((data) => {
-        setIsTeacher(data.isTeacher === true);
+        if (!cancelled) setIsTeacher(data.isTeacher === true);
       })
-      .catch(() => setIsTeacher(false))
-      .finally(() => setLoading(false));
+      .catch(() => { if (!cancelled) setIsTeacher(false); })
+      .finally(() => { if (!cancelled) setFetchDone(true); });
+    return () => { cancelled = true; };
   }, [session]);
 
-  if (status === "loading" || loading) {
+  const loading = useMemo(() => {
+    if (status === "loading") return true;
+    if (!session) return false;
+    return !fetchDone;
+  }, [status, session, fetchDone]);
+
+  if (loading) {
     return (
       <div className="flex items-center justify-center py-32">
         <div className="flex flex-col items-center gap-4">

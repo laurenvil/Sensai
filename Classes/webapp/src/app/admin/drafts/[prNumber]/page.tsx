@@ -3,7 +3,7 @@
 import { useEffect, useState, use } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
-import { ArrowLeft, Check, Save, GitMerge, FileText, Loader2, AlertCircle } from "lucide-react";
+import { ArrowLeft, Save, GitMerge, FileText, Loader2, AlertCircle } from "lucide-react";
 import Link from "next/link";
 import { clsx } from "clsx";
 
@@ -14,13 +14,13 @@ export default function DraftReviewPage({
 }) {
   const router = useRouter();
   const { prNumber } = use(params);
-  const { data: session, status } = useSession();
-  
-  const [draft, setDraft] = useState<any>(null);
-  const [files, setFiles] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { status } = useSession();
+
+  const [draft, setDraft] = useState<Record<string, string | number> | null>(null);
+  const [files, setFiles] = useState<Array<{ filename: string; content?: string; sha?: string }>>([]);
+  const [loading, setLoading] = useState(status !== "unauthenticated");
   const [error, setError] = useState("");
-  
+
   const [activeFile, setActiveFile] = useState<string | null>(null);
   const [fileContent, setFileContent] = useState("");
   const [savingFile, setSavingFile] = useState(false);
@@ -39,25 +39,27 @@ export default function DraftReviewPage({
   const allChecked = Object.values(checklist).every(Boolean);
 
   useEffect(() => {
-    if (status === "authenticated") {
-      fetch(`/api/admin/drafts/${prNumber}`)
-        .then((res) => {
-          if (!res.ok) throw new Error("Failed to load draft");
-          return res.json();
-        })
-        .then((data) => {
-          setDraft(data.draft);
-          setFiles(data.files || []);
-          if (data.files && data.files.length > 0) {
-            setActiveFile(data.files[0].filename);
-            setFileContent(data.files[0].content || "");
-          }
-        })
-        .catch((err) => setError(err.message))
-        .finally(() => setLoading(false));
-    } else if (status === "unauthenticated") {
-      setLoading(false);
+    if (status !== "authenticated") {
+      return;
     }
+    let cancelled = false;
+    fetch(`/api/admin/drafts/${prNumber}`)
+      .then((res) => {
+        if (!res.ok) throw new Error("Failed to load draft");
+        return res.json();
+      })
+      .then((data) => {
+        if (cancelled) return;
+        setDraft(data.draft);
+        setFiles(data.files || []);
+        if (data.files && data.files.length > 0) {
+          setActiveFile(data.files[0].filename);
+          setFileContent(data.files[0].content || "");
+        }
+      })
+      .catch((err) => { if (!cancelled) setError(err.message); })
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
   }, [status, prNumber]);
 
   function handleFileSelect(filename: string) {
@@ -103,8 +105,8 @@ export default function DraftReviewPage({
       // but for simple edits this works until page reload.
       alert("File saved successfully!");
       
-    } catch (err: any) {
-      alert(`Error saving file: ${err.message}`);
+    } catch (err: unknown) {
+      alert(`Error saving file: ${err instanceof Error ? err.message : "Unknown error"}`);
     } finally {
       setSavingFile(false);
     }
@@ -126,8 +128,8 @@ export default function DraftReviewPage({
       
       alert("Module approved and merged successfully!");
       router.push("/admin/drafts");
-    } catch (err: any) {
-      alert(`Error merging module: ${err.message}`);
+    } catch (err: unknown) {
+      alert(`Error merging module: ${err instanceof Error ? err.message : "Unknown error"}`);
       setMerging(false);
     }
   }

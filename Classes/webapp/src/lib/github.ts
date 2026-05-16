@@ -301,15 +301,7 @@ export async function listContractIssues(
   repo: string
 ): Promise<ContractIssue[]> {
   try {
-    const { data } = await octokit.issues.listForRepo({
-      owner,
-      repo,
-      labels: "contract-pending,contract-approved",
-      state: "all",
-      per_page: 100,
-    });
-
-    // Also fetch pending-only and approved-only since the above is AND logic
+    // Fetch pending and approved separately since GitHub labels filter uses AND logic
     const [pending, approved] = await Promise.all([
       octokit.issues.listForRepo({
         owner,

@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useSession, signIn, signOut } from "next-auth/react";
@@ -77,9 +78,11 @@ export function Navbar() {
               <div className="h-8 w-20 animate-pulse rounded bg-gray-200 dark:bg-gray-800" />
             ) : session ? (
               <div className="flex items-center gap-3">
-                <img
+                <Image
                   src={session.user?.image || ""}
                   alt={session.user?.name || ""}
+                  width={32}
+                  height={32}
                   className="h-8 w-8 rounded-full"
                 />
                 <span className="text-sm font-medium">
