@@ -29,15 +29,22 @@ export default function ModuleDetailPage() {
 
   useEffect(() => {
     fetch(`/api/github/module-content?slug=${slug}`)
-      .then((r) => r.json())
+      .then((r) => {
+        if (!r.ok) throw new Error("Failed to load module");
+        return r.json();
+      })
       .then((data) => {
+        if (data.error) throw new Error(data.error);
         setContent(data);
         if (data?.starterCode) {
           const firstFile = Object.keys(data.starterCode)[0];
           if (firstFile) setSelectedFile(firstFile);
         }
       })
-      .catch(() => {})
+      .catch((e) => {
+        console.error("Failed to load module:", e);
+        setContent(null);
+      })
       .finally(() => setLoading(false));
   }, [slug]);
 
