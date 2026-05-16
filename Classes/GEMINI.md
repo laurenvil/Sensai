@@ -4,7 +4,7 @@ This file provides guidance to AI coding assistants when working with code in th
 
 ## What This Repo Is
 
-**Sensai Arduino Classes** is a GitHub template repository for deploying Arduino & IoT courses using GitHub Classroom. Teachers fork/template this repo to create a class; students get private workspace repos via GitHub Classroom invitation links. The platform is entirely GitHub-native — no external services, no API keys beyond `GITHUB_TOKEN`. On-device AI tutoring is powered by **Sensai** running on the Arduino Uno Q.
+**Sensai Sensai Classes** is a GitHub template repository for deploying Arduino & IoT courses using GitHub Classroom. Teachers fork/template this repo to create a class; students get private workspace repos via GitHub Classroom invitation links. The platform is entirely GitHub-native — no external services, no API keys beyond `GITHUB_TOKEN`. On-device AI tutoring is powered by **Sensai** running on the Arduino Uno Q.
 
 Core mechanics:
 - Students push Arduino sketches → GitHub Actions validates sketch structure → score posted as a GitHub Check
@@ -64,7 +64,7 @@ All AI behavior is controlled by `.github/prompts/*.prompt.yml` — plain YAML w
 
 ## Webapp (`/webapp`)
 
-A Next.js 16 (App Router) platform serving as the Arduino Classes admin/student dashboard.
+A Next.js 16 (App Router) platform serving as the Sensai Classes admin/student dashboard.
 
 ### Running the Webapp
 ```bash

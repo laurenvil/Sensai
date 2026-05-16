@@ -1,4 +1,4 @@
-# Arduino Classes Production SaaS — Implementation Summary
+# Sensai Classes Production SaaS — Implementation Summary
 
 > **Branch:** `Arduino Class`
 > **Status:** All 4 infrastructure gaps closed; production build verified.
@@ -64,7 +64,7 @@ Replaces GitHub API as source of truth for grades, contracts, and student roster
 
 - SQLite via `better-sqlite3` with WAL mode and foreign key enforcement
 - Auto-migration on first boot — no manual schema setup
-- DB file location: `data/Arduino Classes.db` (configurable via `DATABASE_PATH` env var)
+- DB file location: `data/Sensai Classes.db` (configurable via `DATABASE_PATH` env var)
 - `data/` added to `.gitignore`
 
 **Tables:**
@@ -126,7 +126,7 @@ GITHUB_APP_ID=
 GITHUB_APP_PRIVATE_KEY=          # base64-encoded PEM key
 GITHUB_APP_INSTALLATION_ID=
 GITHUB_WEBHOOK_SECRET=
-DATABASE_PATH=data/Arduino Classes.db
+DATABASE_PATH=data/Sensai Classes.db
 ```
 
 ---
@@ -140,7 +140,7 @@ DATABASE_PATH=data/Arduino Classes.db
 2. **Install the App** on your org and note the Installation ID
 3. **Base64-encode** the App's `.pem` private key: `base64 -w0 < app.pem`
 4. **Set all env vars** from `.env.local.example` in your hosting platform
-5. **Ensure `data/` is writable** — SQLite writes to `data/Arduino Classes.db` at runtime
+5. **Ensure `data/` is writable** — SQLite writes to `data/Sensai Classes.db` at runtime
 6. **Create assignments** via `POST /api/admin/assignments`
 7. **Distribute assignments** via `POST /api/admin/assignments/[slug]/distribute`
 
@@ -169,5 +169,5 @@ webapp/
 ├── .env.local.example             # Updated: all new env vars documented
 ├── .gitignore                     # Updated: /data/ excluded
 └── data/                          # Runtime only — gitignored
-    └── Arduino Classes.db              # SQLite database (auto-created on first boot)
+    └── Sensai Classes.db              # SQLite database (auto-created on first boot)
 ```

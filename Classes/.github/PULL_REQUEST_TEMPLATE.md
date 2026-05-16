@@ -1,4 +1,4 @@
-## 📋 Pull Request — Arduino Classes
+## 📋 Pull Request — Sensai Classes
 
 ### Module
 - [ ] Module 01 — Welcome to Arduino

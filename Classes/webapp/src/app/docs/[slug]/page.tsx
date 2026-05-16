@@ -5,9 +5,9 @@ import { ChevronLeft } from "lucide-react";
 const DOCS: Record<string, { title: string; content: string }> = {
   overview: {
     title: "Overview",
-    content: `# Arduino Classes — Open Classroom Framework
+    content: `# Sensai Classes — Open Classroom Framework
 
-**Arduino Classes** is a GitHub template repository that transforms any GitHub organization into an Arduino & IoT learning platform powered by Sensai AI.
+**Sensai Classes** is a GitHub template repository that transforms any GitHub organization into an Arduino & IoT learning platform powered by Sensai AI.
 
 ## How It Works
 
@@ -40,7 +40,7 @@ const DOCS: Record<string, { title: string; content: string }> = {
     title: "Teacher Setup",
     content: `# Teacher Setup Guide
 
-Deploy an Arduino Classes course in 30 minutes.
+Deploy an Sensai Classes course in 30 minutes.
 
 ## Prerequisites
 
@@ -51,7 +51,7 @@ Deploy an Arduino Classes course in 30 minutes.
 
 ### 1. Create Your Course Repo
 
-Click **"Use this template"** on the Arduino Classes repository to create a new repo in your org.
+Click **"Use this template"** on the Sensai Classes repository to create a new repo in your org.
 
 ### 2. Link to GitHub Classroom
 
@@ -109,7 +109,7 @@ Give students the GitHub Classroom invitation URL. They'll get their own private
     title: "Learning Paths",
     content: `# Learning Paths
 
-Arduino Classes offers three paths — choose based on your experience level.
+Sensai Classes offers three paths — choose based on your experience level.
 
 ## Path A — Guided
 
@@ -176,7 +176,7 @@ pytest curriculum-master/modules/module-01-welcome/tests/test_sketch.py -v
     title: "Peer Review",
     content: `# Peer Review
 
-Peer review is a core requirement in Arduino Classes — it's not optional.
+Peer review is a core requirement in Sensai Classes — it's not optional.
 
 ## The 2-for-1 Rule
 
@@ -213,7 +213,7 @@ A comment that:
     title: "AI Features",
     content: `# AI Features
 
-Arduino Classes uses [GitHub Models](https://docs.github.com/en/github-models) for all AI features — no external APIs, no cost, no API keys beyond \`GITHUB_TOKEN\`. For on-device AI, students use **Sensai** on the Uno Q board.
+Sensai Classes uses [GitHub Models](https://docs.github.com/en/github-models) for all AI features — no external APIs, no cost, no API keys beyond \`GITHUB_TOKEN\`. For on-device AI, students use **Sensai** on the Uno Q board.
 
 ## AI-Powered Features
 

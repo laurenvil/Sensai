@@ -1,4 +1,4 @@
-# Arduino Classes Production Staging Plan (Demo-Readiness)
+# Sensai Classes Production Staging Plan (Demo-Readiness)
 
 Objective
 - Create a pseudo-production staging environment to demonstrate Arduino Class SaaS capabilities to investors and early adopters. This plan provides a safe, isolated environment mirroring critical production components with synthetic data and controlled access.

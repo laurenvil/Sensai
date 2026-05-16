@@ -1,4 +1,4 @@
-# Walkthrough — Arduino Classes AI Infrastructure (All Phases Complete)
+# Walkthrough — Sensai Classes AI Infrastructure (All Phases Complete)
 
 ## Overview
 

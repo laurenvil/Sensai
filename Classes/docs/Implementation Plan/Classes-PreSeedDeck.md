@@ -1,4 +1,4 @@
-# Arduino Classes — Pre-Seed Pitch Deck
+# Sensai Classes — Pre-Seed Pitch Deck
 ### The Open Frontier, Inc.
 #### "The Operating System for Technical Education"
 
@@ -6,7 +6,7 @@
 
 ## Slide 1 — Title
 
-**Arduino Classes**
+**Sensai Classes**
 *Learn by Shipping — The GitHub-Native Education Platform*
 
 The Open Frontier, Inc.
@@ -30,7 +30,7 @@ Technical education is broken.
 
 ## Slide 3 — The Solution
 
-**Arduino Classes turns every GitHub repo into a living classroom.**
+**Sensai Classes turns every GitHub repo into a living classroom.**
 
 - Teachers deploy a course in one click using a GitHub template.
 - Students learn through real Pull Requests, not videos.
@@ -109,7 +109,7 @@ Learning Contract approved → AI generates personalized curriculum
 | **GitHub Classroom** | Repo templates | ❌ | ✅ | Partial | Free |
 | **Replit** | Browser IDE | Partial | ❌ | ❌ | $7–$20/mo |
 | **Codecademy** | Interactive exercises | Partial | ❌ | ❌ | $15–$40/mo |
-| **Arduino Classes** | PR-based learning | ✅ Full | ✅ Native | ✅ Built-in | Free + SaaS |
+| **Sensai Classes** | PR-based learning | ✅ Full | ✅ Native | ✅ Built-in | Free + SaaS |
 
 **Our moat: We don't compete with GitHub — we are built ON GitHub. Every student's work is a real repo, a real commit history, a real portfolio.**
 
@@ -124,7 +124,7 @@ Learning Contract approved → AI generates personalized curriculum
    - Tiered: Starter (free) → Pro ($X/seat/mo) → Enterprise (custom)
 
 2. **Course Marketplace (Phase 2)**
-   - Teachers list and sell Arduino Classes; platform takes 15–20% revenue share
+   - Teachers list and sell Sensai Classes; platform takes 15–20% revenue share
    - Similar to Udemy model but with real, portfolio-grade coursework
 
 3. **Enterprise Licensing (Phase 3)**
@@ -175,7 +175,7 @@ Learning Contract approved → AI generates personalized curriculum
 - Enterprise sales team (2–3 reps)
 - Strategic partnerships with GitHub, cloud providers, and hiring platforms
 
-**Viral Loop:** Every student who completes a Arduino Class has a public GitHub portfolio → they share it → others discover Arduino Classes → network effect.
+**Viral Loop:** Every student who completes a Arduino Class has a public GitHub portfolio → they share it → others discover Sensai Classes → network effect.
 
 ---
 
@@ -223,7 +223,7 @@ Learning Contract approved → AI generates personalized curriculum
 
 **Year 1:** The best way to teach coding with GitHub.
 **Year 3:** The marketplace where anyone can create, sell, and take portfolio-grade technical courses.
-**Year 5:** The credentialing layer for technical hiring — employers trust Arduino Classes portfolios because the work is real, verified, and AI-graded.
+**Year 5:** The credentialing layer for technical hiring — employers trust Sensai Classes portfolios because the work is real, verified, and AI-graded.
 
 > "We're not building another video platform. We're building the infrastructure where learning IS doing — and the proof of learning IS the portfolio."
 
@@ -243,7 +243,7 @@ Founder & Board Chair
 
 ```
 ┌─────────────────────────────────────────────────────┐
-│                    Arduino Classes SaaS                    │
+│                    Sensai Classes SaaS                    │
 │                                                       │
 │  ┌──────────┐  ┌──────────┐  ┌──────────────────┐   │
 │  │ Next.js  │  │ Admin    │  │ AI Module        │   │

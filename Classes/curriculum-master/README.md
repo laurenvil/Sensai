@@ -1,4 +1,4 @@
-# 🏛️ Arduino Classes — Curriculum Overview
+# 🏛️ Sensai Classes — Curriculum Overview
 
 > **The living document of this course** — maintained collaboratively by teachers and Path C Expert students.
 

@@ -1,4 +1,4 @@
-# 🤖 Sensai Arduino Classes — Open Classroom Framework
+# 🤖 Sensai Sensai Classes — Open Classroom Framework
 
 > **A GitHub-native learning system** for Arduino & IoT education, built on Git/Fork/CI-CD workflows.  
 > Teachers deploy Arduino courses in one click. Students learn through real Pull Requests, AutoGrading of sketches, and Peer Review.  

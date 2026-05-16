@@ -2,7 +2,7 @@
 
 ## The Core Question
 
-Can you build AI-assisted course generation **directly inside Arduino Classes** without depending on OpenMAIC?
+Can you build AI-assisted course generation **directly inside Sensai Classes** without depending on OpenMAIC?
 
 **Short answer: Yes, absolutely — and GitHub Models makes it the right call.**
 
@@ -12,13 +12,13 @@ Can you build AI-assisted course generation **directly inside Arduino Classes** 
 
 ### Repos Researched
 
-| Repo | Stars | License | What It Is | Verdict for Arduino Classes |
+| Repo | Stars | License | What It Is | Verdict for Sensai Classes |
 |------|-------|---------|-----------|----------------------|
 | [microsoft/generative-ai-for-beginners](https://github.com/microsoft/generative-ai-for-beginners) | 110k | MIT | 21 static lessons with code notebooks; uses GitHub Actions for automated translation into 50 languages | **Excellent structural model** — not a generator, but shows how to build a modular markdown course with Actions CI |
 | [THU-MAIC/OpenMAIC](https://github.com/THU-MAIC/OpenMAIC) | 16.4k | AGPL-3.0 | Full Next.js multi-agent app that generates interactive classrooms | ❌ Wrong fit — full application, AGPL license, cannot embed directly |
-| [github/skills/*](https://github.com/skills) | Various | MIT | GitHub's own Actions-based interactive course templates | **Directly aligned** — same paradigm as Arduino Classes, worth borrowing from |
+| [github/skills/*](https://github.com/skills) | Various | MIT | GitHub's own Actions-based interactive course templates | **Directly aligned** — same paradigm as Sensai Classes, worth borrowing from |
 | [pramodkoujalagi/Automated-Course-Content-Generator](https://github.com/pramodkoujalagi/Automated-Course-Content-Generator) | Low stars | Unknown | Simple LLM-to-markdown course generator | Too rudimentary; not maintained |
-| [ThanhDatVu111/AI_CourseGenerator](https://github.com/ThanhDatVu111/AI_CourseGenerator) | Low stars | Unknown | Student project, Next.js course generator | Not production-grade; wrong stack for Arduino Classes |
+| [ThanhDatVu111/AI_CourseGenerator](https://github.com/ThanhDatVu111/AI_CourseGenerator) | Low stars | Unknown | Student project, Next.js course generator | Not production-grade; wrong stack for Sensai Classes |
 
 **Finding:** There is no well-maintained, MIT/Apache-licensed, GitHub-native AI curriculum generation repo worth forking. The space either produces full applications (like OpenMAIC) or low-quality student projects. **Custom code is the right call.**
 
@@ -74,7 +74,7 @@ This means prompts for curriculum generation can live as **versioned, teacher-ed
 
 ## The Custom Build Option: What to Actually Build
 
-Rather than forking anything, you build three small, purpose-built components inside Arduino Classes:
+Rather than forking anything, you build three small, purpose-built components inside Sensai Classes:
 
 ### Component 1: Module Generator (`workflow_dispatch` trigger)
 
@@ -120,7 +120,7 @@ What we already wrote in `ai-peer-review.yml` — but can be enhanced to use `ac
 
 ## The GitHub Skills Structural Model
 
-**This is the most important finding.** GitHub's own `skills/*` repos are architecturally identical to Arduino Classes and show exactly how GitHub itself builds teacher-driven, Actions-powered learning systems:
+**This is the most important finding.** GitHub's own `skills/*` repos are architecturally identical to Sensai Classes and show exactly how GitHub itself builds teacher-driven, Actions-powered learning systems:
 
 - `.github/workflows/N-step-name.yml` — one workflow per course step
 - `.github/steps/` — markdown content files for each step
@@ -128,7 +128,7 @@ What we already wrote in `ai-peer-review.yml` — but can be enhanced to use `ac
 - `README.md` — the learner interface
 - `.devcontainer/` — optional Codespaces config
 
-Arduino Classes already follows this model. The lesson: **don't fork a course generator — build a prompt file system, just like GitHub Skills does internally.**
+Sensai Classes already follows this model. The lesson: **don't fork a course generator — build a prompt file system, just like GitHub Skills does internally.**
 
 ---
 
@@ -159,9 +159,9 @@ No Node.js. No pnpm. No submodules. No AGPL. No external API keys. No Codespaces
 
 ### When Would You Still Want OpenMAIC?
 
-Only if you want **interactive simulations** — HTML5 physics engines, 3D models, animated whiteboard drawing. GitHub Models cannot produce these. If your curriculum is primarily text, code exercises, and quizzes (which Arduino Classes is), you don't need it.
+Only if you want **interactive simulations** — HTML5 physics engines, 3D models, animated whiteboard drawing. GitHub Models cannot produce these. If your curriculum is primarily text, code exercises, and quizzes (which Sensai Classes is), you don't need it.
 
-Document it as an optional external tool a teacher can run separately if they want that level of richness. But it should have no place in the Arduino Classes dependency tree.
+Document it as an optional external tool a teacher can run separately if they want that level of richness. But it should have no place in the Sensai Classes dependency tree.
 
 ---
 

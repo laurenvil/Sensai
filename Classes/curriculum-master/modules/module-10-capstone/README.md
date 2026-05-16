@@ -42,4 +42,4 @@ Design, build, and present a complete IoT project that:
 - *"Use the arduino tool to upload my capstone sketch."*
 
 ---
-**🎉 Congratulations on completing the Sensai Arduino Classes curriculum!**
+**🎉 Congratulations on completing the Sensai Sensai Classes curriculum!**

@@ -1,8 +1,8 @@
-# Walkthrough — Arduino Classes (Open Classroom System)
+# Walkthrough — Sensai Classes (Open Classroom System)
 
 ## What Changed
 
-The entire `gitClasses` framework was copied into `Classes/` and transformed into the **Sensai Arduino Classes** — a GitHub-native Open Classroom system for Arduino & IoT education with AutoGrading, peer review, and Sensai AI integration.
+The entire `gitClasses` framework was copied into `Classes/` and transformed into the **Sensai Sensai Classes** — a GitHub-native Open Classroom system for Arduino & IoT education with AutoGrading, peer review, and Sensai AI integration.
 
 **90 files changed** across 2 commits on the `Curriculum` branch. All `gitClasses`, `gitClass`, and `OpenFrontier` references removed.
 
@@ -55,7 +55,7 @@ All rewritten for Arduino/electronics context:
 
 | File | What Changed |
 |------|-------------|
-| `README.md` | Complete Arduino Classes landing page |
+| `README.md` | Complete Sensai Classes landing page |
 | `GEMINI.md` | Arduino project conventions (replaces CLAUDE.md) |
 | `TEACHER_SETUP.md` | Full Arduino classroom deployment guide |
 | `COMMUNITY_GUIDELINES.md` | Arduino review checklist (voltage, pins, etc.) |
@@ -69,7 +69,7 @@ All rewritten for Arduino/electronics context:
 ### Webapp
 
 The Next.js webapp was preserved and rebranded:
-- App name: "Arduino Classes"
+- App name: "Sensai Classes"
 - All module metadata updated for 10 Arduino modules
 - All inline documentation pages rebranded
 - All API route fallback orgs changed from `TheOpenFrontier` → `laurenvil`

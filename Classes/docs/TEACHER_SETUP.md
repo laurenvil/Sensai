@@ -1,4 +1,4 @@
-# 🍎 Teacher Setup Guide — Sensai Arduino Classes
+# 🍎 Teacher Setup Guide — Sensai Sensai Classes
 
 > Everything you need to launch your Arduino Open Classroom on GitHub — from zero to students building circuits in under 30 minutes.
 
@@ -6,7 +6,7 @@
 
 ## Overview
 
-The Arduino Classes framework uses three GitHub tools working together:
+The Sensai Classes framework uses three GitHub tools working together:
 
 ```
 GitHub Organization          ← Your "school building"
@@ -89,7 +89,7 @@ Share the **Invitation Link** from GitHub Classroom. When students click it:
 
 ## 🤖 AI-Powered Features (Built-In, Free)
 
-Arduino Classes uses [GitHub Models](https://docs.github.com/en/github-models) — GitHub's built-in AI inference API.
+Sensai Classes uses [GitHub Models](https://docs.github.com/en/github-models) — GitHub's built-in AI inference API.
 
 ### Generate Arduino Modules with AI
 

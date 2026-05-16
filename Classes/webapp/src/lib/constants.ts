@@ -1,4 +1,4 @@
-export const APP_NAME = "Arduino Classes";
+export const APP_NAME = "Sensai Classes";
 export const APP_DESCRIPTION = "Open Classroom Framework — Arduino & IoT learning platform powered by Sensai";
 
 export const GITHUB_SCOPES = ["read:org", "repo", "workflow"];

@@ -1,6 +1,6 @@
 ---
 name: 🐛 Bug Report
-about: Report a bug in the Arduino Classes curriculum, sketches, or workflows
+about: Report a bug in the Sensai Classes curriculum, sketches, or workflows
 title: "[Bug] "
 labels: bug
 ---

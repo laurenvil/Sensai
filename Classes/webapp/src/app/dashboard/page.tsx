@@ -62,7 +62,7 @@ export default function DashboardPage() {
     return (
       <div className="mx-auto max-w-2xl px-4 py-32 text-center">
         <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-          Welcome to Arduino Classes
+          Welcome to Sensai Classes
         </h1>
         <p className="mt-4 text-gray-600 dark:text-gray-400">
           Sign in with GitHub to access your dashboard, track progress, and

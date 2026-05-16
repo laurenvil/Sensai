@@ -1,6 +1,6 @@
 # Walkthrough: Classes WebApp Framework
 
-This document walks through the architecture, data flow, and key patterns of the Classes webapp — a Next.js 16 application that serves as the student/teacher portal for the Sensai Arduino Classes system.
+This document walks through the architecture, data flow, and key patterns of the Classes webapp — a Next.js 16 application that serves as the student/teacher portal for the Sensai Sensai Classes system.
 
 ---
 

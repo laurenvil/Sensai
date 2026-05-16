@@ -14,7 +14,7 @@ export interface Tenant {
   orgSlug: string;
   displayName: string;
   avatarUrl: string;
-  repoName: string; // the Arduino Classes template repo
+  repoName: string; // the Sensai Classes template repo
   repoFullName: string; // org/repo
 }
 

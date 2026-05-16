@@ -1,4 +1,4 @@
-# 🤝 Community Guidelines — Arduino Classes
+# 🤝 Community Guidelines — Sensai Classes
 
 > *In this classroom, we are all teachers and we are all students.*
 

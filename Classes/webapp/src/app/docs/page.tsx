@@ -20,7 +20,7 @@ const DOC_SECTIONS = [
         href: "/docs/overview",
         icon: BookOpen,
         title: "Overview",
-        description: "What Arduino Classes is and how it works.",
+        description: "What Sensai Classes is and how it works.",
       },
       {
         href: "/docs/teacher-setup",
@@ -86,7 +86,7 @@ export default function DocsPage() {
       </h1>
       <p className="mt-2 text-gray-600 dark:text-gray-400">
         Everything you need to know about setting up, teaching with, and
-        learning through Arduino Classes.
+        learning through Sensai Classes.
       </p>
 
       {DOC_SECTIONS.map((section) => (

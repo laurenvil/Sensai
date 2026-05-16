@@ -1,6 +1,6 @@
 # Teacher Admin Panel & Student Progress Tracking
 
-Extend the Arduino Classes webapp with a **teacher admin panel** for classroom oversight and **student progress tracking** for both teachers and students.
+Extend the Sensai Classes webapp with a **teacher admin panel** for classroom oversight and **student progress tracking** for both teachers and students.
 
 ## Architecture Overview
 

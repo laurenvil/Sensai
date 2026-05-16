@@ -5,7 +5,7 @@ This directory contains the chronological record of the AI-native curriculum inf
 ## Chronological Development Record
 
 1. [01-ai_native_analysis.md](./01-ai_native_analysis.md)
-   *   *Objective:* Deep dive into OpenMAIC vs. Arduino Classes and proposal for a GitHub Models native architecture.
+   *   *Objective:* Deep dive into OpenMAIC vs. Sensai Classes and proposal for a GitHub Models native architecture.
    *   *Outcome:* Established the "No Dependencies" AI strategy.
 
 2. [02-ai_curriculum_options.md](./02-ai_curriculum_options.md)
@@ -46,5 +46,5 @@ This directory contains the chronological record of the AI-native curriculum inf
     *   *Outcome:* Clean Next.js build and error-free React lifecycle states.
 
 13. [13-Arduino-Classes-Deployment-Plan.md](./13-Arduino-Classes-Deployment-Plan.md)
-    *   *Objective:* Implementation Plan — Arduino Classes (Sensai) Deployment & Validation.
+    *   *Objective:* Implementation Plan — Sensai Classes (Sensai) Deployment & Validation.
     *   *Outcome:* A detailed, phase-by-phase sequence for GitHub configuration, webapp deployment, and hardware/AutoGrader testing.

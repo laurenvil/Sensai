@@ -1,4 +1,4 @@
-# Arduino Classes Webapp vs GitHub App Architecture — Comparative Analysis
+# Sensai Classes Webapp vs GitHub App Architecture — Comparative Analysis
 
 > **Reference:** `docs/WebApp/GithubApp.md` — "Headless Classroom" blueprint using a GitHub App as the Keymaster.
 

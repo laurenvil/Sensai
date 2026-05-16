@@ -1,7 +1,7 @@
-Arduino Classes Production SaaS — Tech Audit (Arduino Class)
+Sensai Classes Production SaaS — Tech Audit (Arduino Class)
 
 Executive Summary
-- Arduino Class is the production SaaS tier of The Open Frontier’s Arduino Classes platform. It replaces per-user tokens with a GitHub App installation token, uses a SQLite data store for rapid MVP deployment, and exposes a production-grade API surface for assignment distribution, grading, and contract management. This document captures current state, gaps, risks, and a roadmap to strengthen security, reliability, observability, and multi-tenant readiness for pre-seed and Series A discussions.
+- Arduino Class is the production SaaS tier of The Open Frontier’s Sensai Classes platform. It replaces per-user tokens with a GitHub App installation token, uses a SQLite data store for rapid MVP deployment, and exposes a production-grade API surface for assignment distribution, grading, and contract management. This document captures current state, gaps, risks, and a roadmap to strengthen security, reliability, observability, and multi-tenant readiness for pre-seed and Series A discussions.
 
 1) Architecture & Scope
 - Two-tier deployment: Free Classroom (main branch) and Production SaaS (Arduino Class branch).
