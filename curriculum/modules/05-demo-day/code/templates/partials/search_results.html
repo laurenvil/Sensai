@@ -1,0 +1,35 @@
+<!-- search_results.html — HTMX partial for search results
+     Replaces: the search results rendering in search.templ -->
+{% if results and results|length > 0 %}
+<div class="space-y-4">
+    <p class="text-sm opacity-60">Found {{ results|length }} result(s)</p>
+    
+    {% for result in results %}
+    <div class="card bg-base-100 shadow-md card-hover fade-in">
+        <div class="card-body">
+            <div class="flex justify-between items-start">
+                <div class="flex-1">
+                    {% if result.result_type == "faq" %}
+                        <h3 class="font-bold text-lg">❓ {{ result.question }}</h3>
+                        <p class="mt-2">{{ result.text }}</p>
+                    {% else %}
+                        <h3 class="font-bold text-lg">📄 Summary</h3>
+                        <p class="mt-2">{{ result.text }}</p>
+                    {% endif %}
+                </div>
+                <div class="flex flex-col items-end gap-1 ml-4">
+                    <span class="badge badge-primary badge-sm">{{ result.file_name }}</span>
+                    {% if result.category %}
+                        <span class="badge badge-secondary badge-sm">{{ result.category }}</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="alert alert-warning">
+    <span>No results found. Try a different query or upload more notes.</span>
+</div>
+{% endif %}

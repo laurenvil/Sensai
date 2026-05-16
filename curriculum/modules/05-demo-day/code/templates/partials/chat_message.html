@@ -1,0 +1,16 @@
+<!-- The User's Message -->
+<div class="chat chat-end mb-4 fade-in">
+    <div class="chat-header">You</div>
+    <div class="chat-bubble">{{ user_msg }}</div>
+</div>
+
+<!-- The AI's Response -->
+<div class="chat chat-start mb-4 fade-in">
+    <div class="chat-image avatar">
+        <div class="w-10 rounded-full bg-primary flex items-center justify-center text-xl">
+            🦙
+        </div>
+    </div>
+    <div class="chat-header">Study Buddy</div>
+    <div class="chat-bubble chat-bubble-primary whitespace-pre-wrap">{{ ai_msg }}</div>
+</div>

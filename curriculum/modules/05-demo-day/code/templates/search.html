@@ -1,0 +1,78 @@
+<!-- search.html — Semantic search across all notes
+     Replaces: frontend/templates/search.templ -->
+{% extends "base.html" %}
+{% block title %}Search Notes{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8 max-w-4xl">
+    <h1 class="text-3xl font-bold mb-2">🔍 Search Your Notes</h1>
+    <p class="text-sm opacity-60 mb-6">
+        Search across all your uploaded notes using natural language.
+        The AI uses vector similarity to find the most relevant content.
+    </p>
+    
+    <!-- Search Form -->
+    <div class="card bg-base-100 shadow-lg mb-8">
+        <div class="card-body">
+            <form hx-post="/search"
+                  hx-target="#search-results"
+                  hx-swap="innerHTML"
+                  hx-indicator="#search-spinner">
+                
+                <div class="form-control mb-4">
+                    <label class="label"><span class="label-text">What are you looking for?</span></label>
+                    <input type="text" name="search_input"
+                           placeholder="e.g. What are the key causes of the Industrial Revolution?"
+                           class="input input-bordered w-full" required />
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                    <div class="form-control">
+                        <label class="label"><span class="label-text">Search Type</span></label>
+                        <select name="search_type" class="select select-bordered">
+                            <option value="summaries">📄 Summaries</option>
+                            <option value="faqs">❓ FAQs</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-control">
+                        <label class="label"><span class="label-text">Category (optional)</span></label>
+                        <select name="category" class="select select-bordered">
+                            <option value="">All Categories</option>
+                            {% for cat in categories %}
+                            <option value="{{ cat.type if cat.type is defined else cat['type'] }}">
+                                {{ cat.name if cat.name is defined else cat['name'] }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="form-control">
+                        <label class="label"><span class="label-text">File (optional)</span></label>
+                        <select name="file_name" class="select select-bordered">
+                            <option value="">All Files</option>
+                            {% for note in notes %}
+                            <option value="{{ note.file_name if note.file_name is defined else note['file_name'] }}">
+                                {{ note.file_name if note.file_name is defined else note['file_name'] }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                
+                <button type="submit" class="btn btn-primary">
+                    <span id="search-spinner" class="loading loading-spinner htmx-indicator"></span>
+                    🔍 Search
+                </button>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Search Results -->
+    <div id="search-results">
+        <div class="text-center py-10 opacity-40">
+            <p class="text-lg">Enter a search query to find relevant notes</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

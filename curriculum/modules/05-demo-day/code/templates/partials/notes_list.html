@@ -1,0 +1,52 @@
+<!-- notes_list.html — HTMX partial for the notes table
+     Swapped in dynamically when notes are uploaded/deleted -->
+{% if notes and notes|length > 0 %}
+<div class="overflow-x-auto">
+    <table class="table table-zebra w-full">
+        <thead>
+            <tr>
+                <th>File</th>
+                <th>Category</th>
+                <th>Summary</th>
+                <th>Uploaded</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for note in notes %}
+            <tr class="fade-in">
+                <td class="font-bold">{{ note.file_name if note.file_name is defined else note['file_name'] }}</td>
+                <td>
+                    {% set cat = note.category if note.category is defined else note['category'] %}
+                    {% if cat %}
+                        <span class="badge badge-secondary">{{ cat }}</span>
+                    {% else %}
+                        <span class="badge badge-ghost">Uncategorized</span>
+                    {% endif %}
+                </td>
+                <td class="text-sm opacity-70 max-w-xs truncate">
+                    {% set summary = note.summary if note.summary is defined else note['summary'] %}
+                    {{ summary[:100] if summary else "No summary" }}{% if summary and summary|length > 100 %}...{% endif %}
+                </td>
+                <td class="text-sm opacity-50">
+                    {{ note.uploaded_at if note.uploaded_at is defined else note['uploaded_at'] }}
+                </td>
+                <td>
+                    <button hx-delete="/notes/{{ note.id if note.id is defined else note['id'] }}"
+                            hx-target="#notes-list"
+                            hx-swap="innerHTML"
+                            hx-confirm="Delete this note?"
+                            class="btn btn-ghost btn-sm text-error">
+                        🗑️
+                    </button>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="alert alert-info">
+    <span>No notes uploaded yet. Upload your first note above!</span>
+</div>
+{% endif %}

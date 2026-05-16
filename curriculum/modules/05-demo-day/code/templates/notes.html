@@ -1,0 +1,50 @@
+<!-- notes.html — Upload and manage study notes
+     Replaces: frontend/templates/notes.templ -->
+{% extends "base.html" %}
+{% block title %}My Notes{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8 max-w-4xl">
+    <h1 class="text-3xl font-bold mb-2">📝 My Notes</h1>
+    <p class="text-sm opacity-60 mb-6">
+        Upload your study notes (.txt files). The AI will automatically classify them
+        into your categories, extract a summary, and generate study FAQs.
+    </p>
+    
+    <!-- Upload Form -->
+    <div class="card bg-base-100 shadow-lg mb-8">
+        <div class="card-body">
+            <h2 class="card-title text-lg">Upload a Note</h2>
+            
+            <form hx-post="/notes"
+                  hx-target="#notes-list"
+                  hx-swap="innerHTML"
+                  hx-encoding="multipart/form-data"
+                  hx-indicator="#upload-spinner">
+                
+                <div class="flex flex-col sm:flex-row gap-4 items-end">
+                    <div class="form-control flex-1">
+                        <label class="label"><span class="label-text">Select a file</span></label>
+                        <input type="file" name="upload_file" accept=".txt,.md,.text"
+                               class="file-input file-input-bordered w-full" required />
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary">
+                        <span id="upload-spinner" class="loading loading-spinner htmx-indicator"></span>
+                        📤 Upload & Process
+                    </button>
+                </div>
+                
+                <p class="text-xs opacity-50 mt-2">
+                    Supported formats: .txt, .md — Max size: 5 MB
+                </p>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Notes List -->
+    <div id="notes-list">
+        {% include "partials/notes_list.html" %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,53 @@
+<!-- signup.html — Sign up page
+     Replaces: frontend/templates/signup.templ -->
+{% extends "base.html" %}
+{% block title %}Sign Up{% endblock %}
+
+{% block content %}
+<div class="flex justify-center items-center min-h-[80vh]">
+    <div class="card bg-base-100 shadow-xl w-full max-w-md">
+        <div class="card-body">
+            <h2 class="card-title text-2xl font-bold justify-center">✨ Create Account</h2>
+            <p class="text-center text-sm opacity-60 mb-4">
+                Start organizing your study notes with AI
+            </p>
+            
+            <form hx-post="/signup"
+                  hx-target="#status"
+                  hx-swap="innerHTML">
+                
+                <div id="status"></div>
+                
+                <div class="form-control mb-4">
+                    <label class="label"><span class="label-text">Username</span></label>
+                    <input type="text" name="username" placeholder="Choose a username"
+                           class="input input-bordered w-full" required />
+                </div>
+                
+                <div class="form-control mb-4">
+                    <label class="label"><span class="label-text">Password</span></label>
+                    <input type="password" name="password" placeholder="Choose a password"
+                           class="input input-bordered w-full" required />
+                </div>
+                
+                <div class="form-control mb-6">
+                    <label class="label"><span class="label-text">Confirm Password</span></label>
+                    <input type="password" name="passwordRepeat" placeholder="Repeat your password"
+                           class="input input-bordered w-full" required />
+                </div>
+                
+                <div class="form-control">
+                    <button type="submit" class="btn btn-primary w-full">
+                        Create Account
+                    </button>
+                </div>
+            </form>
+            
+            <p class="text-center mt-4 text-sm">
+                Already have an account?
+                <a href="/login" class="link link-primary">Sign in</a>
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}

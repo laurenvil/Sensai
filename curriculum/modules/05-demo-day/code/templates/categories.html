@@ -1,0 +1,62 @@
+<!-- categories.html — Create and manage note categories
+     Replaces: frontend/templates/rules.templ
+     
+     The original called these "rules" — classification rules that tell
+     the AI how to categorize uploaded notes. We renamed to "categories"
+     because it's more intuitive for students. -->
+{% extends "base.html" %}
+{% block title %}Categories{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8 max-w-4xl">
+    <h1 class="text-3xl font-bold mb-2">📂 Note Categories</h1>
+    <p class="text-sm opacity-60 mb-6">
+        Create categories so the AI can automatically classify your uploaded notes.
+        For example: "Biology", "History", "Math".
+    </p>
+    
+    <!-- Create Category Form -->
+    <div class="card bg-base-100 shadow-lg mb-8">
+        <div class="card-body">
+            <h2 class="card-title text-lg">Add a New Category</h2>
+            
+            <form hx-post="/categories"
+                  hx-target="#categories-list"
+                  hx-swap="innerHTML"
+                  hx-on::after-request="if(event.detail.successful) this.reset()"
+                  class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                
+                <div class="form-control">
+                    <label class="label"><span class="label-text">Name</span></label>
+                    <input type="text" name="rule_name" placeholder="e.g. Biology"
+                           class="input input-bordered" required />
+                </div>
+                
+                <div class="form-control">
+                    <label class="label"><span class="label-text">Type</span></label>
+                    <input type="text" name="rule_type" placeholder="e.g. science"
+                           class="input input-bordered" required />
+                </div>
+                
+                <div class="form-control">
+                    <label class="label"><span class="label-text">Description</span></label>
+                    <input type="text" name="rule_description"
+                           placeholder="e.g. Notes about biology, cells, DNA"
+                           class="input input-bordered" required />
+                </div>
+                
+                <div class="form-control md:col-span-3">
+                    <button type="submit" class="btn btn-primary">
+                        ➕ Add Category
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Categories List -->
+    <div id="categories-list">
+        {% include "partials/categories_list.html" %}
+    </div>
+</div>
+{% endblock %}

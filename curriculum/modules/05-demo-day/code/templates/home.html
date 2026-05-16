@@ -1,0 +1,73 @@
+<!-- home.html — Landing page
+     Replaces: frontend/templates/home.templ -->
+{% extends "base.html" %}
+{% block title %}Home{% endblock %}
+
+{% block content %}
+<div class="hero min-h-[80vh] hero-gradient">
+    <div class="hero-content flex-col lg:flex-row gap-10">
+        <div class="text-center lg:text-left max-w-lg">
+            <h1 class="text-5xl font-bold text-white">🦙 Study Llama</h1>
+            <h2 class="text-2xl font-semibold text-gray-300 mt-2">
+                Your AI-Powered Study Companion
+            </h2>
+            <p class="py-6 text-lg text-gray-400">
+                Upload your class notes, and Study Llama will automatically
+                <strong class="text-white">classify</strong> them into categories,
+                <strong class="text-white">extract</strong> key summaries and FAQs, and let you
+                <strong class="text-white">search</strong> across everything using natural language.
+            </p>
+            <p class="text-sm text-gray-500 mb-6">
+                100% local. 100% free. Powered by your own llama-server.
+            </p>
+            <div class="flex flex-col sm:flex-row gap-3 justify-center lg:justify-start">
+                {% if authenticated %}
+                    <a href="/categories" class="btn btn-primary btn-lg">
+                        📂 Manage Categories
+                    </a>
+                    <a href="/notes" class="btn btn-outline btn-lg text-white border-white hover:bg-white hover:text-black">
+                        📝 Upload Notes
+                    </a>
+                {% else %}
+                    <a href="/login" class="btn btn-primary btn-lg">
+                        🔑 Log In to Get Started
+                    </a>
+                    <a href="/signup" class="btn btn-outline btn-lg text-white border-white hover:bg-white hover:text-black">
+                        ✨ Create Account
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="card bg-base-100 shadow-2xl p-6 max-w-md">
+            <h3 class="text-xl font-bold mb-4">How It Works</h3>
+            <ul class="steps steps-vertical">
+                <li class="step step-primary" data-content="1">
+                    <div class="text-left ml-2">
+                        <p class="font-bold">Create Categories</p>
+                        <p class="text-sm opacity-70">Define subjects like Biology, History, Math</p>
+                    </div>
+                </li>
+                <li class="step step-primary" data-content="2">
+                    <div class="text-left ml-2">
+                        <p class="font-bold">Upload Notes</p>
+                        <p class="text-sm opacity-70">AI auto-classifies and extracts key info</p>
+                    </div>
+                </li>
+                <li class="step step-primary" data-content="3">
+                    <div class="text-left ml-2">
+                        <p class="font-bold">Search & Review</p>
+                        <p class="text-sm opacity-70">Ask questions across all your notes</p>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+{% if error %}
+<div class="container mx-auto px-4 mt-4">
+    <div class="alert alert-warning">{{ error }}</div>
+</div>
+{% endif %}
+{% endblock %}

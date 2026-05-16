@@ -1,0 +1,11 @@
+Biology Study Notes - Cell Biology
+
+Mitochondria is the powerhouse of the cell. It generates ATP (adenosine triphosphate) through cellular respiration. The process involves breaking down glucose in the presence of oxygen.
+
+Photosynthesis requires sunlight, water, and carbon dioxide. It occurs in the chloroplasts of plant cells. The chemical equation is: 6CO2 + 6H2O + light -> C6H12O6 + 6O2. Plants convert light energy into chemical energy stored in glucose.
+
+DNA stands for deoxyribonucleic acid. It carries the genetic instructions for the development and function of living organisms. DNA has a double helix structure, discovered by Watson and Crick in 1953. The four bases are adenine (A), thymine (T), guanine (G), and cytosine (C).
+
+The cell membrane is a phospholipid bilayer that controls what enters and exits the cell. It is selectively permeable, meaning it allows some molecules through while blocking others. This is crucial for maintaining homeostasis.
+
+Mitosis is the process of cell division that results in two identical daughter cells. It consists of four stages: prophase, metaphase, anaphase, and telophase. Mitosis is essential for growth and repair of tissues.

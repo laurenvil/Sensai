@@ -1,0 +1,13 @@
+Physics Study Notes - Motion and Forces
+
+Newton's First Law of Motion (Law of Inertia): An object at rest stays at rest, and an object in motion stays in motion at constant velocity, unless acted upon by an external force.
+
+Newton's Second Law of Motion: Force equals mass times acceleration (F = ma). This means the acceleration of an object depends on the net force acting on it and its mass. A heavier object requires more force to accelerate.
+
+Newton's Third Law of Motion: For every action, there is an equal and opposite reaction. When you push against a wall, the wall pushes back with equal force.
+
+Gravity is a fundamental force of attraction between objects with mass. On Earth's surface, gravitational acceleration is approximately 9.8 m/s^2. Weight is the force of gravity on an object: W = mg.
+
+Friction is a force that opposes motion between surfaces in contact. Static friction prevents stationary objects from moving. Kinetic friction acts on objects already in motion. Friction depends on the types of surfaces and the normal force.
+
+Momentum is the product of an object's mass and velocity: p = mv. The law of conservation of momentum states that in a closed system, total momentum before a collision equals total momentum after.

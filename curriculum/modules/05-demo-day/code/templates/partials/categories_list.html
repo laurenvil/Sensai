@@ -1,0 +1,44 @@
+<!-- categories_list.html — HTMX partial for the categories table
+     Swapped in dynamically when categories are added/deleted -->
+{% if categories and categories|length > 0 %}
+<div class="overflow-x-auto">
+    <table class="table table-zebra w-full">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Type</th>
+                <th>Description</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for cat in categories %}
+            <tr class="fade-in">
+                <td class="font-bold">{{ cat.name if cat.name is defined else cat['name'] }}</td>
+                <td>
+                    <span class="badge badge-primary">
+                        {{ cat.type if cat.type is defined else cat['type'] }}
+                    </span>
+                </td>
+                <td class="text-sm opacity-70">
+                    {{ cat.description if cat.description is defined else cat['description'] }}
+                </td>
+                <td>
+                    <button hx-delete="/categories/{{ cat.id if cat.id is defined else cat['id'] }}"
+                            hx-target="#categories-list"
+                            hx-swap="innerHTML"
+                            hx-confirm="Delete this category?"
+                            class="btn btn-ghost btn-sm text-error">
+                        🗑️
+                    </button>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="alert alert-info">
+    <span>No categories yet. Create one above to get started!</span>
+</div>
+{% endif %}

@@ -1,0 +1,11 @@
+<div class="flex items-center justify-between p-3 rounded-lg hover:bg-base-300 transition-colors {{ 'bg-base-300 shadow-inner' if session.id == current_session_id else 'bg-base-100 shadow-sm' }}">
+    <a href="/chat/{{ session.id }}" class="flex-1 truncate block text-sm font-medium" title="{{ session.title }}">
+        💬 {{ session.title }}
+    </a>
+    <button hx-delete="/chat/{{ session.id }}" 
+            hx-confirm="Delete this chat session?"
+            class="btn btn-ghost btn-xs text-error ml-2"
+            title="Delete chat">
+        🗑️
+    </button>
+</div>

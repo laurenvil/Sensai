@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% block title %}Study Buddy Chat{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-6 max-w-6xl h-[85vh]">
+    <div class="flex flex-col md:flex-row gap-6 h-full">
+        <!-- Sidebar -->
+        <div class="w-full md:w-1/4 flex flex-col bg-base-200 rounded-box p-4 h-full">
+            <a href="/chat" class="btn btn-primary w-full mb-4">
+                ➕ New Chat
+            </a>
+            <div class="flex-1 overflow-y-auto space-y-2">
+                {% if chat_sessions %}
+                    {% for session in chat_sessions %}
+                        {% include "partials/chat_sidebar_item.html" %}
+                    {% endfor %}
+                {% else %}
+                    <p class="text-sm opacity-60 text-center mt-4">No past chats yet.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Chat Area -->
+        <div class="w-full md:w-3/4 flex flex-col h-full bg-base-100 shadow-xl rounded-box p-4 border border-base-200">
+            <!-- Header -->
+            <div class="flex justify-between items-center mb-4 border-b border-base-300 pb-2">
+                <div>
+                    <h1 class="text-2xl font-bold">🤖 Study Buddy</h1>
+                    <p class="text-sm opacity-70">Chat with your local AI agent. It knows about your uploaded notes!</p>
+                </div>
+            </div>
+
+            <!-- Chat Messages Area -->
+            <div class="flex-1 bg-base-200/50 rounded-box p-4 overflow-y-auto mb-4" id="chat-messages">
+                {% if not chat_history %}
+                <!-- Initial greeting -->
+                <div class="chat chat-start mb-4 fade-in">
+                    <div class="chat-image avatar">
+                        <div class="w-10 rounded-full bg-primary flex items-center justify-center text-xl">
+                            🦙
+                        </div>
+                    </div>
+                    <div class="chat-header">Study Buddy</div>
+                    <div class="chat-bubble chat-bubble-primary">
+                        Hi! I'm your Study Buddy. Ask me questions about your notes, or type <strong>/flashcards</strong> to generate some practice questions!
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- History -->
+                {% if chat_history %}
+                    {% for msg in chat_history %}
+                        {% if msg.role == 'user' %}
+                        <div class="chat chat-end mb-4 fade-in">
+                            <div class="chat-header">You</div>
+                            <div class="chat-bubble">{{ msg.content }}</div>
+                        </div>
+                        {% elif msg.role == 'assistant' %}
+                        <div class="chat chat-start mb-4 fade-in">
+                            <div class="chat-image avatar">
+                                <div class="w-10 rounded-full bg-primary flex items-center justify-center text-xl">
+                                    🦙
+                                </div>
+                            </div>
+                            <div class="chat-header">Study Buddy</div>
+                            <div class="chat-bubble chat-bubble-primary whitespace-pre-wrap">{{ msg.content }}</div>
+                        </div>
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
+            </div>
+
+            <!-- Input Area -->
+            <form hx-post="/chat" 
+                  hx-target="#chat-messages" 
+                  hx-swap="beforeend"
+                  hx-on::after-request="if(event.detail.successful) { this.reset(); const chat = document.getElementById('chat-messages'); chat.scrollTop = chat.scrollHeight; }"
+                  class="flex gap-2">
+                {% if current_session_id %}
+                <input type="hidden" name="session_id" value="{{ current_session_id }}">
+                {% endif %}
+                <input type="text" name="message" placeholder="Ask a question or type /flashcards..." 
+                       class="input input-bordered flex-1" required autocomplete="off" />
+                <button type="submit" class="btn btn-primary">Send 🚀</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Scroll to bottom on load
+    document.addEventListener("DOMContentLoaded", function() {
+        const chat = document.getElementById('chat-messages');
+        chat.scrollTop = chat.scrollHeight;
+    });
+</script>
+{% endblock %}
