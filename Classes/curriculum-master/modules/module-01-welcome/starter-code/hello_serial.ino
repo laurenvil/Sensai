@@ -7,7 +7,7 @@
 // 2. Print "Hello from Arduino!" to the Serial Monitor
 // 3. In loop(), print the number of seconds since startup (use millis())
 
-void setup() {
+void break_setup() {
     // TODO: Start serial communication at 9600 baud
     // Hint: Serial.begin(???);
 
