@@ -1,6 +1,6 @@
-# AI Integration Architecture — gitClasses
+# AI Integration Architecture — Arduino Classes
 
-gitClasses uses **GitHub Models** — GitHub's built-in AI inference API — to power all AI features. No external dependencies, no API keys, no third-party services.
+Arduino Classes uses **GitHub Models** — GitHub's built-in AI inference API — to power all AI features. No external dependencies, no API keys, no third-party services.
 
 ## How It Works
 
@@ -136,14 +136,14 @@ Teachers can upgrade to metered billing via GitHub Settings if higher throughput
 ### Why not OpenMAIC?
 - **AGPL-3.0 license** would contaminate the template repo
 - **Full Node.js application** (300+ npm packages) — wrong scale for our needs
-- **Interactive simulations** are its strength, but gitClasses focuses on text/code/quiz content
+- **Interactive simulations** are its strength, but Arduino Classes focuses on text/code/quiz content
 - Documented as an optional external tool at [THU-MAIC/OpenMAIC](https://github.com/THU-MAIC/OpenMAIC) for teachers who want rich multimedia
 
 ---
 
 ## Path C: Student AI Contributions
 
-In gitClasses, AI is not a black box—it is infrastructure that students can improve.
+In Arduino Classes, AI is not a black box—it is infrastructure that students can improve.
 Expert-level (Path C) students are encouraged to submit Pull Requests to modify the YAML prompt templates in `.github/prompts/`. This allows students to:
 - Make the AutoGrader failure explanations clearer
 - Improve the quality of peer review guidance

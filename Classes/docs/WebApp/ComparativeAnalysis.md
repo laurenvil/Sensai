@@ -1,4 +1,4 @@
-# gitClasses Webapp vs GitHub App Architecture — Comparative Analysis
+# Arduino Classes Webapp vs GitHub App Architecture — Comparative Analysis
 
 > **Reference:** `docs/WebApp/GithubApp.md` — "Headless Classroom" blueprint using a GitHub App as the Keymaster.
 
@@ -6,13 +6,13 @@
 
 ## Executive Summary
 
-The GithubApp.md blueprint proposes a three-layer production architecture: a webapp frontend/backend, a **GitHub App** as a privileged identity broker, and GitHub Actions as the grading engine. The `main` branch implements the same end-to-end vision using a **simpler OAuth delegation model** in place of a registered GitHub App. The `gitClass` branch closes all four gaps, implementing the full production SaaS architecture.
+The GithubApp.md blueprint proposes a three-layer production architecture: a webapp frontend/backend, a **GitHub App** as a privileged identity broker, and GitHub Actions as the grading engine. The `main` branch implements the same end-to-end vision using a **simpler OAuth delegation model** in place of a registered GitHub App. The `Arduino Class` branch closes all four gaps, implementing the full production SaaS architecture.
 
 ---
 
 ## Architecture Comparison Overview
 
-| Dimension | GithubApp.md Blueprint | `main` (Free Tier) | `gitClass` (Production SaaS) |
+| Dimension | GithubApp.md Blueprint | `main` (Free Tier) | `Arduino Class` (Production SaaS) |
 |-----------|----------------------|---------------------|-------------------------------|
 | **Identity model** | GitHub App (installation token) | GitHub OAuth (user-delegated token) | GitHub App + OAuth dual-auth |
 | **API authority** | App acts as platform identity | User's token used for all calls | App token preferred, OAuth fallback |
@@ -28,7 +28,7 @@ The GithubApp.md blueprint proposes a three-layer production architecture: a web
 
 ## Summary Score Card
 
-| Phase | Blueprint Feature | `main` (Free) | `gitClass` (SaaS) | Notes |
+| Phase | Blueprint Feature | `main` (Free) | `Arduino Class` (SaaS) | Notes |
 |-------|------------------|--------------|-------------------|-------|
 | 1 | GitHub App registration | Partial (OAuth) | Implemented | `lib/github-app.ts` + dual-auth fallback |
 | 1 | Webhook subscription | Not implemented | Implemented | `/api/webhooks/github` + HMAC verification |
@@ -44,6 +44,6 @@ The GithubApp.md blueprint proposes a three-layer production architecture: a web
 | — | Role-based access control | Extra | Extra | Not in blueprint |
 | — | Docs site | Extra | Extra | Not in blueprint |
 
-**Overall:** The `gitClass` branch fully implements the GithubApp.md blueprint. All four architectural gaps (GitHub App auth, webhooks, persistent database, automated repo creation) are closed. The free-tier `main` branch remains as a zero-infrastructure classroom deployment using GitHub Classroom.
+**Overall:** The `Arduino Class` branch fully implements the GithubApp.md blueprint. All four architectural gaps (GitHub App auth, webhooks, persistent database, automated repo creation) are closed. The free-tier `main` branch remains as a zero-infrastructure classroom deployment using GitHub Classroom.
 
 See [`docs/WebApp/ProductionSaaS.md`](./ProductionSaaS.md) for the full implementation reference.

@@ -1,27 +1,22 @@
 ---
-name: "💡 Curriculum Improvement"
-about: "Path C Experts — propose an improvement to the master curriculum."
-title: "[Improvement] - Brief description"
-labels: curriculum-improvement
-assignees: []
+name: 📚 Module Improvement
+about: Suggest an improvement to the Arduino curriculum, sketches, tests, or AI prompts
+title: "[Improvement] "
+labels: enhancement, path-c
 ---
 
-## 🎯 What are you improving?
+**Which module or file?**
+e.g., Module 05 — Sensing the Environment, or `.github/prompts/explain-test-failure.prompt.yml`
 
-*Which module, file, or concept does this improve?*
+**What should change?**
+Describe the improvement clearly. For AI prompts, explain what the current behavior is and what you want it to do instead.
 
-## 💡 Your Proposed Change
+**Why is this better for students?**
+How does this improvement help learners?
 
-*Describe what you want to add, change, or fix:*
+**Your proposed change (optional)**
+```
+Paste your proposed edit here (sketch code, markdown, YAML, etc.)
+```
 
-## 🤔 Why is this better?
-
-*Explain how this helps future learners:*
-
-## 📝 Implementation Notes
-
-*Any technical details, links, or references:*
-
----
-
-> **Path C Students:** After this issue is approved by the teacher, open a Pull Request to `curriculum-master` with your changes. Reference this issue number in your PR (`Closes #XX`).
+> 💡 **Path C students:** You can submit this improvement as a PR! Fork the repo, make the change, and reference this issue in your PR description.

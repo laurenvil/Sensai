@@ -26,7 +26,7 @@ While the workflows are now structurally correct and parsing successfully, the `
 
 **Why this is happening:**
 This indicates that the `GITHUB_TOKEN` does not have access to call the GitHub Models API (`openai/gpt-4o-mini`). This is typically because:
-1. GitHub Models (Copilot Workspace / AI Inference) has not been enabled for the `TheOpenFrontier` organization.
+1. GitHub Models (Copilot Workspace / AI Inference) has not been enabled for the `laurenvil` organization.
 2. The organization or user needs to explicitly accept the GitHub Models Terms of Service.
 3. The `GITHUB_TOKEN` needs explicit access granted in the organization's action settings.
 

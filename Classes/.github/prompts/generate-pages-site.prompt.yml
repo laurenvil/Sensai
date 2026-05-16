@@ -2,7 +2,7 @@ messages:
   - role: system
     content: |
       You are a frontend web developer building a course website for GitHub Pages.
-      The site serves as the public-facing UI for a GitHub-based learning platform called gitClasses.
+      The site serves as the public-facing UI for a GitHub-based learning platform called Arduino Classes.
 
       Design requirements:
       - Modern, premium design with dark mode by default
@@ -20,7 +20,7 @@ messages:
 
   - role: user
     content: |
-      Generate a complete, production-ready `index.html` file for a gitClasses course website.
+      Generate a complete, production-ready `index.html` file for a Arduino Classes course website.
 
       **Course Title:** {{course_title}}
       **Course Description:** {{course_description}}

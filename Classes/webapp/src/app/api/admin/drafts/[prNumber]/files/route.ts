@@ -36,8 +36,8 @@ export async function PUT(
   }
 
   const octokit = createOctokit(session.accessToken);
-  const owner = process.env.NEXT_PUBLIC_GITHUB_ORG || "TheOpenFrontier";
-  const repo = "gitClasses";
+  const owner = process.env.NEXT_PUBLIC_GITHUB_ORG || "laurenvil";
+  const repo = "Classes";
 
   try {
     await updateDraftFile(octokit, owner, repo, branch, path, content, sha);

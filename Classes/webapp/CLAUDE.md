@@ -1,1 +1,1 @@
-@AGENTS.md
+See the root CLAUDE.md for webapp instructions.

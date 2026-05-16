@@ -1,12 +1,12 @@
-# gitClasses × OpenMAIC — AI-Native Framework Analysis
+# Arduino Classes × OpenMAIC — AI-Native Framework Analysis
 
 ## Executive Summary
 
 OpenMAIC (Tsinghua University, 16.4k ⭐) is a **Next.js + LangGraph multi-agent system** that turns any topic or document into a live interactive classroom — slides, quizzes, simulations, AI teachers, whiteboard drawing, voice TTS, and real-time student-agent debates. It just released v0.2.1 (April 26, 2026) with voice cloning, 3D simulations, GPT-5.5/DeepSeek-V4 support, and a full ZIP export/import for classrooms.
 
-gitClasses is a **GitHub-native learning framework** built on the Git/fork/CI-CD workflow — AutoGrading via pytest, peer review via Pull Requests, and community contribution scoring.
+Arduino Classes is a **GitHub-native learning framework** built on the Git/fork/CI-CD workflow — AutoGrading via pytest, peer review via Pull Requests, and community contribution scoring.
 
-**The opportunity**: These two systems are *perfectly complementary*. OpenMAIC generates the course content; gitClasses delivers the workflow discipline and assessment scaffolding. Merging them creates a framework where AI builds the lessons, and students learn via real professional tools.
+**The opportunity**: These two systems are *perfectly complementary*. OpenMAIC generates the course content; Arduino Classes delivers the workflow discipline and assessment scaffolding. Merging them creates a framework where AI builds the lessons, and students learn via real professional tools.
 
 ---
 
@@ -24,7 +24,7 @@ app/api/chat/          ← SSE streaming for real-time multi-agent discussion
 ```
 
 ### What It Can Generate (v0.2.1)
-| Scene Type | Description | gitClasses Relevance |
+| Scene Type | Description | Arduino Classes Relevance |
 |-----------|-------------|---------------------|
 | **Slides** | AI-narrated, laser pointer, spotlight | Module lesson pages |
 | **Quizzes** | Multi-choice, short answer + AI grading | AutoGrader supplement |
@@ -105,7 +105,7 @@ A Docker-deployed OpenMAIC instance (with Ollama for free local LLMs) becomes th
 
 ---
 
-## Concrete Integration Points: OpenMAIC → gitClasses
+## Concrete Integration Points: OpenMAIC → Arduino Classes
 
 ### Integration 1: AI Module Generator (Tier 1/2)
 
@@ -173,10 +173,10 @@ on:
 
 ---
 
-## The "AI-Native" gitClasses Architecture
+## The "AI-Native" Arduino Classes Architecture
 
 ```
-gitClasses (AI-Native)
+Arduino Classes (AI-Native)
 │
 ├── .github/workflows/
 │   ├── deploy-pages.yml          ← Static site (existing)

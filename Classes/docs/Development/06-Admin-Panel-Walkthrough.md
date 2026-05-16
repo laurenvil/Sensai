@@ -2,7 +2,7 @@
 
 ## Summary
 
-Extended the gitClasses webapp with a **teacher admin panel** and **student progress tracking** system. Teachers see a dashboard with student roster, contract approvals, and per-student deep-dives. Students see their own module progress on their dashboard.
+Extended the Arduino Classes webapp with a **teacher admin panel** and **student progress tracking** system. Teachers see a dashboard with student roster, contract approvals, and per-student deep-dives. Students see their own module progress on their dashboard.
 
 ## Key Design Decision: Teacher Authentication
 

@@ -71,7 +71,7 @@ export default function HomePage() {
               <span className="text-indigo-600">the way professionals work</span>
             </h1>
             <p className="mx-auto mt-6 max-w-2xl text-lg text-gray-600 dark:text-gray-400">
-              gitClasses is an open classroom framework where teachers deploy
+              Arduino Classes is an open classroom framework where teachers deploy
               courses in one click and students learn through real Pull Requests,
               AutoGrading, and AI-powered feedback.
             </p>

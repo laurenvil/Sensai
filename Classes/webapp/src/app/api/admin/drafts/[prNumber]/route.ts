@@ -20,8 +20,8 @@ export async function GET(
   }
 
   const octokit = createOctokit(session.accessToken);
-  const owner = process.env.NEXT_PUBLIC_GITHUB_ORG || "TheOpenFrontier";
-  const repo = "gitClasses";
+  const owner = process.env.NEXT_PUBLIC_GITHUB_ORG || "laurenvil";
+  const repo = "Classes";
 
   try {
     const details = await getDraftModuleDetails(octokit, owner, repo, prNumber);
@@ -54,8 +54,8 @@ export async function POST(
   }
 
   const octokit = createOctokit(session.accessToken);
-  const owner = process.env.NEXT_PUBLIC_GITHUB_ORG || "TheOpenFrontier";
-  const repo = "gitClasses";
+  const owner = process.env.NEXT_PUBLIC_GITHUB_ORG || "laurenvil";
+  const repo = "Classes";
 
   try {
     await mergeDraftModule(octokit, owner, repo, prNumber);

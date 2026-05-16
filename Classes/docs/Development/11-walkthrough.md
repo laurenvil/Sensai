@@ -1,4 +1,4 @@
-# Walkthrough — gitClasses AI Infrastructure (All Phases Complete)
+# Walkthrough — Arduino Classes AI Infrastructure (All Phases Complete)
 
 ## Overview
 

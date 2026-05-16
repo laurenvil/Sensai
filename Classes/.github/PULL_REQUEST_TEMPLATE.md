@@ -1,31 +1,32 @@
-## Summary of changes
-<!-- What did you build or change? -->
+## 📋 Pull Request — Arduino Classes
 
-## Learning Path
-<!-- Which path did you follow? -->
-- [ ] Path A (Guided)
-- [ ] Path B (Explorer — describe your project below)
-- [ ] Path C (Expert — which curriculum issue does this close?)
+### Module
+- [ ] Module 01 — Welcome to Arduino
+- [ ] Module 02 — Your First Circuit
+- [ ] Module 03 — Variables & Logic
+- [ ] Module 04 — Reading the World
+- [ ] Module 05 — Sensing the Environment
+- [ ] Module 06 — Talking to the Computer
+- [ ] Module 07 — Making Things Move
+- [ ] Module 08 — Advanced Communication
+- [ ] Module 09 — IoT Projects
+- [ ] Module 10 — Demo Day
 
-## AutoGrader Status
-<!-- Paste a link to your passing Actions run -->
-- [ ] ✅ AutoGrader is passing (link to run: )
+### Path
+- [ ] **A — Guided** (followed the README step by step)
+- [ ] **B — Explorer** (custom Arduino project — link your Learning Contract issue: #)
+- [ ] **C — Expert** (improving the curriculum itself)
 
-## Peer Reviews Completed
-<!-- You MUST complete 2 peer reviews before this PR can be merged -->
-- [ ] Review 1: [link to PR you reviewed]()
-- [ ] Review 2: [link to PR you reviewed]()
+### What I Did
+_Describe what your Arduino sketch does and what you learned._
 
-## Self-Assessment
-<!-- Rate yourself honestly — this helps the teacher give better feedback -->
-| Area | Self-Score (1–5) | Notes |
-|------|----------------|-------|
-| Technical correctness | | |
-| Code clarity / comments | | |
-| Learning contract goals met | | |
+### Peer Reviews Given
+_Link 2 PRs you reviewed (required for completion):_
+1. 
+2. 
 
-## Questions for Reviewer
-<!-- Anything you want specific feedback on? -->
-
----
-Closes # <!-- link your Learning Contract issue number here -->
+### Checklist
+- [ ] `learning-contract.md` committed to repo root
+- [ ] Arduino sketch compiles (AutoGrader green ✅)
+- [ ] Added a resource to `community-resources/`
+- [ ] Reviewed 2 peers' PRs

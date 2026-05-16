@@ -1,5 +1,5 @@
-export const APP_NAME = "gitClasses";
-export const APP_DESCRIPTION = "Open Classroom Framework — GitHub-native learning platform";
+export const APP_NAME = "Arduino Classes";
+export const APP_DESCRIPTION = "Open Classroom Framework — Arduino & IoT learning platform powered by Sensai";
 
 export const GITHUB_SCOPES = ["read:org", "repo", "workflow"];
 
@@ -17,15 +17,20 @@ export const PROMPT_FILES = {
 } as const;
 
 export const GRADING_WEIGHTS = {
-  "module-01-basics": {
+  "module-01-welcome": {
     learningContract: 25,
-    moduleMastery: 50,
+    sketchMastery: 50,
     communityContribution: 25,
   },
-  "module-02-branching": {
-    add: 40,
-    subtract: 40,
-    branchExists: 20,
+  "module-02-circuits": {
+    learningContract: 25,
+    sketchMastery: 50,
+    communityContribution: 25,
+  },
+  "module-03-logic": {
+    learningContract: 25,
+    sketchMastery: 50,
+    communityContribution: 25,
   },
 } as const;
 
@@ -33,27 +38,32 @@ export const LEARNING_PATHS = [
   {
     id: "A",
     name: "Guided",
-    description: "Follow step-by-step starter code",
+    description: "Follow step-by-step Arduino sketches and wiring guides",
     audience: "New learners",
   },
   {
     id: "B",
     name: "Explorer",
-    description: "Build an original project using core concepts",
+    description: "Build an original Arduino/IoT project using core concepts",
     audience: "Self-directed learners",
   },
   {
     id: "C",
     name: "Expert",
-    description: "Submit PRs to improve the curriculum itself",
+    description: "Submit PRs to improve the curriculum and AI prompts",
     audience: "Advanced learners",
   },
 ] as const;
 
 export const MODULE_META: Record<string, { title: string; maxScore: number }> = {
-  "module-01-basics": { title: "Git Basics", maxScore: 100 },
-  "module-02-branching": { title: "Branching & Merging", maxScore: 100 },
-  "module-03-cicd": { title: "CI/CD", maxScore: 100 },
-  "module-04-opensource": { title: "Open Source", maxScore: 100 },
-  "module-05-capstone": { title: "Capstone", maxScore: 100 },
+  "module-01-welcome": { title: "Welcome to Arduino", maxScore: 100 },
+  "module-02-circuits": { title: "Your First Circuit", maxScore: 100 },
+  "module-03-logic": { title: "Variables & Logic", maxScore: 100 },
+  "module-04-analog": { title: "Reading the World", maxScore: 100 },
+  "module-05-sensors": { title: "Sensing the Environment", maxScore: 100 },
+  "module-06-serial": { title: "Talking to the Computer", maxScore: 100 },
+  "module-07-actuators": { title: "Making Things Move", maxScore: 100 },
+  "module-08-i2c": { title: "Advanced Communication", maxScore: 100 },
+  "module-09-iot": { title: "IoT Projects", maxScore: 100 },
+  "module-10-capstone": { title: "Demo Day", maxScore: 100 },
 };

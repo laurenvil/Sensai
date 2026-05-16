@@ -5,17 +5,17 @@ import { ChevronLeft } from "lucide-react";
 const DOCS: Record<string, { title: string; content: string }> = {
   overview: {
     title: "Overview",
-    content: `# gitClasses — Open Classroom Framework
+    content: `# Arduino Classes — Open Classroom Framework
 
-**gitClasses** is a GitHub template repository that transforms any GitHub organization into a Udemy-styled learning platform.
+**Arduino Classes** is a GitHub template repository that transforms any GitHub organization into an Arduino & IoT learning platform powered by Sensai AI.
 
 ## How It Works
 
 1. **Teachers** click "Use this template" to create a course repo
 2. **GitHub Classroom** distributes the repo to students as individual assignments
 3. **Students** learn by writing real code, pushing to GitHub, and opening Pull Requests
-4. **AutoGrading** via GitHub Actions runs pytest and scores code automatically
-5. **AI** explains failures, generates quizzes, and creates personalized curricula
+4. **AutoGrading** via GitHub Actions validates Arduino sketches and scores them automatically
+5. **Sensai AI** explains compilation errors, generates quizzes, and creates personalized curricula
 6. **Peer Review** is enforced — every student reviews 2 peers before their work is complete
 
 ## Key Principles
@@ -40,7 +40,7 @@ const DOCS: Record<string, { title: string; content: string }> = {
     title: "Teacher Setup",
     content: `# Teacher Setup Guide
 
-Deploy a gitClasses course in 30 minutes.
+Deploy an Arduino Classes course in 30 minutes.
 
 ## Prerequisites
 
@@ -51,7 +51,7 @@ Deploy a gitClasses course in 30 minutes.
 
 ### 1. Create Your Course Repo
 
-Click **"Use this template"** on the gitClasses repository to create a new repo in your org.
+Click **"Use this template"** on the Arduino Classes repository to create a new repo in your org.
 
 ### 2. Link to GitHub Classroom
 
@@ -85,7 +85,7 @@ Give students the GitHub Classroom invitation URL. They'll get their own private
 1. Click the **Invitation Link** your teacher shared
 2. Accept the assignment — your private repo is created instantly
 3. Clone your repo locally: \`git clone <your-repo-url>\`
-4. Open \`curriculum-master/modules/module-01-basics/README.md\`
+4. Open \`curriculum-master/modules/module-01-welcome/README.md\`
 
 ## Choose Your Path
 
@@ -109,7 +109,7 @@ Give students the GitHub Classroom invitation URL. They'll get their own private
     title: "Learning Paths",
     content: `# Learning Paths
 
-gitClasses offers three paths — choose based on your experience level.
+Arduino Classes offers three paths — choose based on your experience level.
 
 ## Path A — Guided
 
@@ -142,7 +142,7 @@ Every \`git push\` triggers a GitHub Actions workflow that scores your code.
 
 ## How It Works
 
-1. GitHub Actions runs \`pytest\` against your code
+1. GitHub Actions validates your Arduino sketch structure and runs tests
 2. Each test has a point value (via \`@pytest.mark.parametrize("points", [N])\`)
 3. The grading reporter posts a score as a GitHub Check
 4. If tests fail, AI explains the failure in a PR comment
@@ -153,22 +153,22 @@ Every \`git push\` triggers a GitHub Actions workflow that scores your code.
 | Component | Points | What It Checks |
 |-----------|--------|----------------|
 | Learning Contract | 25 | \`learning-contract.md\` exists with >50 chars |
-| Module Mastery | 50 | \`hello()\` returns "Hello, Open Classroom!" |
+| Sketch Mastery | 50 | Arduino sketch has \`setup()\`, \`loop()\`, and required calls |
 | Community Contribution | 25 | A \`.md\` file in \`community-resources/\` |
 
 ## Scoring — Module 02
 
 | Component | Points | What It Checks |
 |-----------|--------|----------------|
-| add() function | 40 | Correct addition with edge cases |
-| subtract() function | 40 | Correct subtraction with edge cases |
+| Sketch Structure | 50 | Has \`setup()\`, \`loop()\`, \`pinMode()\`, \`digitalWrite()\` |
+| Learning Contract | 25 | \`learning-contract.md\` exists |
 | Branch naming | 20 | Pushed from \`feature/*\` or \`fix/*\` branch |
 
 ## Running Tests Locally
 
 \`\`\`bash
 pip install pytest
-pytest curriculum-master/modules/module-01-basics/tests/test_basics.py -v
+pytest curriculum-master/modules/module-01-welcome/tests/test_sketch.py -v
 \`\`\`
 `,
   },
@@ -176,7 +176,7 @@ pytest curriculum-master/modules/module-01-basics/tests/test_basics.py -v
     title: "Peer Review",
     content: `# Peer Review
 
-Peer review is a core requirement in gitClasses — it's not optional.
+Peer review is a core requirement in Arduino Classes — it's not optional.
 
 ## The 2-for-1 Rule
 
@@ -213,7 +213,7 @@ A comment that:
     title: "AI Features",
     content: `# AI Features
 
-gitClasses uses [GitHub Models](https://docs.github.com/en/github-models) for all AI features — no external APIs, no cost, no API keys beyond \`GITHUB_TOKEN\`.
+Arduino Classes uses [GitHub Models](https://docs.github.com/en/github-models) for all AI features — no external APIs, no cost, no API keys beyond \`GITHUB_TOKEN\`. For on-device AI, students use **Sensai** on the Uno Q board.
 
 ## AI-Powered Features
 

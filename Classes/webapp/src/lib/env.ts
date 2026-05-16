@@ -1,6 +1,6 @@
 export const env = {
   githubOrg: process.env.NEXT_PUBLIC_GITHUB_ORG || "",
-  githubRepo: process.env.NEXT_PUBLIC_GITHUB_REPO || "gitClasses",
+  githubRepo: process.env.NEXT_PUBLIC_GITHUB_REPO || "Arduino Classes",
   modelsEndpoint:
     process.env.GITHUB_MODELS_ENDPOINT ||
     "https://models.github.ai/inference",

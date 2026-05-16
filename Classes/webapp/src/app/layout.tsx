@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "gitClasses — Open Classroom Framework",
+  title: "Arduino Classes — Open Classroom Framework",
   description:
     "A Udemy-styled GitHub learning system built on Git, CI/CD, and AI.",
 };

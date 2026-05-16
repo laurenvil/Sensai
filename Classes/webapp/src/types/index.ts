@@ -1,6 +1,6 @@
 export type UserRole = "teacher" | "student" | "admin";
 
-export interface GitClassesUser {
+export interface Arduino ClassesUser {
   id: string;
   name: string;
   email: string;
@@ -14,7 +14,7 @@ export interface Tenant {
   orgSlug: string;
   displayName: string;
   avatarUrl: string;
-  repoName: string; // the gitClasses template repo
+  repoName: string; // the Arduino Classes template repo
   repoFullName: string; // org/repo
 }
 

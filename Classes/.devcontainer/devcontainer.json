@@ -1,31 +1,17 @@
 {
-  "name": "gitClasses — Dev Environment",
-  "image": "mcr.microsoft.com/devcontainers/python:3.11",
+  "name": "Arduino Classes",
+  "image": "mcr.microsoft.com/devcontainers/python:3.12",
   "features": {
-    "ghcr.io/devcontainers/features/node:1": {
-      "version": "20"
-    }
+    "ghcr.io/devcontainers/features/node:1": {}
   },
-  "postCreateCommand": "pip install pytest pytest-json-report && echo '✅ gitClasses dev environment ready!'",
+  "postCreateCommand": "pip install pytest && cd webapp && npm install",
   "customizations": {
     "vscode": {
       "extensions": [
-        "ms-python.python",
-        "ms-python.vscode-pylance",
-        "GitHub.copilot",
-        "GitHub.vscode-pull-request-github",
-        "eamodio.gitlens"
-      ],
-      "settings": {
-        "python.defaultInterpreterPath": "/usr/local/bin/python",
-        "editor.formatOnSave": true,
-        "[python]": {
-          "editor.defaultFormatter": "ms-python.python"
-        }
-      }
+        "GitHub.classroom",
+        "ms-vscode.vscode-serial-monitor",
+        "vsciot-vscode.vscode-arduino"
+      ]
     }
-  },
-  "remoteEnv": {
-    "GITHUB_TOKEN": "${localEnv:GITHUB_TOKEN}"
   }
 }

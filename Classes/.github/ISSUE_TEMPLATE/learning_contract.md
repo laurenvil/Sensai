@@ -1,66 +1,51 @@
 ---
-name: "📜 Learning Contract"
-about: "Define your learning path for this module. Your teacher will approve this before you begin."
-title: "[Contract] - YOUR NAME HERE"
+name: 📝 Learning Contract
+about: Define your Arduino learning goals for this module (Path B students)
+title: "[Contract] Module XX — "
 labels: contract-pending
-assignees: []
 ---
 
-## 👤 Student Information
+## 📋 Learning Contract
 
-- **Full Name:**
-- **GitHub Username:** @
-- **Module:** module-01-basics
-
----
-
-## 🛤️ Chosen Learning Path
-
-*Select one by placing an `x` in the brackets:*
-
-- [ ] **Path A (Guided):** I will follow the step-by-step starter code in `module-01-basics/starter-code/`
-- [ ] **Path B (Explorer):** I will build an original project using this module's core concepts
-- [ ] **Path C (Expert):** I will submit a Pull Request to improve the curriculum itself
+**Name:** 
+**Module:** 
+**Path:** B (Explorer)
 
 ---
 
-## 🎯 My Three Learning Goals
+### 🎯 My Arduino Project Idea
 
-What are the 3 main things you want to master in this module?
+*Describe what you want to build. What problem does it solve? What hardware will you use?*
 
-1.
-2.
-3.
+### 🔧 Hardware I'll Use
 
----
+- [ ] Arduino Uno Q
+- [ ] LEDs / Resistors
+- [ ] Sensors (which ones?): 
+- [ ] Actuators (which ones?): 
+- [ ] Display (OLED, LCD): 
+- [ ] Other: 
 
-## 📅 My Timeline
+### 📚 My 3 Learning Goals
+
+1. 
+2. 
+3. 
+
+### 📅 My Timeline
 
 | Milestone | Target Date |
 |-----------|------------|
-| Learning Contract approved | |
-| First working commit | |
-| AutoGrader passing (green check) | |
-| 2 peer reviews completed | |
-| PR ready for merge | |
+| Contract approved | |
+| First working sketch uploaded | |
+| Hardware wired and tested | |
+| AutoGrader passing | |
+| PR opened for review | |
+
+### 🤝 Peer Review Pledge
+
+I will review **2 peers' Pull Requests** before mine is merged.
 
 ---
 
-## 🤝 Peer Review Commitment
-
-- [ ] I agree to review **at least 2** peers' Pull Requests before my own work is considered complete
-- [ ] I have read the [Community Guidelines](../../COMMUNITY_GUIDELINES.md)
-- [ ] I understand that copying code without attribution violates the collaboration policy
-
----
-
-## 💬 My Project Idea (Path B/C only)
-
-*If you chose Path B or C, briefly describe your project or proposed improvement:*
-
-> Write here...
-
----
-
-**🍎 Teacher Note:**
-> Review this contract and reply with **"Approved ✅"** then change the label from `contract-pending` to `contract-approved` to green-light this student's project.
+> 🤖 **Teacher note:** Comment "Approved" on this issue to trigger AI-generated personalized Arduino curriculum for this student.

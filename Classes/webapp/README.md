@@ -1,6 +1,6 @@
-# gitClasses WebApp
+# Arduino Classes WebApp
 
-A Next.js 16 multi-tenant webapp that serves as both a Udemy-style course platform and the gitClasses docs site. Teachers and students interact with GitHub workflows, AI, and course content through a browser UI.
+A Next.js 16 multi-tenant webapp that serves as both a Udemy-style course platform and the Arduino Classes docs site. Teachers and students interact with GitHub workflows, AI, and course content through a browser UI.
 
 ---
 
@@ -26,7 +26,7 @@ Copy `webapp/.env.local.example` and populate:
 | `GITHUB_SECRET` | GitHub OAuth App client secret |
 | `AUTH_SECRET` | NextAuth secret (`openssl rand -base64 32`) |
 | `NEXT_PUBLIC_GITHUB_ORG` | Your GitHub org slug (= tenant) |
-| `NEXT_PUBLIC_GITHUB_REPO` | Repo name (default: `gitClasses`) |
+| `NEXT_PUBLIC_GITHUB_REPO` | Repo name (default: `Arduino Classes`) |
 | `GITHUB_MODELS_ENDPOINT` | GitHub Models endpoint (default provided) |
 | `GITHUB_MODELS_MODEL` | AI model (default: `openai/gpt-4o-mini`) |
 
@@ -132,7 +132,7 @@ Triggering a workflow calls `actions.createWorkflowDispatch` via Octokit, which 
 
 ## AI Assistant Features
 
-The `/ai` page provides an interactive chat with the gitClasses AI tutor:
+The `/ai` page provides an interactive chat with the Arduino Classes AI tutor:
 
 - **Students** — ask about Git concepts, debug pytest failures, get help writing Learning Contracts, get peer review advice
 - **Teachers** — brainstorm module topics, refine AI prompts, review curriculum ideas
@@ -149,7 +149,7 @@ Built into the webapp at `/docs`:
 
 | Slug | Content |
 |------|---------|
-| `overview` | What gitClasses is and how it works |
+| `overview` | What Arduino Classes is and how it works |
 | `teacher-setup` | 30-minute deployment guide |
 | `student-guide` | Accept assignment, choose path, completion checklist |
 | `learning-paths` | Path A/B/C explained |

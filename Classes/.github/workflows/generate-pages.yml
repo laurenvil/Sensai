@@ -7,17 +7,17 @@ on:
         description: 'Course title (e.g., "Learn Git & GitHub")'
         required: true
         type: string
-        default: 'gitClasses — Learn by Doing'
+        default: 'Arduino Classes — Learn by Doing'
       course_description:
         description: 'One-line course description'
         required: true
         type: string
-        default: 'Master Git, GitHub, and real-world development workflows through hands-on projects, peer review, and automated grading.'
+        default: 'Master Arduino, IoT, and real-world electronics through hands-on projects, peer review, and Sensai AI tutoring.'
       org_name:
         description: 'GitHub Organization name'
         required: true
         type: string
-        default: 'TheOpenFrontier'
+        default: 'laurenvil'
       classroom_invite_url:
         description: 'GitHub Classroom invitation URL (optional)'
         required: false
@@ -141,7 +141,7 @@ jobs:
               # Wrap as basic HTML
               html = f"""<!DOCTYPE html>
           <html lang="en">
-          <head><meta charset="UTF-8"><title>gitClasses</title></head>
+          <head><meta charset="UTF-8"><title>Arduino Classes</title></head>
           <body>{content}</body>
           </html>"""
 

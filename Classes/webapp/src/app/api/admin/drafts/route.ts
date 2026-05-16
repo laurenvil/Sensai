@@ -11,8 +11,8 @@ export async function GET() {
   }
 
   const octokit = createOctokit(session.accessToken);
-  const owner = process.env.NEXT_PUBLIC_GITHUB_ORG || "TheOpenFrontier";
-  const repo = "gitClasses";
+  const owner = process.env.NEXT_PUBLIC_GITHUB_ORG || "laurenvil";
+  const repo = "Arduino Classes";
 
   try {
     const drafts = await listDraftModules(octokit, owner, repo);

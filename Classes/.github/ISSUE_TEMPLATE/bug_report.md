@@ -1,27 +1,30 @@
 ---
-name: "🐛 Bug Report"
-about: "Found a bug in the starter code or curriculum? Report it here."
-title: "[Bug] - Brief description"
+name: 🐛 Bug Report
+about: Report a bug in the Arduino Classes curriculum, sketches, or workflows
+title: "[Bug] "
 labels: bug
-assignees: []
 ---
 
-## 📍 Where is the bug?
+**Describe the bug**
+What happened? What did you expect to happen?
 
-- **File:**
-- **Module:**
-- **Line number (if applicable):**
+**Module affected**
+Which module is this about? (e.g., Module 02 — Your First Circuit)
 
-## 🔎 What did you expect to happen?
+**Steps to reproduce**
+1. ...
+2. ...
 
-## 💥 What actually happened?
+**Arduino board / IDE version**
+- Board: Arduino Uno Q / Uno R3 / Other
+- IDE: Arduino IDE 2.x / arduino-cli / Sensai
 
-## 🔁 Steps to reproduce
+**Sketch code (if applicable)**
+```cpp
+// Paste your sketch here
+```
 
-1.
-2.
-3.
-
-## 📎 Screenshots / Error output
-
-*Paste error messages or screenshots here*
+**Error message (if applicable)**
+```
+Paste any error output here
+```

@@ -1,73 +1,57 @@
-# 🤝 Open Classroom Community Guidelines
+# 🤝 Community Guidelines — Arduino Classes
 
 > *In this classroom, we are all teachers and we are all students.*
 
 ---
 
-## 1. The Code of Review 🔍
+## The Code of Review
 
-Peer review is not about finding bugs — it's about sharing perspectives.
+Peer review is about sharing perspectives and learning together — not finding bugs.
 
 | ✅ Do | ❌ Don't |
-|-------|---------|
-| "This function could be simplified by..." | "You wrote this wrong." |
-| "Consider using X because it handles edge case Y..." | "Just use X." |
-| "I learned from your approach to Z — have you considered..." | "Mine is better." |
-
-### The 2-for-1 Rule
-For every Pull Request you open, you are expected to provide **meaningful feedback on two other peers' PRs** before your own is merged.
-
-> **What counts as meaningful?** A comment that references specific code, explains a tradeoff, or asks a genuine question. "Looks good!" alone does not count.
+|---|---|
+| "This sketch could be simplified by..." | "You wrote this wrong." |
+| "Consider using `millis()` instead of `delay()` because..." | "Just use millis()." |
+| "I learned from your wiring approach — have you considered..." | "Mine is better." |
+| "What would happen if the sensor reads 0 here?" | "This will break." |
 
 ---
 
-## 2. Learning Paths & Shared Growth 🚀
-
-### Path B (Explorers)
-If you hit a wall:
-- Open a **Discussion** with the `help-wanted` label
-- Don't struggle in silence — your question likely helps others
-- Expect an answer from a classmate or teacher within 48 hours
-
-### Path C (Experts)
-Your goal is to improve the curriculum:
-- When you submit a PR to `curriculum-master`, include documentation so others learn from your changes
-- Reference the Issue you're closing in your PR description (`Closes #XX`)
-- Your changes will be reviewed by the teacher before merging
-
----
-
-## 3. Communication Norms 💬
-
-- **Issues as conversations:** Treat Learning Contracts as living documents. If your goals change mid-module, update your issue and tag the teacher with `@teacher-username`.
-- **Constructive conflict:** If you disagree with a peer's approach, offer an alternative solution or a reference (video/article/doc) that supports your reasoning.
-- **Response time:** Aim to respond to review requests within **48 hours**.
-
----
-
-## 4. Collaboration vs. Plagiarism 📚
+## Collaboration vs. Plagiarism
 
 | ✅ Collaboration | ❌ Plagiarism |
-|----------------|--------------|
-| Discussing logic and approach | Copying another student's implementation |
-| Sharing a helpful resource | Submitting AI-generated code without understanding |
-| Helping a peer debug (without writing their code) | Copying code from the internet without attribution |
-| Using code snippets with a source comment | Removing someone else's authorship |
+|---|---|
+| Discussing circuit design and coding approach | Copying another student's sketch |
+| Sharing a helpful Arduino tutorial | Submitting AI-generated code without understanding it |
+| Helping a peer debug their wiring | Copying code without attribution |
+| Using code snippets with a `// Source:` comment | Removing someone else's authorship |
 
-> **If you use a snippet from a peer or a website:** Add a comment in your code citing the source.  
-> Example: `# Adapted from @classmate's PR #42 — simplified the loop`
+**If you use a snippet from a peer, Sensai, or website:** Add a comment citing the source.
 
 ---
 
-## 5. Escalation & Conflict Resolution 🛡️
+## Arduino-Specific Review Checklist
 
-If a peer's review feels unfair or unkind:
+When reviewing a peer's PR, check:
+- [ ] Does the sketch have `void setup()` and `void loop()`?
+- [ ] Are pin numbers declared as named constants (not magic numbers)?
+- [ ] Is the voltage safe? (Uno Q is 3.3V — no 5V signals on pins!)
+- [ ] Does the code have comments explaining the logic?
+- [ ] Is `Serial.begin(9600)` called in `setup()` if Serial is used?
+
+---
+
+## Communication Norms
+
+- Treat Learning Contracts as living documents
+- Respond to review requests within **48 hours**
+- If you disagree, offer an alternative with reasoning
+- Ask Sensai for help before asking a peer — but always ask a peer too!
+
+---
+
+## Escalation
+
+If a peer's review feels unfair:
 1. Reply calmly with your reasoning
-2. If it persists, open a private Issue tagged `@teacher-username` — don't escalate publicly
-
-Teachers reserve the right to remove comments that violate these guidelines.
-
----
-
-*By contributing to this repository, you agree to uphold these standards.*  
-*Let's build something great together.* 🎓
+2. If it persists, open a private issue tagged to your teacher

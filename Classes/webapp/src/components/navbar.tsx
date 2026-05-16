@@ -42,7 +42,7 @@ export function Navbar() {
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 font-bold text-lg">
             <BookOpen className="h-6 w-6 text-indigo-600" />
-            <span>gitClasses</span>
+            <span>Arduino Classes</span>
           </Link>
 
           {/* Desktop nav */}
