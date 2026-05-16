@@ -1,38 +1,34 @@
+# Arduino project artifacts
+*.hex
+*.elf
+*.bin
+*.o
+*.d
+build/
+
 # Python
 __pycache__/
-*.py[cod]
-*$py.class
-*.egg-info/
-dist/
-build/
-*.egg
-
-# Virtual environments
+*.pyc
+*.pyo
+.venv/
 venv/
-env/
-.env/
 
 # IDE
 .vscode/
 .idea/
-*.swp
-*.swo
 
 # OS
 .DS_Store
 Thumbs.db
 
-# Model files (too large for git)
+# Database artifacts
+*.db
+
+# ChromaDB (legacy)
+chroma_data/
+
+# Uploads (legacy)
+uploads/
+
+# Model files
 *.gguf
-models/
-
-# Generated files
-flashcards.txt
-
-# Module 5 — Demo Day artifacts
-modules/05-demo-day/reference/
-modules/05-demo-day/code/chroma_data/
-modules/05-demo-day/code/uploads/
-modules/05-demo-day/code/*.db
-
-
