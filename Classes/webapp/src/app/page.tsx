@@ -12,13 +12,13 @@ const FEATURES = [
     icon: BookOpen,
     title: "Udemy-Style Courses",
     description:
-      "Browse modules with progress tracking, auto-grading, and completion certificates — all powered by GitHub.",
+      "Browse modules with progress tracking, auto-grading, and completion certificates — all powered by Sensai.",
   },
   {
     icon: GitBranch,
     title: "Learn by Doing",
     description:
-      "Every concept taught through real Pull Requests, code reviews, and CI/CD pipelines.",
+      "Every concept taught through real hardware sketches, code reviews, and CI/CD pipelines.",
   },
   {
     icon: Bot,
@@ -66,7 +66,7 @@ export default function HomePage() {
         <div className="mx-auto max-w-7xl px-4 py-24 sm:px-6 lg:px-8">
           <div className="text-center">
             <h1 className="text-5xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-6xl">
-              Learn Git & GitHub
+              Learn Arduino & IoT
               <br />
               <span className="text-indigo-600">the way professionals work</span>
             </h1>
@@ -165,7 +165,7 @@ export default function HomePage() {
           <div className="mx-auto mt-12 max-w-2xl space-y-6">
             {[
               { step: "1", text: "You push code to your GitHub repository" },
-              { step: "2", text: "GitHub Actions runs pytest against your code" },
+              { step: "2", text: "GitHub Actions compiles and tests your Arduino sketch" },
               { step: "3", text: "Score out of 100 is posted to your PR" },
               { step: "4", text: "If tests fail, AI explains what went wrong and suggests a fix" },
             ].map((item) => (
