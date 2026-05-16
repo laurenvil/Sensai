@@ -1,0 +1,202 @@
+name: 🎨 Generate Course Website
+
+on:
+  workflow_dispatch:
+    inputs:
+      course_title:
+        description: 'Course title (e.g., "Learn Git & GitHub")'
+        required: true
+        type: string
+        default: 'gitClasses — Learn by Doing'
+      course_description:
+        description: 'One-line course description'
+        required: true
+        type: string
+        default: 'Master Git, GitHub, and real-world development workflows through hands-on projects, peer review, and automated grading.'
+      org_name:
+        description: 'GitHub Organization name'
+        required: true
+        type: string
+        default: 'TheOpenFrontier'
+      classroom_invite_url:
+        description: 'GitHub Classroom invitation URL (optional)'
+        required: false
+        type: string
+        default: ''
+
+permissions:
+  contents: write
+  pull-requests: write
+  models: read
+
+jobs:
+  generate-site:
+    name: Generate GitHub Pages Site
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build modules JSON from filesystem
+        id: modules
+        run: |
+          # Scan curriculum-master/modules/ and build a JSON array
+          MODULES_JSON=$(python3 << 'PYEOF'
+          import json, os, re
+
+          modules_dir = "curriculum-master/modules"
+          modules = []
+
+          if os.path.isdir(modules_dir):
+              for entry in sorted(os.listdir(modules_dir)):
+                  module_path = os.path.join(modules_dir, entry)
+                  if not os.path.isdir(module_path):
+                      continue
+
+                  readme_path = os.path.join(module_path, "README.md")
+                  title = entry.replace("-", " ").title()
+                  description = ""
+                  status = "active"
+
+                  if os.path.exists(readme_path):
+                      with open(readme_path) as f:
+                          content = f.read()
+                      # Extract title from first heading
+                      title_match = re.search(r'^#\s+(.+)', content, re.MULTILINE)
+                      if title_match:
+                          title = title_match.group(1).strip()
+                      # Extract first paragraph as description
+                      desc_match = re.search(r'^>\s*\*\*(.+?)\*\*', content, re.MULTILINE)
+                      if desc_match:
+                          description = desc_match.group(1).strip()
+                      else:
+                          # Grab first non-heading, non-empty line
+                          for line in content.split('\n'):
+                              line = line.strip()
+                              if line and not line.startswith('#') and not line.startswith('>') and not line.startswith('---'):
+                                  description = line[:120]
+                                  break
+
+                  has_tests = os.path.isdir(os.path.join(module_path, "tests"))
+                  has_code = os.path.isdir(os.path.join(module_path, "starter-code"))
+
+                  modules.append({
+                      "slug": entry,
+                      "title": title,
+                      "description": description or f"Module: {entry}",
+                      "status": "active" if has_tests else "coming_soon",
+                      "path": f"curriculum-master/modules/{entry}/README.md",
+                      "has_autograder": has_tests,
+                      "has_starter_code": has_code
+                  })
+
+          print(json.dumps(modules))
+          PYEOF
+          )
+
+          echo "modules_json<<EOF" >> $GITHUB_OUTPUT
+          echo "$MODULES_JSON" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Generate site HTML with AI
+        id: ai-site
+        uses: actions/ai-inference@v1
+        with:
+          prompt-file: '.github/prompts/generate-pages-site.prompt.yml'
+          input: |
+            course_title: ${{ inputs.course_title }}
+            course_description: ${{ inputs.course_description }}
+            modules_json: ${{ steps.modules.outputs.modules_json }}
+            org_name: ${{ inputs.org_name }}
+            repo_url: https://github.com/${{ github.repository }}
+
+      - name: Write index.html
+        run: |
+          RESPONSE_FILE="${{ steps.ai-site.outputs.response-file }}"
+          if [ -f "$RESPONSE_FILE" ]; then
+            CONTENT=$(cat "$RESPONSE_FILE")
+          else
+            CONTENT="${{ steps.ai-site.outputs.response }}"
+          fi
+
+          # Extract just the HTML from the response (strip any markdown fences)
+          python3 << 'PYEOF'
+          import os, re
+
+          response_file = "${{ steps.ai-site.outputs.response-file }}"
+          if os.path.exists(response_file):
+              with open(response_file) as f:
+                  content = f.read()
+          else:
+              content = os.environ.get("AI_RESPONSE", "")
+
+          # Try to extract HTML from markdown code block
+          html_match = re.search(r'```html?\s*\n(.*?)```', content, re.DOTALL)
+          if html_match:
+              html = html_match.group(1).strip()
+          elif content.strip().startswith('<!DOCTYPE') or content.strip().startswith('<html'):
+              html = content.strip()
+          else:
+              # Wrap as basic HTML
+              html = f"""<!DOCTYPE html>
+          <html lang="en">
+          <head><meta charset="UTF-8"><title>gitClasses</title></head>
+          <body>{content}</body>
+          </html>"""
+
+          with open("index.html", "w") as f:
+              f.write(html)
+          print("✅ index.html written")
+          PYEOF
+
+      - name: Create branch and open PR
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          BRANCH_NAME="ai/update-pages-site-$(date +%Y%m%d-%H%M%S)"
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git checkout -b "$BRANCH_NAME"
+          git add index.html
+          git commit -m "feat(pages): AI-generated course website
+
+          Generated by GitHub Models (actions/ai-inference)
+          Prompt: .github/prompts/generate-pages-site.prompt.yml
+          Course: ${{ inputs.course_title }}
+
+          ⚠️ AI-generated — teacher review required before merge."
+
+          git push origin "$BRANCH_NAME"
+
+          gh pr create \
+            --title "🎨 AI-Generated Course Website" \
+            --body "## AI-Generated GitHub Pages Site
+
+          This PR adds a modern, responsive course website for GitHub Pages.
+
+          **Course:** ${{ inputs.course_title }}
+          **Modules detected:** ${{ steps.modules.outputs.modules_json }}
+
+          ---
+
+          ### ⚠️ Teacher Review Checklist
+          - [ ] Design looks professional and matches course branding
+          - [ ] All module links are correct
+          - [ ] Responsive on mobile (check with browser dev tools)
+          - [ ] Classroom invitation URL works (if provided)
+          - [ ] Contact/support information is accurate
+
+          ### Preview
+          After merge, the site will deploy to:
+          \`https://${{ inputs.org_name }}.github.io/${{ github.event.repository.name }}/\`
+
+          ---
+
+          *Generated by \`actions/ai-inference\`. Edit the prompt at \`.github/prompts/generate-pages-site.prompt.yml\` to customize the design.*" \
+            --label "ai-generated" \
+            --draft \
+            --base main \
+            --head "$BRANCH_NAME"

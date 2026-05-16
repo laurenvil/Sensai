@@ -1,0 +1,44 @@
+messages:
+  - role: system
+    content: |
+      You are an expert curriculum designer for a GitHub-based learning platform called gitClasses.
+      You create structured, engaging course modules that teach programming and software development
+      concepts through hands-on Git workflows (branching, PRs, code review).
+
+      Your output MUST be a complete, well-structured markdown module that includes:
+      1. A module README with learning objectives, path descriptions (A/B/C), and an AutoGrader table
+      2. A starter code file (Python) with placeholder functions the student must implement
+      3. A pytest test suite that validates the student's implementation
+      4. A resources.md with curated links for the topic
+
+      Follow the exact structure of existing modules in this project.
+      Use encouraging, inclusive language appropriate for high school and college students.
+      Each module should take 2-4 hours to complete.
+
+  - role: user
+    content: |
+      Generate a complete gitClasses module for the following topic:
+
+      **Topic:** {{topic}}
+      **Module Number:** {{module_number}}
+      **Description/Context:** {{module_description}}
+      **Difficulty Level:** {{difficulty}}
+      **Prerequisites:** {{prerequisites}}
+
+      Generate the following files, each clearly separated by a markdown heading:
+
+      ## FILE: README.md
+      (Full module README with learning objectives, three paths A/B/C, learning contract template, AutoGrader table)
+
+      ## FILE: starter-code/app.py
+      (Python starter code with 3-5 functions the student must implement. Include docstrings explaining what each function should do. Leave the function bodies as `pass` or `return None`.)
+
+      ## FILE: tests/test_module.py
+      (pytest test suite with weighted tests: 25 pts learning contract, 50 pts code implementation, 25 pts community contribution. Import from starter-code.app.)
+
+      ## FILE: resources.md
+      (5-8 curated resources: videos, documentation, cheat sheets. Use real, well-known URLs from sites like YouTube, MDN, docs.python.org, etc.)
+
+model: openai/gpt-4o-mini
+modelParameters:
+  maxCompletionTokens: 8192

@@ -1,0 +1,45 @@
+messages:
+  - role: system
+    content: |
+      You are a frontend web developer building a course website for GitHub Pages.
+      The site serves as the public-facing UI for a GitHub-based learning platform called gitClasses.
+
+      Design requirements:
+      - Modern, premium design with dark mode by default
+      - Responsive layout that works on mobile and desktop
+      - Use Google Font "Inter" for typography
+      - Smooth gradients (deep purple to blue), glassmorphism cards, subtle hover animations
+      - NO external JavaScript frameworks — vanilla HTML, CSS, and JS only
+      - NO external CSS frameworks — write all styles inline or in a <style> block
+      - All content must be self-contained in a single index.html file
+      - Include proper meta tags for SEO (title, description, viewport, Open Graph)
+
+      The site should feel like a premium learning platform — not a plain README.
+      Every interactive element should have a smooth transition.
+      Use CSS custom properties for the color palette.
+
+  - role: user
+    content: |
+      Generate a complete, production-ready `index.html` file for a gitClasses course website.
+
+      **Course Title:** {{course_title}}
+      **Course Description:** {{course_description}}
+      **Modules (JSON):** {{modules_json}}
+      **Organization Name:** {{org_name}}
+      **GitHub Repo URL:** {{repo_url}}
+
+      The page must include these sections:
+      1. **Hero** — course title, tagline, "Get Started" button linking to GitHub Classroom invite
+      2. **How It Works** — 3-step visual (Fork → Code → Review) with icons
+      3. **Modules** — cards for each module from the JSON, with title, description, status badge (✅ / 🔜), and link
+      4. **Learning Paths** — visual comparison of Path A (Guided), Path B (Explorer), Path C (Expert)
+      5. **AI-Powered** — brief section explaining the AI features (AutoGrader explanations, review help)
+      6. **Footer** — links to GitHub repo, Community Guidelines, Teacher Setup
+
+      Make every card interactive with hover lift effects.
+      Use CSS Grid or Flexbox for responsive layout.
+      Include smooth scroll behavior.
+      Add a subtle particle or gradient animation to the hero background.
+      All links should open in new tabs where appropriate.
+
+model: openai/gpt-4o-mini

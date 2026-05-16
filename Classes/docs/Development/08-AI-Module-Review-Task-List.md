@@ -1,0 +1,21 @@
+# AI Module Draft Review Implementation Tasks
+
+- [x] Update `lib/github.ts` with API helpers
+  - `listDraftModules`
+  - `getDraftModuleDetails`
+  - `updateDraftFile`
+  - `mergeDraftModule`
+- [x] Create Backend API Routes
+  - `GET /api/admin/drafts`
+  - `GET /api/admin/drafts/[prNumber]`
+  - `POST /api/admin/drafts/[prNumber]/merge`
+  - `PUT /api/admin/drafts/[prNumber]/files`
+- [x] Update Admin Dashboard UI
+  - Add "Pending AI Modules" link to `/admin/page.tsx`
+- [x] Build Drafts List Page (`/admin/drafts/page.tsx`)
+- [x] Build Draft Review Interface (`/admin/drafts/[prNumber]/page.tsx`)
+  - Layout with file tree and editor pane
+  - Teacher Review Checklist component
+  - Save file functionality
+  - Approve & Merge functionality
+- [x] Verify functionality

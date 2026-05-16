@@ -1,0 +1,16 @@
+---
+name: Required Reviewers
+description: Require at least one peer approval before a PR can be merged
+
+# When students open a PR, automatically request review from the teacher org team
+# (Replace 'your-org/reviewers' with your actual GitHub team slug)
+# This file is processed by GitHub's CODEOWNERS system.
+
+# All modules require teacher sign-off
+/curriculum-master/  @your-org/instructors
+
+# Community resources require an Expert reviewer  
+/curriculum-master/community-resources/  @your-org/experts @your-org/instructors
+
+# AI prompt improvements require an Expert reviewer and teacher sign-off
+/.github/prompts/  @your-org/experts @your-org/instructors

@@ -1,0 +1,67 @@
+name: Peer Review Assistant
+
+on:
+  pull_request:
+    types: [opened]
+
+jobs:
+  post-peer-review-instructions:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Post Peer Review Instructions
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const body = `
+            ## 👋 Peer Review Required
+
+            Congratulations on opening a Pull Request! 🎉
+
+            To complete this module, you need **two peer reviews**:
+
+            ### Your To-Do List
+            - [ ] Find 2 classmates in the organization's repository list
+            - [ ] Leave **meaningful feedback** on their Pull Requests (not just "looks good!")
+            - [ ] Paste the links to your 2 reviews as a comment below
+            - [ ] Once you've reviewed 2 peers, request a review from \`@${context.repo.owner}\`
+
+            ### How to Give Great Feedback
+            > See our [Community Guidelines](../blob/main/COMMUNITY_GUIDELINES.md) for tips on the Code of Review.
+
+            - ✅ **Specific**: Point to exact lines and explain *why*
+            - ✅ **Kind**: Address the code, not the person ("This function could..." not "You should...")
+            - ✅ **Actionable**: Suggest a concrete next step or resource
+
+            ---
+            _Your PR will not be merged until the AutoGrader passes AND peer reviews are complete._
+            `;
+
+            await github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: body.trim()
+            });
+
+  # Label the PR so teachers can filter the Classroom dashboard
+  label-pr:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Add "needs-peer-review" label
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            try {
+              await github.rest.issues.addLabels({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                labels: ['needs-peer-review']
+              });
+            } catch (e) {
+              // Label may not exist in fresh repos; that's OK
+              console.log('Could not add label:', e.message);
+            }

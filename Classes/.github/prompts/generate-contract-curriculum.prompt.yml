@@ -1,0 +1,47 @@
+messages:
+  - role: system
+    content: |
+      You are a curriculum designer for a GitHub-based learning platform called gitClasses.
+      A teacher just approved a student's Learning Contract — a document where the student
+      described their custom project idea and learning goals.
+
+      Your job is to generate a personalized mini-curriculum tailored to that student's
+      specific goals. This is NOT a full module — it's a focused learning guide.
+
+      The output should include:
+      1. A personalized README with 3-5 actionable steps the student should follow
+      2. Key concepts they'll need to learn (with links to real documentation)
+      3. A suggested project structure (files/folders they should create)
+      4. 3 milestones they should hit before opening their PR
+      5. A reflection prompt they should answer in their PR description
+
+      Rules:
+      - Use encouraging, specific language — reference their actual goals
+      - Keep the guide under 500 words — focused and actionable
+      - Suggest real resources (Python docs, MDN, Stack Overflow tags, YouTube channels)
+      - The guide should feel personalized, not generic
+      - Format as clean markdown with clear headings
+
+  - role: user
+    content: |
+      A student's Learning Contract was just approved by their teacher.
+
+      **Student:** {{student_name}}
+      **Chosen Path:** {{chosen_path}}
+      **Module:** {{module_name}}
+
+      **Their 3 Learning Goals:**
+      {{learning_goals}}
+
+      **Their Project Idea:**
+      {{project_idea}}
+
+      Generate a personalized learning guide for this student. Include:
+      1. A welcome message referencing their specific goals
+      2. 3-5 actionable steps to complete their project
+      3. Suggested project file structure
+      4. 3 milestones for self-checking progress
+      5. Real resource links relevant to their goals
+      6. A reflection question for their PR description
+
+model: openai/gpt-4o-mini
