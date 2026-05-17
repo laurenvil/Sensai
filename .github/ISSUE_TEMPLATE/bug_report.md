@@ -1,28 +1,30 @@
 ---
-name: Bug report
-about: Report a bug or unexpected behavior
-title: "[BUG]"
+name: 🐛 Bug Report
+about: Report a bug in the Sensai Classes curriculum, sketches, or workflows
+title: "[Bug] "
 labels: bug
-assignees: ''
-
 ---
 
-## Quick Summary
+**Describe the bug**
+What happened? What did you expect to happen?
 
-##  Environment & Tools
-- **PicoClaw Version:** (e.g., v0.1.2 or commit hash)
-- **Go Version:** (e.g., go 1.22)
-- **AI Model & Provider:** (e.g., GPT-4o via OpenAI / DeepSeek via SiliconFlow)
-- **Operating System:** (e.g., Ubuntu 22.04 / macOS / Android Termux)
-- **Channels:** (e.g., Discord, Telegram, Feishu, ...)
+**Module affected**
+Which module is this about? (e.g., Module 02 — Your First Circuit)
 
-## 📸 Steps to Reproduce
-1. 
-2. 
-3. 
+**Steps to reproduce**
+1. ...
+2. ...
 
-## ❌ Actual Behavior
+**Arduino board / IDE version**
+- Board: Arduino Uno Q / Uno R3 / Other
+- IDE: Arduino IDE 2.x / arduino-cli / Sensai
 
-## ✅ Expected Behavior
+**Sketch code (if applicable)**
+```cpp
+// Paste your sketch here
+```
 
-## 💬 Additional Context
+**Error message (if applicable)**
+```
+Paste any error output here
+```

@@ -1,0 +1,180 @@
+name: 🤖 Generate AI Module
+
+on:
+  workflow_dispatch:
+    inputs:
+      topic:
+        description: 'Module topic (e.g., "Introduction to Python Functions")'
+        required: true
+        type: string
+      module_number:
+        description: 'Module number (e.g., "03")'
+        required: true
+        type: string
+      module_description:
+        description: 'Module context or specific instructions for the AI'
+        required: false
+        type: string
+        default: 'Provide a comprehensive lesson covering the basics of this topic.'
+      difficulty:
+        description: 'Difficulty level'
+        required: true
+        type: choice
+        options:
+          - beginner
+          - intermediate
+          - advanced
+        default: beginner
+      prerequisites:
+        description: 'Prerequisites (e.g., "Module 01 - Git Basics")'
+        required: false
+        type: string
+        default: 'None'
+
+permissions:
+  contents: write
+  pull-requests: write
+  models: read
+
+jobs:
+  generate-module:
+    name: Generate Module Content
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Generate module content with AI
+        id: ai-content
+        uses: actions/ai-inference@v1
+        with:
+          prompt-file: '.github/prompts/generate-module.prompt.yml'
+          max-completion-tokens: 8192
+          max-tokens: 8192
+          input: |
+            topic: ${{ toJSON(inputs.topic) }}
+            module_number: ${{ toJSON(inputs.module_number) }}
+            module_description: ${{ toJSON(inputs.module_description) }}
+            difficulty: ${{ toJSON(inputs.difficulty) }}
+            prerequisites: ${{ toJSON(inputs.prerequisites) }}
+
+      - name: Parse and write module files
+        env:
+          AI_RESPONSE: ${{ steps.ai-content.outputs.response }}
+          MODULE_NUM: ${{ inputs.module_number }}
+          MODULE_TOPIC: ${{ inputs.topic }}
+        run: |
+          export MODULE_DIR="curriculum-master/modules/module-${MODULE_NUM}-ai-generated"
+          mkdir -p "${MODULE_DIR}/starter-code" "${MODULE_DIR}/tests"
+
+          RESPONSE_FILE="${{ steps.ai-content.outputs.response-file }}"
+          if [ -f "$RESPONSE_FILE" ]; then
+            CONTENT=$(cat "$RESPONSE_FILE")
+          else
+            CONTENT="$AI_RESPONSE"
+          fi
+
+          # Parse the AI output into separate files
+          # The prompt instructs the AI to use "## FILE: path" headers
+          python3 << 'PYTHON_SCRIPT'
+          import os, re, sys
+
+          module_dir = os.environ["MODULE_DIR"]
+          content = ""
+
+          response_file = "${{ steps.ai-content.outputs.response-file }}"
+          if os.path.exists(response_file):
+              with open(response_file) as f:
+                  content = f.read()
+          else:
+              content = os.environ.get("AI_RESPONSE", "")
+
+          if not content.strip():
+              print("ERROR: No AI response received")
+              sys.exit(1)
+
+          # Split on "# FILE:" or "## FILE:" markers, case-insensitive
+          sections = re.split(r'(?i)#+\s*FILE:\s*', content)
+
+          for section in sections[1:]:  # skip preamble before first FILE marker
+              lines = section.strip().split('\n')
+              filename = lines[0].strip().strip('`').strip()
+              file_content = '\n'.join(lines[1:]).strip()
+
+              # Remove leading/trailing markdown code fences if present
+              file_content = re.sub(r'^```\w*\n?', '', file_content)
+              file_content = re.sub(r'\n?```$', '', file_content)
+
+              filepath = os.path.join(module_dir, filename)
+              os.makedirs(os.path.dirname(filepath), exist_ok=True)
+
+              with open(filepath, 'w') as f:
+                  f.write(file_content + '\n')
+
+              print(f"  ✅ Created: {filepath}")
+
+          # If no files were parsed, write the whole response as README
+          if len(sections) <= 1:
+              readme_path = os.path.join(module_dir, "README.md")
+              with open(readme_path, 'w') as f:
+                  f.write(content)
+              print(f"  ⚠️ Could not parse file markers — wrote entire response to {readme_path}")
+
+          print(f"\n🎉 Module generated in {module_dir}/")
+          PYTHON_SCRIPT
+
+      - name: Create branch and open PR
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          MODULE_NUM: ${{ inputs.module_number }}
+          MODULE_TOPIC: ${{ inputs.topic }}
+        run: |
+          BRANCH_NAME="ai/module-${MODULE_NUM}-$(echo "$MODULE_TOPIC" | tr '[:upper:]' '[:lower:]' | tr ' ' '-' | tr -cd 'a-z0-9-' | head -c 40)"
+          MODULE_DIR="curriculum-master/modules/module-${MODULE_NUM}-ai-generated"
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git checkout -b "$BRANCH_NAME"
+          git add "$MODULE_DIR/"
+          git commit -m "feat(ai): generate module ${MODULE_NUM} — ${MODULE_TOPIC}
+
+          Generated by GitHub Models (actions/ai-inference)
+          Prompt: .github/prompts/generate-module.prompt.yml
+          Difficulty: ${{ inputs.difficulty }}
+          Prerequisites: ${{ inputs.prerequisites }}
+
+          ⚠️ AI-generated content — teacher review required before merge."
+
+          git push origin "$BRANCH_NAME"
+
+          gh pr create \
+            --title "🤖 AI Module ${MODULE_NUM}: ${MODULE_TOPIC}" \
+            --body "## AI-Generated Module
+
+          This module was generated using GitHub Models via \`actions/ai-inference\`.
+
+          **Topic:** ${MODULE_TOPIC}
+          **Description:** ${{ inputs.module_description }}
+          **Difficulty:** ${{ inputs.difficulty }}
+          **Prerequisites:** ${{ inputs.prerequisites }}
+          **Prompt:** \`.github/prompts/generate-module.prompt.yml\`
+
+          ---
+
+          ### ⚠️ Teacher Review Checklist
+          - [ ] Learning objectives are accurate and appropriate
+          - [ ] Starter code is correctly scaffolded (\`pass\` / \`return None\`)
+          - [ ] Test suite matches the starter code functions
+          - [ ] Resources use real, working URLs
+          - [ ] Difficulty matches the stated level
+          - [ ] Content is appropriate for the target audience
+
+          ---
+
+          *Review this PR, make any edits, then merge to add the module to the curriculum.*" \
+            --label "ai-generated" \
+            --draft \
+            --base Curriculum \
+            --head "$BRANCH_NAME"
