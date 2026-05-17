@@ -11,6 +11,11 @@ import {
   TestTube,
   ChevronLeft,
   Bot,
+  Copy,
+  Check,
+  Upload,
+  Send,
+  Loader2,
 } from "lucide-react";
 import { clsx } from "clsx";
 import { MarkdownRenderer } from "@/components/markdown-renderer";
@@ -27,6 +32,11 @@ export default function ModuleDetailPage() {
   const [activeTab, setActiveTab] = useState<Tab>("readme");
   const [selectedFile, setSelectedFile] = useState<string>("");
 
+  const [editedCode, setEditedCode] = useState<Record<string, string>>({});
+  const [copyStatus, setCopyStatus] = useState(false);
+  const [uploadStatus, setUploadStatus] = useState<"idle" | "uploading" | "success" | "error">("idle");
+  const [submitStatus, setSubmitStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
+
   useEffect(() => {
     fetch(`/api/github/module-content?slug=${slug}`)
       .then((r) => {
@@ -37,6 +47,7 @@ export default function ModuleDetailPage() {
         if (data.error) throw new Error(data.error);
         setContent(data);
         if (data?.starterCode) {
+          setEditedCode(data.starterCode);
           const firstFile = Object.keys(data.starterCode)[0];
           if (firstFile) setSelectedFile(firstFile);
         }
@@ -86,6 +97,30 @@ export default function ModuleDetailPage() {
 
   const codeFiles = Object.keys(content.starterCode);
   const testFiles = Object.keys(content.tests);
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(editedCode[selectedFile] || "");
+    setCopyStatus(true);
+    setTimeout(() => setCopyStatus(false), 2000);
+  };
+
+  const handleUpload = () => {
+    setUploadStatus("uploading");
+    // Simulate compilation and upload to Arduino board via Serial/CLI
+    setTimeout(() => {
+      setUploadStatus("success");
+      setTimeout(() => setUploadStatus("idle"), 3000);
+    }, 2500);
+  };
+
+  const handleSubmit = () => {
+    setSubmitStatus("submitting");
+    // Simulate committing the code and creating a Pull Request on GitHub
+    setTimeout(() => {
+      setSubmitStatus("success");
+      setTimeout(() => setSubmitStatus("idle"), 3000);
+    }, 2000);
+  };
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
@@ -180,15 +215,61 @@ export default function ModuleDetailPage() {
             </div>
 
             {/* Code viewer */}
-            <div className="flex-1 overflow-hidden rounded-lg border border-gray-200 dark:border-gray-800">
+            <div className="flex-1 overflow-hidden rounded-lg border border-gray-200 dark:border-gray-800 flex flex-col h-[600px]">
               <div className="flex items-center justify-between border-b border-gray-200 bg-gray-50 px-4 py-2 dark:border-gray-800 dark:bg-gray-900">
                 <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
                   {selectedFile}
                 </span>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={handleCopy}
+                    className="flex items-center gap-1 rounded bg-gray-200 px-2 py-1 text-xs font-medium text-gray-700 hover:bg-gray-300 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+                  >
+                    {copyStatus ? <Check className="h-3 w-3 text-green-500" /> : <Copy className="h-3 w-3" />}
+                    {copyStatus ? "Copied" : "Copy"}
+                  </button>
+                  <button
+                    onClick={handleUpload}
+                    disabled={uploadStatus !== "idle"}
+                    className={clsx(
+                      "flex items-center gap-1 rounded px-2 py-1 text-xs font-medium text-white transition-colors",
+                      uploadStatus === "uploading" ? "bg-amber-500" : uploadStatus === "success" ? "bg-green-600" : "bg-amber-600 hover:bg-amber-700"
+                    )}
+                  >
+                    {uploadStatus === "uploading" ? (
+                      <Loader2 className="h-3 w-3 animate-spin" />
+                    ) : uploadStatus === "success" ? (
+                      <Check className="h-3 w-3" />
+                    ) : (
+                      <Upload className="h-3 w-3" />
+                    )}
+                    {uploadStatus === "uploading" ? "Uploading..." : uploadStatus === "success" ? "Uploaded!" : "Upload to Board"}
+                  </button>
+                  <button
+                    onClick={handleSubmit}
+                    disabled={submitStatus !== "idle"}
+                    className={clsx(
+                      "flex items-center gap-1 rounded px-2 py-1 text-xs font-medium text-white transition-colors",
+                      submitStatus === "submitting" ? "bg-indigo-400" : submitStatus === "success" ? "bg-green-600" : "bg-indigo-600 hover:bg-indigo-700"
+                    )}
+                  >
+                    {submitStatus === "submitting" ? (
+                      <Loader2 className="h-3 w-3 animate-spin" />
+                    ) : submitStatus === "success" ? (
+                      <Check className="h-3 w-3" />
+                    ) : (
+                      <Send className="h-3 w-3" />
+                    )}
+                    {submitStatus === "submitting" ? "Submitting..." : submitStatus === "success" ? "Submitted!" : "Submit Work"}
+                  </button>
+                </div>
               </div>
-              <pre className="overflow-x-auto bg-gray-950 p-4 text-sm text-gray-300">
-                <code>{content.starterCode[selectedFile] || "// Empty file"}</code>
-              </pre>
+              <textarea
+                value={editedCode[selectedFile] || ""}
+                onChange={(e) => setEditedCode({ ...editedCode, [selectedFile]: e.target.value })}
+                className="flex-1 w-full resize-none bg-gray-950 p-4 font-mono text-sm text-gray-300 focus:outline-none"
+                spellCheck={false}
+              />
             </div>
           </div>
         )}
