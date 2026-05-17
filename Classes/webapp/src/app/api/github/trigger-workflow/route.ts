@@ -9,7 +9,7 @@ export async function POST(request: NextRequest) {
   }
 
   const body = await request.json();
-  const { workflowFile, ref = "main", inputs } = body;
+  const { workflowFile, ref = "Curriculum", inputs } = body;
 
   if (!workflowFile) {
     return Response.json(

@@ -176,5 +176,5 @@ jobs:
           *Review this PR, make any edits, then merge to add the module to the curriculum.*" \
             --label "ai-generated" \
             --draft \
-            --base main \
+            --base Curriculum \
             --head "$BRANCH_NAME"
