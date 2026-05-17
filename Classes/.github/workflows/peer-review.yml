@@ -28,7 +28,7 @@ jobs:
             - [ ] Once you've reviewed 2 peers, request a review from \`@${context.repo.owner}\`
 
             ### How to Give Great Feedback
-            > See our [Community Guidelines](../blob/main/COMMUNITY_GUIDELINES.md) for tips on the Code of Review.
+            > See our [Community Guidelines](../blob/Curriculum/COMMUNITY_GUIDELINES.md) for tips on the Code of Review.
 
             - ✅ **Specific**: Point to exact lines and explain *why*
             - ✅ **Kind**: Address the code, not the person ("This function could..." not "You should...")

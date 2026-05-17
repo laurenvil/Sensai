@@ -2,7 +2,7 @@ name: Deploy Course Website
 
 on:
   push:
-    branches: [main]
+    branches: [Curriculum]
   workflow_dispatch: # Allows manual trigger
 
 permissions:
