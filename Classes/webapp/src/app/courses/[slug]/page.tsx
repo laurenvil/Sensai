@@ -113,13 +113,30 @@ export default function ModuleDetailPage() {
     }, 2500);
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     setSubmitStatus("submitting");
-    // Simulate committing the code and creating a Pull Request on GitHub
-    setTimeout(() => {
+    try {
+      const res = await fetch("/api/github/submit-work", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          slug,
+          filename: selectedFile,
+          content: editedCode[selectedFile] || "",
+        }),
+      });
+
+      if (!res.ok) {
+        throw new Error("Failed to submit work");
+      }
+
       setSubmitStatus("success");
+      setTimeout(() => setSubmitStatus("idle"), 5000);
+    } catch (e) {
+      console.error(e);
+      setSubmitStatus("error");
       setTimeout(() => setSubmitStatus("idle"), 3000);
-    }, 2000);
+    }
   };
 
   return (
